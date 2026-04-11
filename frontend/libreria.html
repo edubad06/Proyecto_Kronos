@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitxes</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+
+<body>
+
+    <nav class="cabecera-principal" id="navbar">
+        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        <div class="cabecera-acciones">
+            <a href="libreria.html" class="enlace-menu">Fitxes</a>
+            <div class="contenedor-desplegable">
+                <button class="boton-nueva-ficha">+ Nova fitxa</button>
+                <div class="contenido-desplegable">
+                    <a href="ficha_nova.html?tab=ue">UE</a>
+                    <a href="ficha_nova.html?tab=yacimiento">Jaciment</a>
+                    <a href="ficha_nova.html?tab=sector">Sector</a>
+                </div>
+            </div>
+            <a href="profile.html" class="avatar-cabecera">PR</a>
+        </div>
+    </nav>
+
+    <section id="pagina-listado" class="contenedor-listado">
+        <h1 class="titulo-pagina">Fitxes</h1>
+
+        <div class="barra-filtros">
+            <div class="campo-formulario-base">
+                <label>Data</label>
+                <input type="date">
+            </div>
+            <div class="campo-formulario-base">
+                <label>Jaciment</label>
+                <select>
+                    <option>Pedralbes</option>
+                </select>
+            </div>
+            <div class="campo-formulario-base">
+                <label>Sector</label>
+                <select>
+                    <option>Tots</option>
+                </select>
+            </div>
+            <div class="campo-formulario-base">
+                <label>Unitat estratigràfica</label>
+                <input type="text" placeholder="🔍 Cercar">
+            </div>
+        </div>
+
+        <div class="ficha-lista ficha_jac">
+            <div>
+                <div class="titulo-ficha">Pedralbes</div>
+                <div class="subtitulo-ficha">Jaciment sota l'església Sant Ramon Nonat</div>
+                <span class="etiqueta-categoria yacimiento">Jaciment</span>
+            </div>
+            <div class="datos-ficha-derecha">📍 Barcelona | 📅 Neolític | ···</div>
+        </div>
+
+        <div class="ficha-lista ficha_sec">
+            <div>
+                <div class="titulo-ficha">Ped-41-2</div>
+                <div class="subtitulo-ficha">Jaciment sota l'església Sant Ramon Nonat</div>
+                <span class="etiqueta-categoria sector">Sector</span>
+            </div>
+            <div class="datos-ficha-derecha">📍 Pedralbes / 41.4196, 2.2069 | 👤 Paloma Ruiz | ···</div>
+        </div>
+
+        <div class="ficha-lista ficha_ue">
+            <div>
+                <div class="titulo-ficha">UE-32</div>
+                <div class="subtitulo-ficha">Jaciment sota l'església Sant Ramon Nonat</div>
+                <span class="etiqueta-categoria ue">UE</span>
+            </div>
+            <div class="datos-ficha-derecha">📍 Pedralbes / Ped-41-2 | 👤 Paloma Ruiz | ···</div>
+        </div>
+    </section>
+    <script src="js/script_libreria.js"></script>
+
+</body>
+
+</html>

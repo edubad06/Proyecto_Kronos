@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRONOS - Perfil</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+
+<body>
+
+    <nav class="cabecera-principal" id="navbar">
+        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        <div class="cabecera-acciones">
+            <a href="libreria.html" class="enlace-menu">Fitxes</a>
+            <div class="contenedor-desplegable">
+                <button class="boton-nueva-ficha">+ Nova fitxa</button>
+                <div class="contenido-desplegable">
+                    <a href="ficha_nova.html?tab=ue">UE</a>
+                    <a href="ficha_nova.html?tab=yacimiento">Jaciment</a>
+                    <a href="ficha_nova.html?tab=sector">Sector</a>
+                </div>
+            </div>
+            <a href="#" class="avatar-cabecera">PR</a>
+        </div>
+    </nav>
+
+    <section id="pagina-perfil" class="contenedor-perfil">
+        <div class="tarjeta-perfil">
+            <div class="avatar-gigante-perfil"></div>
+            <h2 class="nombre-usuario-perfil">Paloma Ruiz</h2>
+
+            <div class="rejilla-datos-perfil">
+                <div class="columna-perfil">
+                    <div class="titulo-bloque-interno">Dades personals</div>
+                    <div class="campo-formulario-base campo-perfil-inactivo">
+                        <label>Correu electrònic</label>
+                        <input type="email" value="paloma@kronos.cat" readonly>
+                    </div>
+                    <div class="campo-formulario-base">
+                        <label>Telèfon mòbil</label>
+                        <input type="text" value="+34 600 000 000">
+                    </div>
+                </div>
+
+                <div class="columna-perfil">
+                    <div class="titulo-bloque-interno">Canviar contrasenya</div>
+                    <div class="campo-formulario-base">
+                        <label>Contrasenya actual</label>
+                        <input type="password">
+                    </div>
+                    <div class="campo-formulario-base">
+                        <label>Nova contrasenya</label>
+                        <input type="password">
+                    </div>
+                    <div class="campo-formulario-base">
+                        <label>Repetir nova contrasenya</label>
+                        <input type="password">
+                    </div>
+                </div>
+            </div>
+
+            <a href="libreria.html" class="boton-guardar-perfil">Desar</a>
+        </div>
+    </section>
+
+</body>
+
+</html>

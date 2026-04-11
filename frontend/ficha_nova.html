@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRONOS - Fitxa</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+
+<body>
+
+    <!-- Barra de navegación global -->
+    <nav class="cabecera-principal" id="navbar">
+        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        <div class="cabecera-acciones">
+            <a href="libreria.html" class="enlace-menu">Fitxes</a>
+            <div class="contenedor-desplegable">
+                <button class="boton-nueva-ficha">+ Nova fitxa</button>
+                <div class="contenido-desplegable">
+                    <a href="ficha_nova.html?tab=ue">UE</a>
+                    <a href="ficha_nova.html?tab=yacimiento">Jaciment</a>
+                    <a href="ficha_nova.html?tab=sector">Sector</a>
+                </div>
+            </div>
+            <a href="profile.html" class="avatar-cabecera">PR</a>
+        </div>
+    </nav>
+
+    <!-- Contenedor principal de la página de detalle -->
+    <section id="pagina-detalle" class="contenedor-detalle">
+        <a href="libreria.html" class="enlace-volver">← Fitxes</a>
+
+        <div class="tarjeta-detalle-principal">
+            
+            <!-- Pestañas de la ficha -->
+            <div class="selector-pestanas" style="display: none;">
+                <button class="boton-selector-pestana activa" id="pestana-ue">UE</button>
+                <button class="boton-selector-pestana" id="pestana-yacimiento">JACIMENT</button>
+                <button class="boton-selector-pestana" id="pestana-sector">SECTOR</button>
+            </div>
+
+            <!-- FORMULARIO UE -->
+            <div id="formulario-ue" class="bloque-pestana activa">
+                <h2 class="nombre-usuario-perfil">Nova UE</h2>
+                <div class="rejilla-dos-columnas-detalle">                    
+                    <!-- Columna Izquierda UE -->
+                    <div class="columna-detalle">
+                        <div class="titulo-bloque-interno">Informació bàsica</div>
+
+                        <div class="grupo-rejilla-interno">
+                            <div class="campo-formulario-base"><label>UE</label><input type="text" placeholder="Codi UE"></div>
+                            <div class="campo-formulario-base"><label>Sector</label><input type="text" placeholder="Sector"></div> <!--  ????????????????? aquÍ tienen que salir las que haya guardadas -->
+                            <div class="campo-formulario-base"><label>Jaciment</label><input type="text" placeholder="Jaciment"></div> <!--  aquÍ tienen que salir las que haya guardadas -->
+                            <div class="campo-formulario-base"><label>Codi intervenció</label><input type="text" placeholder="Sector"></div>
+                            <div class="campo-formulario-base"><label>Datació</label><input type="text" placeholder="Datació"></div>
+                            <div class="campo-formulario-base">
+                                <label>Tipus UE</label>
+                                <select>
+                                    <option>Estrat</option>
+                                    <option>Estructura</option>
+                                    <option>Retall</option>
+                                </select>
+                            </div>
+                            <div class="campo-formulario-base"><label>Textura</label><input type="text" placeholder="Textura"></div>
+                            <div class="campo-formulario-base"><label>Color</label><input type="text" placeholder="Color"></div>
+                            <div class="campo-formulario-base"><label>Material</label><input type="text" placeholder="Color"></div>
+                            
+                        </div>
+                        <div class="campo-formulario-base"><label>Interpretació</label><input type="text" placeholder="Interpretació"></div>   
+                        <div class="titulo-bloque-interno">Dades topográfiques</div>
+                        
+                        <div >    
+                            <div class="campo-formulario-base">
+                                <label><b>Dimensions (cm)</b></label>
+                                <label>Longitud x Amplada x Alçada </label>
+                                <div class="campo-doble-medida">
+                                    <input type="number">
+                                    <span>x</span>
+                                    <input type="number">
+                                    <span>x</span>
+                                    <input type="number">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grupo-rejilla-interno">                           
+                            <div class="campo-formulario-base">
+                                <label><b>Cotes (m)</b> - Sup x Inf</label>
+                                <div class="campo-doble-medida"><input type="number"> <span>x</span> <input type="number"></div>
+                            </div>
+                        </div>                      
+                        
+                        <!-- Privacidad -->
+                        <div class="contenedor-privacidad">
+                            <div class="titulo-privacidad">Privacitat</div>
+                            <label class="opcion-privacidad">
+                                <input type="radio" name="priv1" checked>
+                                <div class="texto-privacidad">
+                                    <strong>Públic</strong>
+                                    <span>Membres de la teva entitat podran veure-ho</span>
+                                </div>
+                            </label>
+                            <label class="opcion-privacidad">
+                                <input type="radio" name="priv1">
+                                <div class="texto-privacidad">
+                                    <strong>Esbós</strong>
+                                    <span>Només tu pots veure-ho</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha UE -->
+                    <div class="columna-detalle">
+                        <div class="titulo-bloque-interno">Relacions</div>
+                        <div class="campo-formulario-base"><label>Igual a</label><input type="text"></div>
+                        <div class="grupo-rejilla-interno">                           
+                            <div class="campo-formulario-base"><label>Cobreix</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Cobert per</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Farceix</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Farcit per</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Talla</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Tallat per</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Recolza</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Se li recolza</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Lliura</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Se li lliura</label><input type="text"></div>
+                        </div>
+                        <div class="campo-area-texto">
+                            <label>Observacions</label>
+                            <textarea></textarea>
+                        </div>
+                        <div class="titulo-bloque-interno">Imatges</div>
+                        <div class="caja-arrastrar-soltar">
+                            
+                            <div class="icono">⬇️</div>
+                            Pots arrossegar i deixar anar els fitxers aquí per afegir-los
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- FORMULARIO YACIMIENTO -->
+            <div id="formulario-yacimiento" class="bloque-pestana">
+                <h2 class="nombre-usuario-perfil">Nou jaciment</h2>
+                <div class="rejilla-dos-columnas-detalle">
+
+                    <!-- Columna Izquierda YACIMIENTO -->
+                    <div class="columna-detalle">
+                        <div class="titulo-bloque-interno">Informació bàsica</div>
+                        <div class="grupo-rejilla-interno">
+                            <div class="campo-formulario-base"><label>Nom/Codi</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Director/a</label><input type="text"></div>
+                        </div>
+                        <div >    
+                            <div class="campo-formulario-base">
+                                <label><b>Coordenades</b></label>
+                                <label>Altitud x Latitud x Profunditat </label>
+                                <div class="campo-doble-medida">
+                                    <input type="number"><!-- altitud: coordenada_x -->
+                                    <span>x</span>
+                                    <input type="number"><!-- latitud: coordenada_y -->
+                                    <span>x</span>
+                                    <input type="number"><!-- profundidad: coordenada_z -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="campo-area-texto">
+                            <label>Descripció</label>
+                            <textarea></textarea>
+                        </div>
+                        <div class="contenedor-privacidad">
+                            <div class="titulo-privacidad">Privacitat</div>
+                            <label class="opcion-privacidad">
+                                <input type="radio" name="priv2" checked>
+                                <div class="texto-privacidad">
+                                    <strong>Públic</strong>
+                                    <span>Membres de la teva entitat podran veure-ho</span>
+                                </div>
+                            </label>
+                            <label class="opcion-privacidad">
+                                <input type="radio" name="priv2">
+                                <div class="texto-privacidad">
+                                    <strong>Esbós</strong>
+                                    <span>Només tu pots veure-ho</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha YACIMIENTO -->
+                    <div class="columna-detalle">
+                        <div class="titulo-bloque-interno">Imatges</div>
+                        <!--
+                        <div class="caja-arrastrar-soltar">
+                            <div class="icono">⬇️</div>
+                            Pots arrossegar i deixar anar els fitxers aquí per afegir-los
+                        </div>-->
+
+                        <article class="caja-arrastrar-soltar">
+                            <div class="dropZone">
+                            Arrossegar imatges aquí
+                            </div>
+                        </article>
+
+                        <div class="titulo-bloque-interno">Mapa</div>
+                        
+                        <div id="map" class="container-map"></div>
+
+                        <div class="contenedor-privacidad">
+                            <div class="titulo-privacidad">Permisos</div>
+                            <div class="campo-formulario-base">
+                                <label>Assignar editors</label>
+                                <div class="contenedor-checkbox-pildora">
+                                    <label class="etiqueta-checkbox-pildora">
+                                        <input type="checkbox" value="usuari1">
+                                        <span>Usuari 1</span>
+                                    </label>
+                                    <label class="etiqueta-checkbox-pildora">
+                                        <input type="checkbox" value="usuari2" checked>
+                                        <span>Usuari 2</span>
+                                    </label>
+                                    <label class="etiqueta-checkbox-pildora">
+                                        <input type="checkbox" value="usuari3">
+                                        <span>Usuari 3</span>
+                                    </label>
+                                    <label class="etiqueta-checkbox-pildora">
+                                        <input type="checkbox" value="usuari4">
+                                        <span>Usuari 4</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- FORMULARIO SECTOR -->
+            <div id="formulario-sector" class="bloque-pestana">
+                <h2 class="nombre-usuario-perfil">Nou sector</h2>
+                <div class="rejilla-dos-columnas-detalle">
+
+                    <!-- Columna Izquierda SECTOR -->
+                    <div class="columna-detalle">
+                        <div class="titulo-bloque-interno">Informació bàsica</div>
+                        <div class="grupo-rejilla-interno">
+                            <div class="campo-formulario-base"><label>Nom/Codi</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Jaciment</label><input type="text"></div>
+                        </div>
+                        <div class="campo-area-texto">
+                            <label>Descripció</label>
+                            <textarea></textarea>
+                        </div>
+                        <div class="contenedor-privacidad">
+                            <div class="titulo-privacidad">Privacitat</div>
+                            <label class="opcion-privacidad">
+                                <input type="radio" name="priv3" checked>
+                                <div class="texto-privacidad">
+                                    <strong>Públic</strong>
+                                    <span>Membres de la teva entitat podran veure-ho</span>
+                                </div>
+                            </label>
+                            <label class="opcion-privacidad">
+                                <input type="radio" name="priv3">
+                                <div class="texto-privacidad">
+                                    <strong>Esbós</strong>
+                                    <span>Només tu pots veure-ho</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha SECTOR -->
+                    <div class="columna-detalle">
+                        <div class="titulo-bloque-interno">Imatges</div>
+                        <div class="caja-arrastrar-soltar">
+                            <div class="icono">⬇️</div>
+                            Pots arrossegar i deixar anar els fitxers aquí per afegir-los
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="contenedor-botones-finales">
+                <button class="boton-accion-guardar">Desar</button> <!-- href="libreria.html"  -->
+            </div>
+
+        </div>
+    </section>
+
+    <script src="js/script_ficha_nova.js"></script>
+</body>
+
+</html>
