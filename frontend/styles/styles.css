@@ -375,12 +375,9 @@ body {
 }
 
 .bloque-pestana {
-  display: none;
-}
-
-.bloque-pestana.activa {
   display: block;
 }
+
 
 /* Estructura de dos columnas dentro del detalle */
 .rejilla-dos-columnas-detalle {
@@ -729,4 +726,30 @@ body {
     width: 100%;
     text-align: center;
   }
+}
+
+@media print {
+    /* Ocultar lo que no queremos en el PDF */
+    .cabecera-principal,
+    .enlace-volver,
+    .enlaces-modificar-borrar,
+    .contenedor-botones-finales {
+        display: none ;
+    }
+
+    /* Ajustar el contenedor para que ocupe toda la página */
+    .contenedor-detalle {
+      padding: 0;
+      max-width: 100%;
+    }
+
+    .tarjeta-detalle-principal {
+      box-shadow: none;
+    }
+
+    /* Las dos columnas en papel */
+    .rejilla-dos-columnas-detalle {
+        grid-template-columns: 1fr 1fr;
+    }
+
 }
