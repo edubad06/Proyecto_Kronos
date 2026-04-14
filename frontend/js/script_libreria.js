@@ -9,7 +9,7 @@ ficha_jaciment.addEventListener("click", function(){
 });
 
 ficha_sector.addEventListener("click", function(){
-    window.location.assign("detail.html?tab=sector");
+    window.location.assign(`detail.html?tab=sector&id=SEC-A`);
 });
 
 ficha_ue.addEventListener("click", function(){

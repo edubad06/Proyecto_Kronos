@@ -1,10 +1,23 @@
-from sqlmodel import SQLModel, Field
+from pydantic import BaseModel
+from typing import Optional
 
-class Sector (SQLModel, table=True):
-    id_sector : int = Field(default=None, primary_key=True)
-    codi_sector: str
-    descripcio: str
+class Sector(BaseModel):
+    id_sector: str
+    id_jaciment: str
+    nom: str
+    descripcio: Optional[str] = None
+    privacitat: Optional[str] = "public"
+    sincronitzat: Optional[bool] = False
 
-    #jaciment ->foránea?
-    #privacitat
-    #imatges
+class SectorResponse(BaseModel):
+    id_sector: str
+    id_jaciment: str
+    nom: str
+    descripcio: Optional[str] = None
+    privacitat: Optional[str] = None
+
+class SectorRequest(BaseModel):
+    id_jaciment: str
+    nom: str
+    descripcio: Optional[str] = None
+    privacitat: Optional[str] = "public"
