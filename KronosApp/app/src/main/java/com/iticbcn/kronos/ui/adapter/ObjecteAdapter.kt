@@ -2,6 +2,7 @@ package com.iticbcn.kronos.ui.adapter
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,10 +22,10 @@ import com.iticbcn.kronos.data.remote.S3Service
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.bumptech.glide.Glide
 
 class ObjecteAdapter(
     private var objectesList: List<ObjecteUE>,
@@ -63,18 +64,13 @@ class ObjecteAdapter(
         val primeraImagen = objecte.imatges_urls?.firstOrNull()
 
         if (!primeraImagen.isNullOrEmpty()) {
-            try {
-                // Si la URL empieza por "http", es de S3, si no, intentamos cargarla como Uri local
-                if (primeraImagen.startsWith("http")) {
-                   // Aquí se debería usar una librería como Glide o Picasso para cargar URLs remotas
-                   // holder.ivIcon.setImageURI(Uri.parse(primeraImagen)) // Esto no funcionará para URLs remotas sin más
-                   holder.ivIcon.setImageResource(R.drawable.ic_launcher_foreground) 
-                } else {
-                    holder.ivIcon.setImageURI(Uri.parse(primeraImagen))
-                }
-            } catch (e: Exception) {
-                holder.ivIcon.setImageResource(R.drawable.ic_launcher_foreground)
-            }
+            // Glide gestiona automáticamente si es una URL de internet (S3) o una URI local del móvil
+            Glide.with(holder.itemView.context)
+                .load(primeraImagen)
+                .placeholder(R.drawable.ic_launcher_foreground) // Imagen mientras carga
+                .error(R.drawable.ic_launcher_foreground)       // Imagen si falla (ej. sin internet)
+                .centerCrop()                                   // Ajusta la imagen al tamaño del ImageView
+                .into(holder.ivIcon)
         } else {
             holder.ivIcon.setImageResource(R.drawable.ic_launcher_foreground)
         }
@@ -118,12 +114,25 @@ class ObjecteAdapter(
                                     .show()
 
                                 val publicUrls = mutableListOf<String>()
+                                var hasError = false
+                                
                                 objecte.imatges_urls.forEach { uriString ->
                                     val publicUrl = S3Service.uploadImage(context, Uri.parse(uriString))
-                                    if (publicUrl != null) publicUrls.add(publicUrl)
+                                    if (publicUrl != null) {
+                                        publicUrls.add(publicUrl)
+                                    } else {
+                                        hasError = true
+                                    }
+                                }
+
+                                if (hasError && publicUrls.isEmpty() && objecte.imatges_urls.isNotEmpty()) {
+                                    dialog.dismiss()
+                                    Toast.makeText(context, "Error al pujar les imatges al S3", Toast.LENGTH_LONG).show()
+                                    return@launch
                                 }
 
                                 val finalObjecte = objecte.copy(imatges_urls = publicUrls, sincronitzat = false)
+                                Log.d("ObjecteAdapter", "Subiendo a Firestore con URLs: $publicUrls")
 
                                 val db = FirebaseFirestore.getInstance()
                                 val docId = "${finalObjecte.jaciment}_${finalObjecte.codi_ue}".replace("/", "_")

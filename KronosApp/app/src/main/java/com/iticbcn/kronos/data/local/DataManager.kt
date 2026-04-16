@@ -1,10 +1,12 @@
 package com.iticbcn.kronos.data.local
 
 import android.content.Context
+import android.util.Log
 import com.iticbcn.kronos.domain.model.ObjecteUE
 import com.iticbcn.kronos.data.repository.UERepository
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.gson.JsonSyntaxException
 
 object DataManager {
     private const val PREFS_NAME = "UE_DATA"
@@ -18,7 +20,11 @@ object DataManager {
         return if (json == null) {
             mutableListOf("Carrer del Francolí, 65", "Pedralbes", "Tarraco")
         } else {
-            Gson().fromJson(json, object : TypeToken<MutableList<String>>() {}.type)
+            try {
+                Gson().fromJson(json, object : TypeToken<MutableList<String>>() {}.type)
+            } catch (e: JsonSyntaxException) {
+                mutableListOf("Carrer del Francolí, 65", "Pedralbes", "Tarraco")
+            }
         }
     }
 
@@ -50,8 +56,15 @@ object DataManager {
             saveFullList(context, ejemplos, KEY_LIST_LOCAL)
             ejemplos
         } else {
-            val type = object : TypeToken<List<ObjecteUE>>() {}.type
-            Gson().fromJson(json, type)
+            try {
+                val type = object : TypeToken<List<ObjecteUE>>() {}.type
+                Gson().fromJson(json, type)
+            } catch (e: Exception) {
+                Log.e("DataManager", "Error parsing local UE list, clearing data", e)
+                val ejemplos = UERepository.getEjemplosIniciales()
+                saveFullList(context, ejemplos, KEY_LIST_LOCAL)
+                ejemplos
+            }
         }
     }
 
@@ -61,8 +74,14 @@ object DataManager {
         return if (json == null) {
             emptyList()
         } else {
-            val type = object : TypeToken<List<ObjecteUE>>() {}.type
-            Gson().fromJson(json, type)
+            try {
+                val type = object : TypeToken<List<ObjecteUE>>() {}.type
+                Gson().fromJson(json, type)
+            } catch (e: Exception) {
+                Log.e("DataManager", "Error parsing DB UE list, clearing data", e)
+                prefs.edit().remove(KEY_LIST_DB).apply()
+                emptyList()
+            }
         }
     }
 

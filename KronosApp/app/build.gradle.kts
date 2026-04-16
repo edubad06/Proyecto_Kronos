@@ -52,6 +52,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.firebase.auth)
     
+    // Glide
+    implementation(libs.glide)
+    
     // FIREBASE (Usando Firestore en lugar de Database)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
