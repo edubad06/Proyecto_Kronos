@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "573047841332",
+    "project_id": "kronos-e3625",
+    "storage_bucket": "kronos-e3625.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:573047841332:android:c9db6a7948d85f5a16e061",
+        "android_client_info": {
+          "package_name": "com.iticbcn.kronos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxn0S7WF9qf2qx00kr4KIT-ThJZ4af56U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

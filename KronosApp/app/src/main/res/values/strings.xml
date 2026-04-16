@@ -1,0 +1,122 @@
+<resources>
+    <string name="app_name">KronosApp</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">Primer Fragment</string>
+    <string name="second_fragment_label">Segon Fragment</string>
+    <string name="next">Següent</string>
+    <string name="previous">Anterior</string>
+    <string name="logo">logo</string>
+    <string name="Name">Nom</string>
+    <string name="Contrasenya">Contrasenya</string>
+    <string name="Login">Iniciar sessió</string>
+    <string name="NoTensComptaClicaAqui">No tens compte? Clica aquí</string>
+    <string name="CrearCompta">Crear compte</string>
+    <string name="TornarEnrera">Tornar enrere</string>
+    <string name="CrearUE">Crear UE</string>
+    <string name="CrearSector">Crear Sector</string>
+    <string name="Nom">Nom</string>
+    <string name="Email">Correu electrònic</string>
+    <string name="ConfirmarContrasenya">Confirmar contrasenya</string>
+    <string name="Crear">Crear</string>
+    <string name="JaTensCompta">Ja tens compte? Torna enrere</string>
+
+    <!-- Formulario UE -->
+    <string name="form_title_estratigrafica">FITXA D\'UNITAT ESTRATIGRÀFICA</string>
+    <string name="codi_intervencio_hint">Codi intervenció</string>
+    <string name="form_ue_hint">UE</string>
+    <string name="form_sector_hint">Sector</string>
+    <string name="form_cronologia_hint">Cronologia</string>
+    <string name="form_tipus_ue_hint">Tipus UE</string>
+    <string name="form_interpretacio_hint">Interpretació</string>
+    <string name="form_textura_hint">Textura</string>
+    <string name="form_color_hint">Color</string>
+    <string name="form_descripcio_hint">Descripció</string>
+    <string name="form_cotes_hint">Cotes</string>
+    <string name="form_material_hint">Material</string>
+    <string name="estat_conservacio">Estat conservació</string>
+
+    <string name="form_cotes_superiors_hint">C. Sup.</string>
+    <string name="form_cotes_inferiors_hint">C. Inf.</string>
+    <string name="form_longitud_hint">Long.</string>
+    <string name="form_amplada_hint">Ampl.</string>
+    <string name="form_alcada_hint">Alç.</string>
+
+    <string name="form_section_fotografies">Fotografies</string>
+    <string name="form_image_preview_description">Previsualització de la imatge</string>
+    <string name="form_add_image_button">Afegir imatge</string>
+    <string name="form_section_relacions">Relacions</string>
+    <string name="form_igual_a_hint">Igual a</string>
+    <string name="form_se_li_lliura_hint">Se li lliura</string>
+    <string name="form_cobert_per_hint">Cobert per</string>
+    <string name="form_tallat_per_hint">Tallat per</string>
+    <string name="form_reblert_per_hint">Reblert per</string>
+    <string name="form_es_lliura_a_hint">Es lliura a</string>
+    <string name="form_cobreix_a_hint">Cobreix a</string>
+    <string name="form_talla_a_hint">Talla a</string>
+    <string name="form_rebleix_a_hint">Rebleix a</string>
+    <string name="form_save_button">Desar</string>
+    <string name="jaciment">Jaciment</string>
+    <string name="sector">Sector</string>
+    <string name="codi_ue">Codi UE</string>
+    <string name="form_observacions_hint">Observacions</string>
+
+    <string name="filtrar">Filtrar</string>
+    <string name="text_filtre_error">No s\'han trobat UE amb aquests filtres</string>
+    <string name="text_ue_local_list_empty">No s\'han trobat UE locals</string>
+    <string name="text_ue_external_list_empty">No s\'han trobat UE externes</string>
+    <string name="image_options">Opcions d\'imatge</string>
+
+    <!-- Account Config Strings -->
+    <string name="titol_configuracio">Configuració del compte</string>
+    <string name="nom_usuari_defecte">Nom de l\'usuari</string>
+    <string name="rol_defecte">Rol en l\'excavació</string>
+
+    <string name="compta_info">INFORMACIÓ DEL COMPTE</string>
+    <string name="nom">Nom</string>
+    <string name="correu_electronic">Correu electrònic</string>
+    <string name="btn_cambiar_contrasenya">Canviar contrasenya</string>
+
+    <string name="excavacio_maj">EXCAVACIÓ</string>
+    <string name="excavacio_min">Excavació</string>
+    <string name="rol">Rol</string>
+
+    <string name="btn_guardar_cambis">Desar canvis</string>
+    <string name="btn_tornar_enrera">Tornar enrere</string>
+
+    <string name="desc_editar_nom">Editar nom</string>
+    <string name="desc_editar_correu">Editar correu</string>
+    <string name="desc_cambiar_contrasenya">Canviar contrasenya</string>
+
+    <string name="usuari_no_trobat">No s\'ha trobat el perfil de l\'usuari</string>
+    <string name="error_carregar_dades">Error en carregar les dades</string>
+    <string name="aplicar_filtre">Aplicar filtre</string>
+
+    <!-- Arrays para los tipos de UE -->
+    <string-array name="tipus_ue_options">
+        <item>Interstrat</item>
+        <item>Estrat</item>
+        <item>Estructura</item>
+        <item>Retall</item>
+    </string-array>
+
+    <!-- Opciones para Jaciment -->
+    <string-array name="jaciment_options">
+        <item>Carrer del Francolí, 65</item>
+        <item>Pedralbes</item>
+        <item>Tarraco</item>
+    </string-array>
+
+    <!-- Opciones para Sector -->
+    <string-array name="sector_options">
+        <item>A Rasa I</item>
+        <item>Sector B</item>
+        <item>Zona Nord</item>
+    </string-array>
+
+
+    <string name="lorem_ipsum">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit...
+    </string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hola fragment en blanc</string>
+</resources>

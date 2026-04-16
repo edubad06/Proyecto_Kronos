@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_edit"
+        android:title="Editar"
+        android:icon="@drawable/edit_document" /> <!-- Asegúrate de que el icono exista -->
+    <item
+        android:id="@+id/action_upload"
+        android:title="Subir"
+        android:icon="@drawable/upload_document" /> <!-- Icono de subida -->
+    <item
+        android:id="@+id/action_delete"
+        android:title="Eliminar"
+        android:icon="@drawable/delete" />
+</menu>
