@@ -49,23 +49,24 @@
                         <div class="titulo-bloque-interno">Informació bàsica</div>
 
                         <div class="grupo-rejilla-interno">
-                            <div class="campo-formulario-base"><label>UE</label><input type="text" placeholder="Codi UE"></div>
-                            <div class="campo-formulario-base"><label>Sector</label><input type="text" placeholder="Sector"></div> <!--  ????????????????? aquÍ tienen que salir las que haya guardadas -->
-                            <div class="campo-formulario-base"><label>Jaciment</label><input type="text" placeholder="Jaciment"></div> <!--  aquÍ tienen que salir las que haya guardadas -->
-                            <div class="campo-formulario-base"><label>Codi intervenció</label><input type="text" placeholder="Sector"></div>
-                            <div class="campo-formulario-base"><label>Datació</label><input type="text" placeholder="Datació"></div>
+                            <div class="campo-formulario-base"><label>UE</label><input type="text" id="i-ue-codi" placeholder="Codi UE"></div>
+                            <div class="campo-formulario-base"><label>Sector</label><input type="text" id="i-ue-codiSec" placeholder="Sector"></div> <!--  ????????????????? aquÍ tienen que salir las que haya guardadas -->
+                            <div class="campo-formulario-base"><label>Jaciment</label><input type="text" id="i-ue-codiJac" placeholder="Jaciment"></div> <!--  aquÍ tienen que salir las que haya guardadas -->
+                            <div class="campo-formulario-base"><label>Codi intervenció</label><input type="text" id="i-ue-codiInterv" placeholder="Sector"></div>
+                            <div class="campo-formulario-base"><label>Datació</label><input type="text" id="i-ue-cronolog" placeholder="Datació"></div>
                             <div class="campo-formulario-base">
                                 <label>Tipus UE</label>
-                                <select>
+                                <select id="i-ue-tipus">
                                     <option>Estrat</option>
                                     <option>Estructura</option>
                                     <option>Retall</option>
                                 </select>
                             </div>
-                            <div class="campo-formulario-base"><label>Textura</label><input type="text" placeholder="Textura"></div>
-                            <div class="campo-formulario-base"><label>Color</label><input type="text" placeholder="Color"></div>
-                            <div class="campo-formulario-base"><label>Material</label><input type="text" placeholder="Color"></div>
-                            <div class="campo-formulario-base"><label>Interpretació</label><input type="text" placeholder="Interpretació"></div>
+                            <div class="campo-formulario-base"><label>Textura</label><input type="text" id="i-ue-text" placeholder="Textura"></div>
+                            <div class="campo-formulario-base"><label>Color</label><input type="text" id="i-ue-color" placeholder="Color"></div>
+                            <div class="campo-formulario-base"><label>Material</label><input type="text" id="i-ue-mat" placeholder="Material"></div>
+                            <div class="campo-formulario-base"><label>Estat conservació</label><input type="text" id="i-ue-estado" placeholder="Estat"></div>
+                            <div class="campo-formulario-base"><label>Interpretació</label><input type="text" id="i-ue-interpr" placeholder="Interpretació"></div>
                         </div>
                            
                         <div class="titulo-bloque-interno">Dades topográfiques</div>
@@ -75,11 +76,11 @@
                                 <label><b>Dimensions (cm)</b></label>
                                 <label>Longitud x Amplada x Alçada </label>
                                 <div class="campo-doble-medida">
-                                    <input type="number">
+                                    <input type="number" id="i-ue-long">
                                     <span>x</span>
-                                    <input type="number">
+                                    <input type="number" id="i-ue-ampl">
                                     <span>x</span>
-                                    <input type="number">
+                                    <input type="number" id="i-ue-alc">
                                 </div>
                             </div>
                         </div>
@@ -87,7 +88,7 @@
                         <div class="grupo-rejilla-interno">                           
                             <div class="campo-formulario-base">
                                 <label><b>Cotes (m)</b> - Sup x Inf</label>
-                                <div class="campo-doble-medida"><input type="number"> <span>x</span> <input type="number"></div>
+                                <div class="campo-doble-medida"><input type="number" id="i-ue-cotaSup"> <span>x</span> <input type="number" id="i-ue-cotaInf"></div>
                             </div>
                         </div>                      
                         
@@ -114,22 +115,22 @@
                     <!-- Columna Derecha UE -->
                     <div class="columna-detalle">
                         <div class="titulo-bloque-interno">Relacions</div>
-                        <div class="campo-formulario-base"><label>Igual a</label><input type="text"></div>
+                        <div class="campo-formulario-base"><label>Igual a</label><input type="text" class="rel-igual_a"></div>
                         <div class="grupo-rejilla-interno">                           
-                            <div class="campo-formulario-base"><label>Cobreix</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Cobert per</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Farceix</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Farcit per</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Talla</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Tallat per</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Recolza</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Se li recolza</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Lliura</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Se li lliura</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Cobreix</label><input type="text" class="rel-cobreix"></div>
+                            <div class="campo-formulario-base"><label>Cobert per</label><input type="text" class="rel-cobert_per"></div>
+                            <div class="campo-formulario-base"><label>Farceix</label><input type="text" class="rel-farceix"></div>
+                            <div class="campo-formulario-base"><label>Farcit per</label><input type="text" class="rel-farcit_per"></div>
+                            <div class="campo-formulario-base"><label>Talla</label><input type="text" class="rel-talla"></div>
+                            <div class="campo-formulario-base"><label>Tallat per</label><input type="text" class="rel-tallat_per"></div>
+                            <div class="campo-formulario-base"><label>Recolza</label><input type="text" class="rel-recolza"></div>
+                            <div class="campo-formulario-base"><label>Se li recolza</label><input type="text" class="rel-se_li_recolza"></div>
+                            <div class="campo-formulario-base"><label>Lliura</label><input type="text" class="lliura"></div>
+                            <div class="campo-formulario-base"><label>Se li lliura</label><input type="text" class="rel-se_li_lliura"></div>
                         </div>
                         <div class="campo-area-texto">
-                            <label>Observacions</label>
-                            <textarea></textarea>
+                            <label>Descripció</label>
+                            <textarea id="i-ue-descr"></textarea>
                         </div>
                         <div class="titulo-bloque-interno">Imatges</div>
                         <article class="caja-arrastrar-soltar">
@@ -151,25 +152,26 @@
                     <div class="columna-detalle">
                         <div class="titulo-bloque-interno">Informació bàsica</div>
                         <div class="grupo-rejilla-interno">
-                            <div class="campo-formulario-base"><label>Nom/Codi</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Director/a</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Nom</label><input type="text" id="i-jac-nom"></div>
+                            <div class="campo-formulario-base"><label>Codi</label><input type="text" id="i-jac-codi"></div>
+                            <div class="campo-formulario-base"><label>Director/a</label><input type="text" id="i-jac-director"></div>
                         </div>
                         <div >    
                             <div class="campo-formulario-base">
                                 <label><b>Coordenades</b></label>
                                 <label>Altitud x Latitud x Profunditat </label>
                                 <div class="campo-doble-medida">
-                                    <input type="number"><!-- altitud: coordenada_x -->
+                                    <input type="number" id="i-jac-alt"><!-- altitud: coordenada_x -->
                                     <span>x</span>
-                                    <input type="number"><!-- latitud: coordenada_y -->
+                                    <input type="number" id="i-jac-lat"><!-- latitud: coordenada_y -->
                                     <span>x</span>
-                                    <input type="number"><!-- profundidad: coordenada_z -->
+                                    <input type="number" id="i-jac-prof"><!-- profundidad: coordenada_z -->
                                 </div>
                             </div>
                         </div>
                         <div class="campo-area-texto">
                             <label>Descripció</label>
-                            <textarea></textarea>
+                            <textarea id="i-jac-descr"></textarea>
                         </div>
                         <div class="contenedor-privacidad">
                             <div class="titulo-privacidad">Privacitat</div>
@@ -242,12 +244,13 @@
                     <div class="columna-detalle">
                         <div class="titulo-bloque-interno">Informació bàsica</div>
                         <div class="grupo-rejilla-interno">
-                            <div class="campo-formulario-base sec-nom"><label>Nom/Codi</label><input type="text"></div>
-                            <div class="campo-formulario-base sec-jac"><label>Jaciment</label><input type="text"></div>
+                            <div class="campo-formulario-base"><label>Nom</label><input type="text" id="i-sec-nom"></div>
+                            <div class="campo-formulario-base"><label>Codi</label><input type="text" id="i-sec-codi"></div>
+                            <div class="campo-formulario-base"><label>Jaciment</label><input type="text" id="i-sec-codiJac"></div>
                         </div>
                         <div class="campo-area-texto">
                             <label>Descripció</label>
-                            <textarea></textarea>
+                            <textarea id="i-sec-descr"></textarea>
                         </div>
                         <div class="contenedor-privacidad">
                             <div class="titulo-privacidad">Privacitat</div>

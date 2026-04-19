@@ -55,42 +55,80 @@ document.querySelectorAll('.bloque-pestana').forEach(f => f.style.display = 'non
 const formularioActivo = document.getElementById('formulario-' + tab);
 if (formularioActivo) formularioActivo.style.display = 'block';
 
-const sec_nom = document.querySelector(".sec-nom");
-console.log(sec_nom.value);
 
-/**
- * const afegirPuntuacio = async function(){
-    const bodyPost = {
-        "nomUsuario": jugador1.nom,
-        "puntuacionMaxima": jugador1.partidaMasPunts,
-        "totalPartidas": jugador1.totalPartidas,
-        "partidasGanadas": jugador1.partidasGanadas,
-        "fecha": fechaPartida,
-        "partidaGanada": partidaGanada,
-        "puntuacionPartida": jugador1.puntsPartidaActual
-    }
-    console.log("histórico que se guarda: ",bodyPost); //Object { nomUsuario: "arnau", puntuacionMaxima: 9, totalPartidas: 3, partidasGanadas: 2, fecha: "2026-01-31", partidaGanada: true, puntuacionPartida: 8 }
-    try{
-        const respuesta = await fetch ("http://127.0.0.1:8000/partida",{
-            method:"POST",
-            body: JSON.stringify(bodyPost),
-            headers:{
-                'Content-Type':'application/json'
-            }
-        });
-        if (respuesta.ok){
-            const body = await respuesta.json();
-            console.log("POST correcto", body); //POST correcto Object { msg: "Histórico guardado correctamente" }
+btn_guardar.addEventListener("click", async function(){
+    try {
+        if (tab === 'sector') {
+            const nouSector = {
+                nom: document.getElementById('i-sec-nom').value,
+                codi_sector: document.getElementById('i-sec-codi').value,
+                codi_jaciment: document.getElementById('i-sec-codiJac').value,
+                descripcio: document.getElementById('i-sec-descr').value,
+                //sincronitzat: false,
+                //imatges_urls: []
+            };
+            await db.collection('sectors').add(nouSector);
+
+        } else if (tab === 'yacimiento') {
+            const nouJaciment = {
+                nom: document.getElementById('i-jac-nom').value,
+                codi_jaciment: document.getElementById('i-jac-codi').value,
+                director: document.getElementById('i-jac-director').value,
+                coordenada_x: document.getElementById('i-jac-alt').value,
+                coordenada_y: document.getElementById('i-jac-lat').value,
+                coordenada_z: document.getElementById('i-jac-prof').value,
+                descripcio: document.getElementById('i-jac-descr').value,
+                //sincronitzat: false,
+                //imatges_urls: []
+            };
+            await db.collection('jaciments').add(nouJaciment);
+
+        } else if (tab === 'ue') {
+            const novaUE = {
+                codi_ue: document.getElementById('i-ue-codi').value,
+                codi_sector: document.getElementById('i-ue-codiSec').value,
+                codi_jaciment: document.getElementById('i-ue-codiJac').value,
+                codi_intervencio: document.getElementById('i-ue-codiInterv').value,
+                tipus_ue: document.getElementById('i-ue-tipus').value,
+                textura: document.getElementById('i-ue-text').value,
+                color: document.getElementById('i-ue-color').value,
+                material: document.getElementById('i-ue-mat').value,
+                cronologia: document.getElementById('i-ue-cronolog').value,
+                estat_conservacio: document.getElementById('i-ue-estado').value,
+                //registrat_per: document.getElementById('i-ue-person').value,
+                interpretacio: document.getElementById('i-ue-interpr').value,
+                descripcio: document.getElementById('i-ue-descr').value,
+                longitud: document.getElementById('i-ue-long').value,
+                amplada: document.getElementById('i-ue-ampl').value,
+                alcada: document.getElementById('i-ue-alc').value,
+                cota_sup: document.getElementById('i-ue-cotaSup').value,
+                cota_inf: document.getElementById('i-ue-cotaInf').value,
+                relacions: [
+                    { tipus: 'igual_a', desti: document.querySelector('.rel-igual_a').value },
+                    { tipus: 'cobreix', desti: document.querySelector('.rel-cobreix').value },
+                    { tipus: 'cobert_per', desti: document.querySelector('.rel-cobert_per').value },
+                    { tipus: 'farceix', desti: document.querySelector('.rel-farceix').value },
+                    { tipus: 'farcit_per', desti: document.querySelector('.rel-farcit_per').value },
+                    { tipus: 'talla', desti: document.querySelector('.rel-talla').value },
+                    { tipus: 'tallat_per', desti: document.querySelector('.rel-tallat_per').value },
+                    { tipus: 'recolza', desti: document.querySelector('.rel-recolza').value },
+                    { tipus: 'se_li_recolza', desti: document.querySelector('.rel-se_li_recolza').value },
+                    { tipus: 'lliura', desti: document.querySelector('.rel-lliura').value },
+                    { tipus: 'se_li_lliura', desti: document.querySelector('.rel-se_li_lliura').value }
+                ].filter(rel => rel.desti !== ''),
+                //sincronitzat: false,
+                //imatges_urls: []
+            };
+            await db.collection('unitats_estratigrafiques').add(novaUE);
         }
-    }
-    catch(e){
-        console.log("error al intentar introducir datos en la BBDD")
-    }
-};
- */
 
-btn_guardar.addEventListener("click", function(){
-    window.location.assign("libreria.html");
+        alert("Desat correctament!");
+        window.location.assign("libreria.html");
+
+    } catch(error) {
+        console.error("Error desant:", error);
+        alert("Error en desar la fitxa");
+    }
 });
 
 //ARRASTRAR Y SOLTAR DOCUMENTOS
