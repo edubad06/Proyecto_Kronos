@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitxes</title>
     <link rel="stylesheet" href="styles/styles.css">
+    <!-- Librería Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 </head>
 
 <body>
@@ -51,7 +56,8 @@
                 <input type="text" placeholder="🔍 Cercar">
             </div>
         </div>
-
+        <div id="contenedor-fichas"></div>
+        <!--  
         <div class="ficha-lista ficha_jac">
             <div>
                 <div class="titulo-ficha">Pedralbes</div>
@@ -78,7 +84,9 @@
             </div>
             <div class="datos-ficha-derecha">📍 Pedralbes / Ped-41-2 | 👤 Paloma Ruiz | ···</div>
         </div>
+        -->
     </section>
+    <script src="js/firebase-config.js"></script>
     <script src="js/script_libreria.js"></script>
 
 </body>

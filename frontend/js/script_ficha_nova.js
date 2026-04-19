@@ -55,7 +55,39 @@ document.querySelectorAll('.bloque-pestana').forEach(f => f.style.display = 'non
 const formularioActivo = document.getElementById('formulario-' + tab);
 if (formularioActivo) formularioActivo.style.display = 'block';
 
+const sec_nom = document.querySelector(".sec-nom");
+console.log(sec_nom.value);
 
+/**
+ * const afegirPuntuacio = async function(){
+    const bodyPost = {
+        "nomUsuario": jugador1.nom,
+        "puntuacionMaxima": jugador1.partidaMasPunts,
+        "totalPartidas": jugador1.totalPartidas,
+        "partidasGanadas": jugador1.partidasGanadas,
+        "fecha": fechaPartida,
+        "partidaGanada": partidaGanada,
+        "puntuacionPartida": jugador1.puntsPartidaActual
+    }
+    console.log("histórico que se guarda: ",bodyPost); //Object { nomUsuario: "arnau", puntuacionMaxima: 9, totalPartidas: 3, partidasGanadas: 2, fecha: "2026-01-31", partidaGanada: true, puntuacionPartida: 8 }
+    try{
+        const respuesta = await fetch ("http://127.0.0.1:8000/partida",{
+            method:"POST",
+            body: JSON.stringify(bodyPost),
+            headers:{
+                'Content-Type':'application/json'
+            }
+        });
+        if (respuesta.ok){
+            const body = await respuesta.json();
+            console.log("POST correcto", body); //POST correcto Object { msg: "Histórico guardado correctamente" }
+        }
+    }
+    catch(e){
+        console.log("error al intentar introducir datos en la BBDD")
+    }
+};
+ */
 
 btn_guardar.addEventListener("click", function(){
     window.location.assign("libreria.html");
@@ -73,6 +105,5 @@ dropZone.addEventListener("drop",(event)=>{ //drop = soltar
     const files = event.dataTransfer.files; //para recuperar el fichero en binari
     loadImages(files); //nos genera un array de todos los ficheros que sueltas
 });
-
 
 

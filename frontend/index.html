@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KRONOS - Login</title>
     <link rel="stylesheet" href="styles/styles.css">
+    <!-- Librería Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=visibility" />
 </head>
 
 <body>
@@ -16,26 +21,28 @@
 
             <div class="campo-formulario-base">
                 <label>Correu electrònic</label>
-                <input type="email" value="paloma@kronos.cat">
+                <input type="email" class="correo">
             </div>
 
             <div class="campo-formulario-base">
                 <label>Contrasenya</label>
-                <input type="password" value="123456">
+                <input type="password" class="passwd">
+                <span id="icon-eye" class="material-symbols-outlined">visibility</span>
             </div>
-
+            <!--  
             <div class="opcion-recordar-login">
                 <input type="checkbox" checked>
                 <div>
                     <strong>Recorda'm</strong>
                     <div>Desa la sessió en aquest dispositiu</div>
                 </div>
-            </div>
+            </div> -->
 
-            <a href="libreria.html" class="boton-enviar-login">Inicia sessió</a>
+            <button class="boton-enviar-login">Inicia sessió</button>
         </div>
     </section>
-
+    <script src="js/firebase-config.js"></script>
+    <script src="js/script_index.js"></script>
 </body>
 
 </html>

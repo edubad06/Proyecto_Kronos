@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Librería Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 </head>
 
 <body>
@@ -127,11 +132,11 @@
                             <textarea></textarea>
                         </div>
                         <div class="titulo-bloque-interno">Imatges</div>
-                        <div class="caja-arrastrar-soltar">
-                            
-                            <div class="icono">⬇️</div>
-                            Pots arrossegar i deixar anar els fitxers aquí per afegir-los
-                        </div>
+                        <article class="caja-arrastrar-soltar">
+                            <div class="dropZone">
+                            Arrossegar imatges aquí
+                            </div>
+                        </article>
                     </div>
 
                 </div>
@@ -237,8 +242,8 @@
                     <div class="columna-detalle">
                         <div class="titulo-bloque-interno">Informació bàsica</div>
                         <div class="grupo-rejilla-interno">
-                            <div class="campo-formulario-base"><label>Nom/Codi</label><input type="text"></div>
-                            <div class="campo-formulario-base"><label>Jaciment</label><input type="text"></div>
+                            <div class="campo-formulario-base sec-nom"><label>Nom/Codi</label><input type="text"></div>
+                            <div class="campo-formulario-base sec-jac"><label>Jaciment</label><input type="text"></div>
                         </div>
                         <div class="campo-area-texto">
                             <label>Descripció</label>
@@ -266,10 +271,11 @@
                     <!-- Columna Derecha SECTOR -->
                     <div class="columna-detalle">
                         <div class="titulo-bloque-interno">Imatges</div>
-                        <div class="caja-arrastrar-soltar">
-                            <div class="icono">⬇️</div>
-                            Pots arrossegar i deixar anar els fitxers aquí per afegir-los
-                        </div>
+                        <article class="caja-arrastrar-soltar">
+                            <div class="dropZone">
+                            Arrossegar imatges aquí
+                            </div>
+                        </article>
                     </div>
 
                 </div>
@@ -283,7 +289,9 @@
         </div>
     </section>
 
+    <script src="js/firebase-config.js"></script>
     <script src="js/script_ficha_nova.js"></script>
+
 </body>
 
 </html>
