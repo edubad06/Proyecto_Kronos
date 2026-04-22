@@ -15,6 +15,7 @@ import com.iticbcn.kronos.domain.model.ObjecteUE
 import com.iticbcn.kronos.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.iticbcn.kronos.ui.formulario.FormularioUE
+import com.google.firebase.auth.FirebaseAuth
 
 class UEFragment : Fragment() {
 
@@ -57,14 +58,16 @@ class UEFragment : Fragment() {
         updateUI(originalList)
     }
 
-    fun applyFilters(jaciment: String, sector: String, ue: String, tipus: String) {
+    fun applyFilters(jaciment: String, sector: String, ue: String, tipus: String, onlyMine: Boolean = false) {
+        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
         val filteredList = originalList.filter { item ->
             val matchJaciment = jaciment.isEmpty() || item.jaciment == jaciment
             val matchSector = sector.isEmpty() || item.codi_sector == sector
             val matchUE = ue.isEmpty() || item.codi_ue.contains(ue, ignoreCase = true)
             val matchTipus = tipus.isEmpty() || item.tipus_ue == tipus
+            val matchOnlyMine = !onlyMine || item.registrat_per == currentUserEmail
 
-            matchJaciment && matchSector && matchUE && matchTipus
+            matchJaciment && matchSector && matchUE && matchTipus && matchOnlyMine
         }
         updateUI(filteredList, isFilter = true)
     }

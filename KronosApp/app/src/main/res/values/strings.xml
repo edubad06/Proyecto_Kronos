@@ -65,6 +65,7 @@
     <string name="text_ue_local_list_empty">No s\'han trobat UE locals</string>
     <string name="text_ue_external_list_empty">No s\'han trobat UE externes</string>
     <string name="image_options">Opcions d\'imatge</string>
+    <string name="fetes_per_mi">Fetes per mi</string>
 
     <!-- Account Config Strings -->
     <string name="titol_configuracio">Configuració del compte</string>

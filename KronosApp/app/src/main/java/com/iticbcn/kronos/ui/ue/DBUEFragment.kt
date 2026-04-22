@@ -22,6 +22,7 @@ class DBUEFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var tvEmptyMessage: TextView
+    private var userRole: String = "tecnic" // Por defecto
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +36,9 @@ class DBUEFragment : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = ObjecteAdapter(emptyList(), isDatabaseSource = true)
+        // Inicializamos con el email del usuario actual
+        val currentEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
+        adapter = ObjecteAdapter(emptyList(), isDatabaseSource = true, currentUserEmail = currentEmail)
         recyclerView.adapter = adapter
 
         return view
@@ -63,6 +66,11 @@ class DBUEFragment : Fragment() {
             .addOnSuccessListener { userDocs ->
                 if (!userDocs.isEmpty) {
                     val userData = userDocs.documents[0]
+                    userRole = userData.getString("rol") ?: "tecnic"
+                    
+                    // Actualizamos el rol en el adaptador
+                    adapter.setUserRole(userRole)
+
                     val excavacions = when (val value = userData.get("excavacio")) {
                         is List<*> -> value.filterIsInstance<String>()
                         is String -> listOf(value)
@@ -95,14 +103,16 @@ class DBUEFragment : Fragment() {
             }
     }
 
-    fun applyFilters(jaciment: String, sector: String, ue: String, tipus: String) {
+    fun applyFilters(jaciment: String, sector: String, ue: String, tipus: String, onlyMine: Boolean = false) {
+        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
         val filteredList = originalList.filter { item ->
             val matchJaciment = jaciment.isEmpty() || item.jaciment == jaciment
             val matchSector = sector.isEmpty() || item.codi_sector == sector
             val matchUE = ue.isEmpty() || item.codi_ue.contains(ue, ignoreCase = true)
             val matchTipus = tipus.isEmpty() || item.tipus_ue == tipus
+            val matchOnlyMine = !onlyMine || item.registrat_per == currentUserEmail
 
-            matchJaciment && matchSector && matchUE && matchTipus
+            matchJaciment && matchSector && matchUE && matchTipus && matchOnlyMine
         }
         updateUI(filteredList, isFilter = true)
     }

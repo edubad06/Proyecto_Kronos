@@ -3,6 +3,7 @@ package com.iticbcn.kronos.ui.accountConfig
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.iticbcn.kronos.databinding.ActivityAccountConfigBinding
@@ -25,20 +26,30 @@ class AccountConfigActivity : AppCompatActivity() {
             finish()
         }
 
-        binding.btnGuardarCambis.setOnClickListener {
-            Toast.makeText(this, "Funcionalitat per guardar en implementació", Toast.LENGTH_SHORT).show()
-        }
-
         binding.btnCambiarContrasenya.setOnClickListener {
             val email = auth.currentUser?.email
             if (email != null) {
-                auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(this, "Correu de restabliment enviat a $email", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                // Diálogo de confirmación inicial
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Canviar contrasenya")
+                    .setMessage("Vols rebre un correu electrònic a $email per restablir la teva contrasenya?")
+                    .setNegativeButton("Cancel·lar", null)
+                    .setPositiveButton("Enviar correu") { _, _ ->
+                        // Petición a Firebase
+                        auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // Popup informativo de éxito y aviso de SPAM
+                                MaterialAlertDialogBuilder(this)
+                                    .setTitle("Correu enviat!")
+                                    .setMessage("S'ha enviat un enllaç a la teva bústia. Si no el veus en uns minuts, si us plau, revisa la teva carpeta de correu brossa (SPAM).")
+                                    .setPositiveButton("Entès", null)
+                                    .show()
+                            } else {
+                                Toast.makeText(this, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
-                }
+                    .show()
             }
         }
     }

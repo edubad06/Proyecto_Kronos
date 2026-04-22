@@ -50,25 +50,25 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_jaciment"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/jaciment"
                         app:errorEnabled="false">
 
-                        <AutoCompleteTextView
-                            android:id="@+id/actv_jaciment"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_jaciment"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            tools:ignore="LabelFor" />
+                            android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:baselineAligned="false"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp">
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/til_sector"
@@ -294,137 +294,147 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:baselineAligned="false"
+                        android:layout_marginTop="8dp"
                         android:orientation="horizontal">
 
-                        <LinearLayout
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:hint="@string/form_se_li_lliura_hint">
 
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_se_li_lliura"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/form_se_li_lliura_hint">
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/et_se_li_lliura"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/form_cobert_per_hint">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/et_cobert_per"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/form_tallat_per_hint">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/et_tallat_per"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/form_reblert_per_hint">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/et_reblert_per"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                        </LinearLayout>
-
-                        <LinearLayout
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:hint="@string/form_es_lliura_a_hint">
 
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_es_lliura_a"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/form_es_lliura_a_hint">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/et_es_lliura_a"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/form_cobreix_a_hint">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/et_cobreix_a"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/form_talla_a_hint">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/et_talla_a"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/form_rebleix_a_hint">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/et_rebleix_a"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                        </LinearLayout>
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/form_cobert_per_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_cobert_per"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:hint="@string/form_cobreix_a_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_cobreix_a"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/form_tallat_per_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_tallat_per"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:hint="@string/form_talla_a_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_talla_a"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/form_reblert_per_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_reblert_per"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:hint="@string/form_rebleix_a_hint">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_rebleix_a"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
+
     <Button
         android:id="@+id/button_save"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="@string/form_save_button"

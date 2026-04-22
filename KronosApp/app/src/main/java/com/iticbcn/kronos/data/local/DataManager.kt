@@ -28,6 +28,10 @@ object DataManager {
         }
     }
 
+    fun getSectors(context: Context): List<String> {
+        return UERepository.getSectoresPorJaciment().values.flatten().distinct()
+    }
+
     fun getSectorsByJaciment(context: Context, jacimentNom: String): List<String> {
         val mapa = UERepository.getSectoresPorJaciment()
         return mapa[jacimentNom] ?: emptyList()

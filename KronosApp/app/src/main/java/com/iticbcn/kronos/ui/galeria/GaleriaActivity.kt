@@ -13,12 +13,16 @@ import com.iticbcn.kronos.R
 import com.iticbcn.kronos.ui.adapter.GaleriaPagerAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.iticbcn.kronos.ui.main.MainActivity
 import com.iticbcn.kronos.ui.ue.UEFragment
 import com.iticbcn.kronos.ui.ue.DBUEFragment
 import com.iticbcn.kronos.ui.accountConfig.AccountConfigActivity
 
 class GaleriaActivity : AppCompatActivity() {
+
+    private var userJaciment: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_galeria)
@@ -45,6 +49,9 @@ class GaleriaActivity : AppCompatActivity() {
                 bottomNavigation.menu.getItem(position).isChecked = true
             }
         })
+
+        // Fetch user jaciment to use in filters
+        fetchUserJaciment()
 
         // MENU SUPERIOR DERECHO (Logout / Salir / Config)
         ivOptions.setOnClickListener { view ->
@@ -86,7 +93,8 @@ class GaleriaActivity : AppCompatActivity() {
 
         // BOTON DEL FILTRE
         btnShowFilter.setOnClickListener {
-            val popup = FilterPopup(this) { jaciment, sector, ueId, tipus ->
+            val isDatabase = viewPager.currentItem == 1
+            val popup = FilterPopup(this, userJaciment, isDatabase) { sector, ueId, tipus, onlyMine ->
                 val fragment = when (viewPager.currentItem) {
                     0 -> supportFragmentManager.findFragmentByTag("f0") as? UEFragment
                     1 -> supportFragmentManager.findFragmentByTag("f1") as? DBUEFragment
@@ -94,11 +102,25 @@ class GaleriaActivity : AppCompatActivity() {
                 }
 
                 when (fragment) {
-                    is UEFragment -> fragment.applyFilters(jaciment, sector, ueId, tipus)
-                    is DBUEFragment -> fragment.applyFilters(jaciment, sector, ueId, tipus)
+                    is UEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, onlyMine)
+                    is DBUEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, onlyMine)
                 }
             }
             popup.show()
+        }
+    }
+
+    private fun fetchUserJaciment() {
+        val userEmail = FirebaseAuth.getInstance().currentUser?.email
+        if (userEmail != null) {
+            FirebaseFirestore.getInstance().collection("usuaris")
+                .whereEqualTo("email", userEmail)
+                .get()
+                .addOnSuccessListener { query ->
+                    if (!query.isEmpty) {
+                        userJaciment = query.documents[0].get("excavacio")?.toString() ?: ""
+                    }
+                }
         }
     }
 }
