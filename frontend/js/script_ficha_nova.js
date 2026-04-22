@@ -7,6 +7,9 @@ const dropZone = document.querySelector(".dropZone");
 
 //variables  
 let map;
+let imatgesPendents = []; 
+/* es una variable temporal para que el usuario pueda arrastrar imágenes antes de darle a guardar 
+(en ese momento todavia no existe en Firestore y por tanto no hay id)*/
 
 //inicializar mapa 
 const initMapa = function() {
@@ -17,35 +20,7 @@ const initMapa = function() {
     }).addTo(map);
     
 }
-initMapa();
 
-//arrastrar imágenes
-const loadImages = function(files) {
-    if (files && files.length > 0) {
-        // Iteramos sobre todos los ficheros
-        Array.from(files).forEach(file => {
-            if (file.type.startsWith("image/")) {
-                const reader = new FileReader(); //libreria de js que usa 3 métodos: onload, onroad y onerror
-                //mientras se carga el fichero. Es decir, si funciona se mete aquí
-                reader.onload = (event) => {
-                    console.log("imagen cargada:", file.name); // comprueba si llega aquí
-                    const imageUrl = event.target.result;
-                    const img = document.createElement("img");
-                    img.src = imageUrl;
-                    dropZone.appendChild(img); //añadimos sin borrar las anteriores
-                }
-                //si hay un error mientras se carga el fichero se mete aqui
-                reader.onerror = (error) => {
-                    console.log("Error durante la carga de la imagen", error);
-                }
-                //te cargo el fichero, y si va bien se mete al onload
-                reader.readAsDataURL(file);
-            } else {
-                alert(`El fitxer "${file.name}" no és una imatge`);
-            }
-        });
-    }
-};
 
 //MOSTRAR FORMULARIO SEGÚN PARÁMETRO
 /*lee el tab de la URL, oculta todos los formularios, y muestra solo el que corresponde.*/
@@ -67,9 +42,13 @@ btn_guardar.addEventListener("click", async function(){
                 //sincronitzat: false,
                 //imatges_urls: []
             };
-            await db.collection('sectors').add(nouSector);
+            const docRef = await db.collection('sectors').add(nouSector);
+            for (const file of imatgesPendents) {
+                await subirImatge(file, docRef.id, 'sectors');
+            }
 
         } else if (tab === 'yacimiento') {
+            initMapa();
             const nouJaciment = {
                 nom: document.getElementById('i-jac-nom').value,
                 codi_jaciment: document.getElementById('i-jac-codi').value,
@@ -81,14 +60,17 @@ btn_guardar.addEventListener("click", async function(){
                 //sincronitzat: false,
                 //imatges_urls: []
             };
-            await db.collection('jaciments').add(nouJaciment);
+            const docRef = await db.collection('jaciments').add(nouJaciment);
+    for (const file of imatgesPendents) {
+        await subirImatge(file, docRef.id, 'jaciments');
+    }
 
         } else if (tab === 'ue') {
             const novaUE = {
                 codi_ue: document.getElementById('i-ue-codi').value,
                 codi_sector: document.getElementById('i-ue-codiSec').value,
-                codi_jaciment: document.getElementById('i-ue-codiJac').value,
-                codi_intervencio: document.getElementById('i-ue-codiInterv').value,
+                //codi_jaciment: document.getElementById('i-ue-codiJac').value,
+                //codi_intervencio: document.getElementById('i-ue-codiInterv').value,
                 tipus_ue: document.getElementById('i-ue-tipus').value,
                 textura: document.getElementById('i-ue-text').value,
                 color: document.getElementById('i-ue-color').value,
@@ -96,13 +78,13 @@ btn_guardar.addEventListener("click", async function(){
                 cronologia: document.getElementById('i-ue-cronolog').value,
                 estat_conservacio: document.getElementById('i-ue-estado').value,
                 //registrat_per: document.getElementById('i-ue-person').value,
-                interpretacio: document.getElementById('i-ue-interpr').value,
+                //interpretacio: document.getElementById('i-ue-interpr').value,
                 descripcio: document.getElementById('i-ue-descr').value,
-                longitud: document.getElementById('i-ue-long').value,
-                amplada: document.getElementById('i-ue-ampl').value,
-                alcada: document.getElementById('i-ue-alc').value,
-                cota_sup: document.getElementById('i-ue-cotaSup').value,
-                cota_inf: document.getElementById('i-ue-cotaInf').value,
+                //longitud: document.getElementById('i-ue-long').value,
+                //amplada: document.getElementById('i-ue-ampl').value,
+                //alcada: document.getElementById('i-ue-alc').value,
+                //cota_sup: document.getElementById('i-ue-cotaSup').value,
+                //cota_inf: document.getElementById('i-ue-cotaInf').value,
                 relacions: [
                     { tipus: 'igual_a', desti: document.querySelector('.rel-igual_a').value },
                     { tipus: 'cobreix', desti: document.querySelector('.rel-cobreix').value },
@@ -131,17 +113,33 @@ btn_guardar.addEventListener("click", async function(){
     }
 });
 
-//ARRASTRAR Y SOLTAR DOCUMENTOS
-dropZone.addEventListener("dragover", (event)=>{ //dragover = arrastrar
-    event.preventDefault(); //para que no abra el documento que arrastramos
-    console.log("estas arrastrando el documento");
+//ARRASTRAR Y SOLTAR IMÁGENES
+dropZone.addEventListener("dragover", (event) => {
+    event.preventDefault();//para que no abra el documento que arrastramos
 });
 
-dropZone.addEventListener("drop",(event)=>{ //drop = soltar
-    event.preventDefault(); //para que no abra el documento que soltamos
-    console.log("he dejado el documento");
-    const files = event.dataTransfer.files; //para recuperar el fichero en binari
-    loadImages(files); //nos genera un array de todos los ficheros que sueltas
+dropZone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    const files = event.dataTransfer.files;//para recuperar el fichero en binari
+    Array.from(files).forEach(file => {
+        if (file.type.startsWith("image/")) {
+            imatgesPendents.push(file); // guardamos para subir después
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.style.width = '100px';
+                img.style.height = '100px';
+                img.style.objectFit = 'cover';
+                dropZone.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert(`El fitxer "${file.name}" no és una imatge`);
+        }
+    });
 });
+
+
 
 

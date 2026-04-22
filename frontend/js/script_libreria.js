@@ -63,7 +63,7 @@ const cargarFichas = async function() {
             const d = doc.data();
             console.log("DATOS UE: ", d);
             //id, titulo, subtitulo, categoria, infoDreta, tab
-            crearFicha(doc.id, d.id_ue, d.tipus_ue, 'ue', `Sector: ${d.id_sector || 'No hay sector'} `, 'ue');
+            crearFicha(doc.id, d.codi_ue, d.tipus_ue, 'ue', `Sector: ${d.codi_sector || 'No hay sector'} `, 'ue');
         });
 
     } catch (error) {

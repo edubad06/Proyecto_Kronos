@@ -3,9 +3,12 @@ const contFicha = document.querySelector(".bloque-pestana");
 const colIzq = document.querySelector(".col-izq");
 const colDcha = document.querySelector(".col-dcha");
 const btn_modificar = document.querySelector(".modificar");
+const btn_borrar = document.querySelector(".borrar");
 const btn_guardar = document.querySelector(".boton-accion-guardar");
 const btn_fitxes = document.querySelector(".enlace-volver");
 const btnPDF = document.querySelector('.boton-accion-exportar');
+const contImg = document.querySelector('.caja-arrastrar-soltar');
+const dropZone = document.querySelector('.dropZone');
 
 let modoEdicion = false;
 
@@ -46,12 +49,15 @@ const crearCampo = function(classCSS, labelText, value, inputId) {
 const params = new URLSearchParams(window.location.search);
 const tab = params.get('tab');
 const id = params.get('id');
+
+let coleccio;
+if (tab === 'sector') coleccio = 'sectors';
+else if (tab === 'yacimiento') coleccio = 'jaciments';
+else if (tab === 'ue') coleccio = 'unitats_estratigrafiques';
+
 const cargarFicha = async function() {
     try {
-        let coleccio;
-        if (tab === 'sector') coleccio = 'sectors';
-        else if (tab === 'yacimiento') coleccio = 'jaciments';
-        else if (tab === 'ue') coleccio = 'unitats_estratigrafiques';
+        
 
         const doc = await db.collection(coleccio).doc(id).get();
         
@@ -86,12 +92,15 @@ const cargarFicha = async function() {
 
             //COLUMNA DERECHA
             //imágenes
+            document.querySelector('.imatges').style.display = 'block';
+            
+            /*
             const titulo = crearDiv('titulo-bloque-interno');
             titulo.textContent="Imatges";
             colDcha.appendChild(titulo);
             const contImg = crearDiv('caja-arrastrar-soltar');
             contImg.id="i-sec-img";
-            colDcha.appendChild(contImg);
+            colDcha.appendChild(contImg);*/
 
             if (dades.imatges_urls && dades.imatges_urls.length > 0) {
                 dades.imatges_urls.forEach(url => {
@@ -161,12 +170,14 @@ const cargarFicha = async function() {
 
             //COLUMNA DERECHA
             //imágenes
+            /*
             const titIMG = crearDiv('titulo-bloque-interno');
             titIMG.textContent="Imatges";
             colDcha.appendChild(titIMG);
             const contImg = crearDiv('caja-arrastrar-soltar');
             contImg.id = "i-jac-img";
-            colDcha.appendChild(contImg);
+            colDcha.appendChild(contImg);*/
+            document.querySelector('.imatges').style.display = 'block';
             if (dades.imatges_urls && dades.imatges_urls.length > 0) {
                 dades.imatges_urls.forEach(url => {
                     const img = document.createElement('img');
@@ -195,8 +206,8 @@ const cargarFicha = async function() {
             const divInfo = crearDiv('grupo-rejilla-interno');
             divInfo.appendChild(crearCampo("campo-formulario-base","UE",dades.codi_ue,"i-ue-codi")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Sector",dades.codi_sector,"i-ue-codiSec")); //ok
-            divInfo.appendChild(crearCampo("campo-formulario-base","Jaciment",dades.codi_jaciment,"i-ue-codiJac"));
-            divInfo.appendChild(crearCampo("campo-formulario-base","Codi intervencio",dades.codi_intervencio,"i-ue-codiInterv"));
+            //divInfo.appendChild(crearCampo("campo-formulario-base","Jaciment",dades.codi_jaciment,"i-ue-codiJac"));
+            //divInfo.appendChild(crearCampo("campo-formulario-base","Codi intervencio",dades.codi_intervencio,"i-ue-codiInterv"));
             divInfo.appendChild(crearCampo("campo-formulario-base","Datacio",dades.cronologia,"i-ue-cronolog")); //ok
             //divInfo.appendChild(crearCampo("campo-formulario-base","Registrat per",dades.registrat_per,"i-ue-person")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Estat conservacio",dades.estat_conservacio,"i-ue-estado")); //ok
@@ -204,8 +215,22 @@ const cargarFicha = async function() {
             divInfo.appendChild(crearCampo("campo-formulario-base","Textura",dades.textura,"i-ue-text")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Color",dades.color,"i-ue-color")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Material",dades.material,"i-ue-mat")); //ok
-            divInfo.appendChild(crearCampo("campo-formulario-base","Interpretació",dades.interpretacio,"i-ue-interpr"));
+            //divInfo.appendChild(crearCampo("campo-formulario-base","Interpretació",dades.interpretacio,"i-ue-interpr"));
             colIzq.appendChild(divInfo);
+            
+            //descripcion
+            //ok
+            const divDescrip = crearDiv('campo-area-texto');
+            const labelDescrip = document.createElement('label');
+            labelDescrip.textContent = "Descripció";
+            const inputDescrip = document.createElement('textarea');
+            inputDescrip.textContent = dades.descripcio || 'No hi ha cap descripciò';
+            inputDescrip.disabled = true;
+            inputDescrip.id="i-ue-descr";
+            divDescrip.appendChild(labelDescrip);
+            divDescrip.appendChild(inputDescrip);
+            colIzq.appendChild(divDescrip);
+            /*
             //medidas topograficas
             const titTopo = crearDiv('titulo-bloque-interno');
             titTopo.textContent="Dades topográfiques";
@@ -266,7 +291,7 @@ const cargarFicha = async function() {
             cotes.appendChild(inputsCotes);
             divCotes.appendChild(cotes);
             colIzq.appendChild(divCotes);
-
+            */
             //COLUMNA DERECHA
             //relaciones
             //ok
@@ -280,25 +305,17 @@ const cargarFicha = async function() {
                 });
             }
 
-            //descripcion
-            //ok
-            const divDescrip = crearDiv('campo-area-texto');
-            const labelDescrip = document.createElement('label');
-            labelDescrip.textContent = "Descripció";
-            const inputDescrip = document.createElement('textarea');
-            inputDescrip.textContent = dades.descripcio || 'No hi ha cap descripciò';
-            inputDescrip.disabled = true;
-            inputDescrip.id="i-ue-descr";
-            divDescrip.appendChild(labelDescrip);
-            divDescrip.appendChild(inputDescrip);
-            colDcha.appendChild(divDescrip);
+            
+
             //imágenes
+            /*
             const titIMG = crearDiv('titulo-bloque-interno');
             titIMG.textContent="Imatges";
             colDcha.appendChild(titIMG);
             const contImg = crearDiv('caja-arrastrar-soltar');
             contImg.id="i-ue-img";
-            colDcha.appendChild(contImg);
+            colDcha.appendChild(contImg);*/
+            document.querySelector('.imatges').style.display = 'block';
             if (dades.imatges_urls && dades.imatges_urls.length > 0) {
                 dades.imatges_urls.forEach(url => {
                     const img = document.createElement('img');
@@ -348,6 +365,7 @@ document.querySelectorAll('.cabecera-principal a, .cabecera-principal button').f
     });
 });
 
+
 btn_fitxes.addEventListener("click", function(){
     volver();
 })
@@ -361,20 +379,29 @@ btn_modificar.addEventListener("click", function(){
     
 });
 
+btn_borrar.addEventListener('click', async function() {
+    const confirmacio = confirm("Estàs segur que vols esborrar aquesta fitxa? Aquesta acció no es pot desfer.");
+    if (!confirmacio) return;
+
+    try {
+        await db.collection(coleccio).doc(id).delete();
+        alert("Fitxa esborrada correctament");
+        window.location.assign("libreria.html");
+    } catch (error) {
+        console.error("Error esborrant:", error);
+        alert("Error en esborrar la fitxa");
+    }
+});
+
 btn_guardar.addEventListener('click', async function() {
     modoEdicion = false;
 
     try {
-        let coleccio;
-        if (tab === 'sector') coleccio = 'sectors';
-        else if (tab === 'yacimiento') coleccio = 'jaciments';
-        else if (tab === 'ue') coleccio = 'unitats_estratigrafiques';
-
         // Recogemos los valores actuales de los inputs
         let dadesActualitzades = {};
 
         if (tab === 'sector') {
-            const inputs = document.querySelectorAll('.col-izq input, .col-izq textarea');
+            
             
             dadesActualitzades = {
                 nom: document.getElementById('i-sec-nom').value,
@@ -383,7 +410,7 @@ btn_guardar.addEventListener('click', async function() {
                 descripcio: document.getElementById('i-sec-descr').value
             };
         } else if (tab === 'yacimiento') {
-            const inputs = document.querySelectorAll('.col-izq input, .col-izq textarea');
+            
             dadesActualitzades = {
                 nom: document.getElementById('i-jac-nom').value,
                 codi_jaciment: document.getElementById('i-jac-codi').value,
@@ -394,12 +421,12 @@ btn_guardar.addEventListener('click', async function() {
                 descripcio: document.getElementById('i-jac-descr').value,
             };
         } else if (tab === 'ue') {
-            const inputs = document.querySelectorAll('.col-izq input, .col-izq textarea');
+            
             dadesActualitzades = {
                 codi_ue: document.getElementById('i-ue-codi').value,
                 codi_sector: document.getElementById('i-ue-codiSec').value,
-                codi_jaciment: document.getElementById('i-ue-codiJac').value,
-                codi_intervencio: document.getElementById('i-ue-codiInterv').value,
+                //codi_jaciment: document.getElementById('i-ue-codiJac').value,
+                //codi_intervencio: document.getElementById('i-ue-codiInterv').value,
                 tipus_ue: document.getElementById('i-ue-tipus').value,
                 textura: document.getElementById('i-ue-text').value,
                 color: document.getElementById('i-ue-color').value,
@@ -407,13 +434,13 @@ btn_guardar.addEventListener('click', async function() {
                 cronologia: document.getElementById('i-ue-cronolog').value,
                 estat_conservacio: document.getElementById('i-ue-estado').value,
                 //registrat_per: document.getElementById('i-ue-person').value,
-                interpretacio: document.getElementById('i-ue-interpr').value,
+                //interpretacio: document.getElementById('i-ue-interpr').value,
                 descripcio: document.getElementById('i-ue-descr').value,
-                longitud: document.getElementById('i-ue-long').value,
-                amplada: document.getElementById('i-ue-ampl').value,
-                alcada: document.getElementById('i-ue-alc').value,
-                cota_sup: document.getElementById('i-ue-cotaSup').value,
-                cota_inf: document.getElementById('i-ue-cotaInf').value,
+                //longitud: document.getElementById('i-ue-long').value,
+                //amplada: document.getElementById('i-ue-ampl').value,
+                //alcada: document.getElementById('i-ue-alc').value,
+                //cota_sup: document.getElementById('i-ue-cotaSup').value,
+                //cota_inf: document.getElementById('i-ue-cotaInf').value,
                 //recogemos las relaciones y construimos el array
                 //pero con el filter solo guardamos las que tienen valor
                 relacions: [
@@ -448,4 +475,29 @@ btn_guardar.addEventListener('click', async function() {
 
 btnPDF.addEventListener('click', function() {
     window.print();
+});
+
+//bloque arrastrar imágenes
+dropZone.addEventListener("dragover", (event) => {
+    event.preventDefault();
+});
+
+dropZone.addEventListener("drop", async (event) => {
+    event.preventDefault();
+    const files = event.dataTransfer.files;
+    Array.from(files).forEach(async file => {
+        if (file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.style.width = '100px';
+                img.style.height = '100px';
+                img.style.objectFit = 'cover';
+                dropZone.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+            if (id) await subirImatge(file, id, coleccio);
+        }
+    });
 });
