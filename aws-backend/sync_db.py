@@ -31,20 +31,20 @@ def lambda_handler(event, context):
         cursor = conn.cursor()
         resum_sync = {"jaciments": 0, "sectors": 0, "ues": 0, "fotos": 0, "relacions": 0}
 
-        # PROCESAR YACIMIENTOS
+        # Procesar yacimientos
         # Buscar registros en Firebase marcados como 'sincronitzat: False'
         docs_jac = db_firestore.collection('jaciments').where('sincronitzat', '==', False).get()
         
         # SQL para insertar si no existe o actualizar si ya existe
         sql_jac = """
-        MERGE INTO jaciments t 
+        MERGE INTO JACIMENTS t 
         USING (SELECT :v_codi as codi FROM dual) s ON (t.codi_jaciment = s.codi)
-        WHEN MATCHED THEN UPDATE SET t.nom = :v_nom, t.director = :v_director, t.coordenada_x = :v_x, t.coordenada_y = :v_y, t.coordenada_z = :v_z, t.descripcio = :v_descripcio
-        WHEN NOT MATCHED THEN INSERT (codi_jaciment, nom, director, coordenada_x, coordenada_y, coordenada_z, descripcio) 
-        VALUES (:v_codi, :v_nom, :v_director, :v_x, :v_y, :v_z, :v_descripcio)
+        WHEN MATCHED THEN UPDATE SET t.nom = :v_nom, t.director = :v_director, t.coordenada_x = :v_x, t.coordenada_y = :v_y, t.coordenada_z = :v_z, t.descripcio = :v_descripcio, t.data = :v_data
+        WHEN NOT MATCHED THEN INSERT (codi_jaciment, nom, director, coordenada_x, coordenada_y, coordenada_z, descripcio, data) 
+        VALUES (:v_codi, :v_nom, :v_director, :v_x, :v_y, :v_z, :v_descripcio, :v_data)
         """
-        sql_del_foto_jac = "DELETE FROM fotografies_jaciment WHERE id_jaciment = (SELECT id_jaciment FROM jaciments WHERE codi_jaciment = :v_codi)"
-        sql_ins_foto_jac = "INSERT INTO fotografies_jaciment (id_jaciment, url_imatge) VALUES ((SELECT id_jaciment FROM jaciments WHERE codi_jaciment = :v_codi), :v_url)"
+        sql_del_foto_jac = "DELETE FROM fotografies_jaciment WHERE id_jaciment = (SELECT id_jaciment FROM JACIMENTS WHERE codi_jaciment = :v_codi)"
+        sql_ins_foto_jac = "INSERT INTO fotografies_jaciment (id_jaciment, url_imatge) VALUES ((SELECT id_jaciment FROM JACIMENTS WHERE codi_jaciment = :v_codi), :v_url)"
 
         for doc in docs_jac:
             p = doc.to_dict()
@@ -57,7 +57,8 @@ def lambda_handler(event, context):
                     "v_x": p.get('coordenada_x'),
                     "v_y": p.get('coordenada_y'),
                     "v_z": p.get('coordenada_z'),
-                    "v_descripcio": p.get('descripcio')
+                    "v_descripcio": p.get('descripcio'),
+                    "v_data": p.get('data')
                 })
                 
                 # Actualizar las fotos asociadas al yacimiento
@@ -72,19 +73,19 @@ def lambda_handler(event, context):
             except Exception as e:
                 print(f"Error Jaciment {p.get('codi_jaciment')}: {e}")
 
-        # PROCESAR SECTORES
+        # Procesar sectores
         docs_s = db_firestore.collection('sectors').where('sincronitzat', '==', False).get()
         
         # SQL para insertar si no existe o actualizar si ya existe
         sql_sector = """
-        MERGE INTO sectors t 
+        MERGE INTO SECTORS t 
         USING (SELECT :v_codi as codi FROM dual) s ON (t.codi_sector = s.codi)
-        WHEN MATCHED THEN UPDATE SET t.id_jaciment = (SELECT id_jaciment FROM jaciments WHERE codi_jaciment = :v_codi_jac), t.nom = :v_nom, t.descripcio = :v_descripcio
-        WHEN NOT MATCHED THEN INSERT (codi_sector, id_jaciment, nom, descripcio) 
-        VALUES (:v_codi, (SELECT id_jaciment FROM jaciments WHERE codi_jaciment = :v_codi_jac), :v_nom, :v_descripcio)
+        WHEN MATCHED THEN UPDATE SET t.id_jaciment = (SELECT id_jaciment FROM JACIMENTS WHERE codi_jaciment = :v_codi_jac), t.nom = :v_nom, t.descripcio = :v_descripcio, t.data = :v_data
+        WHEN NOT MATCHED THEN INSERT (codi_sector, id_jaciment, nom, descripcio, data) 
+        VALUES (:v_codi, (SELECT id_jaciment FROM JACIMENTS WHERE codi_jaciment = :v_codi_jac), :v_nom, :v_descripcio, :v_data)
         """
-        sql_del_foto_sec = "DELETE FROM fotografies_sector WHERE id_sector = (SELECT id_sector FROM sectors WHERE codi_sector = :v_codi)"
-        sql_ins_foto_sec = "INSERT INTO fotografies_sector (id_sector, url_imatge) VALUES ((SELECT id_sector FROM sectors WHERE codi_sector = :v_codi), :v_url)"
+        sql_del_foto_sec = "DELETE FROM fotografies_sector WHERE id_sector = (SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi)"
+        sql_ins_foto_sec = "INSERT INTO fotografies_sector (id_sector, url_imatge) VALUES ((SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi), :v_url)"
 
         for doc in docs_s:
             p = doc.to_dict()
@@ -94,7 +95,8 @@ def lambda_handler(event, context):
                     "v_codi": codi_sec, 
                     "v_codi_jac": p.get('codi_jaciment'), 
                     "v_nom": p.get('nom'),
-                    "v_descripcio": p.get('descripcio')
+                    "v_descripcio": p.get('descripcio'),
+                    "v_data": p.get('data')
                 })
                 
                 # Actualizar las fotos asociadas al sector
@@ -109,25 +111,25 @@ def lambda_handler(event, context):
             except Exception as e:
                 print(f"Error Sector {p.get('codi_sector')}: {e}")
 
-        # PROCESAR UE
+        # Procesar UE
         docs_ue = db_firestore.collection('unitats_estratigrafiques').where('sincronitzat', '==', False).get()
         
         sql_ue = """
-        MERGE INTO unitats_estratigrafiques t 
+        MERGE INTO UNITATS_ESTRATIGRAFIQUES t 
         USING (SELECT :v_codi as codi FROM dual) s ON (t.codi_ue = s.codi)
-        WHEN MATCHED THEN UPDATE SET t.id_sector = (SELECT id_sector FROM sectors WHERE codi_sector = :v_codi_sec), 
+        WHEN MATCHED THEN UPDATE SET t.id_sector = (SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi_sec), 
             t.tipus_ue = :v_tipus, t.descripcio = :v_descripcio, t.material = :v_mat, t.estat_conservacio = :v_estat, 
             t.cronologia = :v_crono, t.textura = :v_textura, t.color = :v_color, 
-            t.coordenada_x = :v_x, t.coordenada_y = :v_y, t.coordenada_z = :v_z
-        WHEN NOT MATCHED THEN INSERT (codi_ue, id_sector, tipus_ue, descripcio, material, estat_conservacio, cronologia, textura, color, coordenada_x, coordenada_y, coordenada_z) 
-            VALUES (:v_codi, (SELECT id_sector FROM sectors WHERE codi_sector = :v_codi_sec), :v_tipus, :v_descripcio, :v_mat, :v_estat, :v_crono, :v_textura, :v_color, :v_x, :v_y, :v_z)
+            t.coordenada_x = :v_x, t.coordenada_y = :v_y, t.coordenada_z = :v_z, t.data = :v_data
+        WHEN NOT MATCHED THEN INSERT (codi_ue, id_sector, tipus_ue, descripcio, material, estat_conservacio, cronologia, textura, color, coordenada_x, coordenada_y, coordenada_z, data) 
+            VALUES (:v_codi, (SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi_sec), :v_tipus, :v_descripcio, :v_mat, :v_estat, :v_crono, :v_textura, :v_color, :v_x, :v_y, :v_z, :v_data)
         """
         
-        sql_delete_fotos = "DELETE FROM fotografies_ue WHERE id_ue = (SELECT id_ue FROM unitats_estratigrafiques WHERE codi_ue = :v_codi)"
-        sql_insert_foto = "INSERT INTO fotografies_ue (id_ue, url_imatge) VALUES ((SELECT id_ue FROM unitats_estratigrafiques WHERE codi_ue = :v_codi), :v_url)"
+        sql_delete_fotos = "DELETE FROM fotografies_ue WHERE id_ue = (SELECT id_ue FROM UNITATS_ESTRATIGRAFIQUES WHERE codi_ue = :v_codi)"
+        sql_insert_foto = "INSERT INTO fotografies_ue (id_ue, url_imatge) VALUES ((SELECT id_ue FROM UNITATS_ESTRATIGRAFIQUES WHERE codi_ue = :v_codi), :v_url)"
 
-        sql_delete_relacions = "DELETE FROM relacions_ue WHERE id_ue_origen = (SELECT id_ue FROM unitats_estratigrafiques WHERE codi_ue = :v_codi)"
-        sql_insert_relacio = "INSERT INTO relacions_ue (id_ue_origen, tipus_relacio, id_ue_desti) VALUES ((SELECT id_ue FROM unitats_estratigrafiques WHERE codi_ue = :v_origen), :v_tipus, :v_desti)"
+        sql_delete_relacions = "DELETE FROM relacions_ue WHERE id_ue_origen = (SELECT id_ue FROM UNITATS_ESTRATIGRAFIQUES WHERE codi_ue = :v_codi)"
+        sql_insert_relacio = "INSERT INTO relacions_ue (id_ue_origen, tipus_relacio, id_ue_desti) VALUES ((SELECT id_ue FROM UNITATS_ESTRATIGRAFIQUES WHERE codi_ue = :v_origen), :v_tipus, :v_desti)"
 
         for doc in docs_ue:
             p = doc.to_dict()
@@ -147,7 +149,8 @@ def lambda_handler(event, context):
                     "v_color": p.get('color'),
                     "v_x": p.get('x'),
                     "v_y": p.get('y'),
-                    "v_z": p.get('z')
+                    "v_z": p.get('z'),
+                    "v_data": p.get('data')
                 })
 
                 # Gestionar las fotos de la UE
