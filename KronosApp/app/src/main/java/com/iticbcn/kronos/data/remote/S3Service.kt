@@ -44,7 +44,6 @@ object S3Service {
             apiConn.outputStream.use { it.write(requestBody.toByteArray(Charsets.UTF_8)) }
 
             val responseCode = apiConn.responseCode
-            // Con Proxy Integration, el error real (400, 500) llegará aquí directamente
             val responseText = if (responseCode in 200..299) {
                 apiConn.inputStream.bufferedReader().use { it.readText() }
             } else {
@@ -93,6 +92,50 @@ object S3Service {
             s3Conn?.disconnect()
         }
         return@withContext null
+    }
+
+    /**
+     * Elimina una imagen de S3 a través del endpoint DELETE /fotos
+     */
+    suspend fun deleteImage(publicUrl: String): Boolean = withContext(Dispatchers.IO) {
+        var conn: HttpURLConnection? = null
+        try {
+            Log.d(TAG, "== INICIO ELIMINACIÓN: $publicUrl ==")
+            val user = FirebaseAuth.getInstance().currentUser ?: return@withContext false
+            val token = user.getIdToken(true).await().token ?: return@withContext false
+
+            // Extraer el nombre del archivo de la URL
+            val fileName = publicUrl.substringAfterLast("/")
+            val requestBody = Gson().toJson(mapOf("file_name" to fileName))
+
+            conn = (URL("$BASE_URL/fotos").openConnection() as HttpURLConnection).apply {
+                requestMethod = "DELETE"
+                connectTimeout = 15000
+                readTimeout = 15000
+                doOutput = true
+                setRequestProperty("Authorization", "Bearer $token")
+                setRequestProperty("X-Api-Key", API_KEY)
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Connection", "close")
+            }
+
+            conn.outputStream.use { it.write(requestBody.toByteArray(Charsets.UTF_8)) }
+
+            val responseCode = conn.responseCode
+            if (responseCode in 200..299) {
+                Log.i(TAG, "¡ELIMINACIÓN EXITOSA! Archivo: $fileName")
+                return@withContext true
+            } else {
+                val error = conn.errorStream?.bufferedReader()?.use { it.readText() } ?: "Error $responseCode"
+                Log.e(TAG, "Error al eliminar de S3: $error")
+                return@withContext false
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Excepción eliminando de S3: ${e.message}")
+            return@withContext false
+        } finally {
+            conn?.disconnect()
+        }
     }
 
     suspend fun synchronizeWithOracle(): Boolean = withContext(Dispatchers.IO) {

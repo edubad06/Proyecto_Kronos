@@ -3,6 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="lightBackground">#A9939B</color>
+    <color name="red">#E65100</color>
 
     <!-- Colores semánticos para Day/Night -->
     <color name="screen_background">@color/lightBackground</color>

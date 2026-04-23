@@ -19,6 +19,7 @@
     <string name="ConfirmarContrasenya">Confirmar contrasenya</string>
     <string name="Crear">Crear</string>
     <string name="JaTensCompta">Ja tens compte? Torna enrere</string>
+    <string name="senseConexio">Sense connexió. Mostrant dades guardades (poden estar desactualitzades)</string>
 
     <!-- Formulario UE -->
     <string name="form_title_estratigrafica">FITXA D\'UNITAT ESTRATIGRÀFICA</string>
@@ -118,6 +119,5 @@
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit...
     </string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hola fragment en blanc</string>
 </resources>

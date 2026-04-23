@@ -6,6 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".ui.ue.DBUEFragment">
 
+    <TextView
+        android:id="@+id/tvCacheWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="@string/senseConexio"
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvObjectes"
         android:layout_width="0dp"
@@ -14,9 +29,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvCacheWarning"
         tools:listitem="@layout/item_object_ue" />
-    <!-- Dentro de tu ConstraintLayout, debajo del RecyclerView -->
+
     <TextView
         android:id="@+id/tvEmptyMessage"
         android:layout_width="wrap_content"
@@ -30,4 +45,5 @@
         app:layout_constraintBottom_toBottomOf="@id/rvObjectes"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

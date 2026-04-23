@@ -11,7 +11,8 @@ import com.iticbcn.kronos.R
 
 class FotoAdapter(
     private val uris: MutableList<Uri>,
-    private val isReadOnly: Boolean = false // Nuevo parámetro
+    private val isReadOnly: Boolean = false,
+    private val onDeleteListener: ((Uri) -> Unit)? = null
 ) : RecyclerView.Adapter<FotoAdapter.ViewHolder>() {
     
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -32,7 +33,6 @@ class FotoAdapter(
             .placeholder(R.drawable.ic_launcher_foreground)
             .into(holder.img)
 
-        // Si es solo lectura, escondemos la cruz de borrar
         if (isReadOnly) {
             holder.btnDelete.visibility = View.GONE
         } else {
@@ -40,6 +40,8 @@ class FotoAdapter(
             holder.btnDelete.setOnClickListener {
                 val currentPos = holder.adapterPosition
                 if (currentPos != RecyclerView.NO_POSITION) {
+                    val uriToRemove = uris[currentPos]
+                    onDeleteListener?.invoke(uriToRemove)
                     uris.removeAt(currentPos)
                     notifyItemRemoved(currentPos)
                     notifyItemRangeChanged(currentPos, uris.size)

@@ -14,6 +14,7 @@ import com.iticbcn.kronos.domain.model.ObjecteUE
 import com.iticbcn.kronos.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.iticbcn.kronos.data.local.DataManager
 
 class DBUEFragment : Fragment() {
 
@@ -22,7 +23,8 @@ class DBUEFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var tvEmptyMessage: TextView
-    private var userRole: String = "tecnic" // Por defecto
+    private lateinit var tvCacheWarning: TextView
+    private var userRole: String = "tecnic"
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,13 +35,21 @@ class DBUEFragment : Fragment() {
 
         recyclerView = view.findViewById(R.id.rvObjectes)
         tvEmptyMessage = view.findViewById(R.id.tvEmptyMessage)
+        tvCacheWarning = view.findViewById(R.id.tvCacheWarning)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // Inicializamos con el email del usuario actual
+        // Cargar caché inicial silenciosamente (sin mostrar el aviso aún)
+        originalList = DataManager.getUEListDB(requireContext())
+        
         val currentEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
-        adapter = ObjecteAdapter(emptyList(), isDatabaseSource = true, currentUserEmail = currentEmail)
+        adapter = ObjecteAdapter(originalList, isDatabaseSource = true, currentUserEmail = currentEmail)
         recyclerView.adapter = adapter
+
+        if (originalList.isEmpty()) {
+            tvEmptyMessage.visibility = View.VISIBLE
+            tvEmptyMessage.setText(R.string.text_ue_external_list_empty)
+        }
 
         return view
     }
@@ -54,7 +64,7 @@ class DBUEFragment : Fragment() {
         val email = currentUser?.email?.trim()
 
         if (email == null) {
-            updateUI(emptyList())
+            updateUI(originalList)
             return
         }
 
@@ -67,8 +77,6 @@ class DBUEFragment : Fragment() {
                 if (!userDocs.isEmpty) {
                     val userData = userDocs.documents[0]
                     userRole = userData.getString("rol") ?: "tecnic"
-                    
-                    // Actualizamos el rol en el adaptador
                     adapter.setUserRole(userRole)
 
                     val excavacions = when (val value = userData.get("excavacio")) {
@@ -84,33 +92,45 @@ class DBUEFragment : Fragment() {
                             .addOnSuccessListener { ueDocs ->
                                 val listUE = ueDocs.toObjects(ObjecteUE::class.java)
                                 originalList = listUE
+                                DataManager.saveUEListDB(requireContext(), originalList)
+                                
+                                // El aviso solo aparece si los datos vienen de la caché de Firestore (ej. offline)
+                                if (ueDocs.metadata.isFromCache) {
+                                    tvCacheWarning.visibility = View.VISIBLE
+                                } else {
+                                    tvCacheWarning.visibility = View.GONE
+                                }
+                                
                                 updateUI(originalList)
                             }
                             .addOnFailureListener { e ->
-                                Log.e("FirestoreDB", "Error cargando UEs", e)
-                                updateUI(emptyList())
+                                Log.e("FirestoreDB", "Error cargando UEs, usando caché", e)
+                                tvCacheWarning.visibility = View.VISIBLE
+                                updateUI(originalList)
                             }
                     } else {
+                        tvCacheWarning.visibility = View.GONE
                         updateUI(emptyList())
                     }
                 } else {
+                    tvCacheWarning.visibility = View.GONE
                     updateUI(emptyList())
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("FirestoreDB", "Error consultando usuario", e)
-                updateUI(emptyList())
+                Log.e("FirestoreDB", "Error consultando usuario, usando caché", e)
+                tvCacheWarning.visibility = View.VISIBLE
+                updateUI(originalList)
             }
     }
 
     fun applyFilters(jaciment: String, sector: String, ue: String, tipus: String, onlyMine: Boolean = false) {
-        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
         val filteredList = originalList.filter { item ->
             val matchJaciment = jaciment.isEmpty() || item.jaciment == jaciment
             val matchSector = sector.isEmpty() || item.codi_sector == sector
             val matchUE = ue.isEmpty() || item.codi_ue.contains(ue, ignoreCase = true)
             val matchTipus = tipus.isEmpty() || item.tipus_ue == tipus
-            val matchOnlyMine = !onlyMine || item.registrat_per == currentUserEmail
+            val matchOnlyMine = !onlyMine || item.registrat_per == (FirebaseAuth.getInstance().currentUser?.email ?: "")
 
             matchJaciment && matchSector && matchUE && matchTipus && matchOnlyMine
         }

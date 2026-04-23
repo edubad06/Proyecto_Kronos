@@ -69,7 +69,6 @@ class AccountConfigActivity : AppCompatActivity() {
                         val email = document.getString("email") ?: emailAuth
                         val excavacio = document.get("excavacio")?.toString() ?: "Cap assignada"
                         val rol = document.getString("rol") ?: "Usuari"
-                        val codiIntervencio = document.getString("codi_intervencio") ?: "---"
 
                         binding.tvNombreHeader.text = nom
                         binding.tvRolHeader.text = rol
@@ -77,7 +76,6 @@ class AccountConfigActivity : AppCompatActivity() {
                         binding.tvEmail.text = email
                         binding.tvExcavacio.text = excavacio
                         binding.tvRol.text = rol
-                        binding.tvCodiEx.text = codiIntervencio
                     } else {
                         Toast.makeText(this, "Usuari no trobat a la base de dades", Toast.LENGTH_SHORT).show()
                     }

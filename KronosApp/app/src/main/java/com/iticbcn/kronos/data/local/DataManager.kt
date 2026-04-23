@@ -89,6 +89,10 @@ object DataManager {
         }
     }
 
+    fun saveUEListDB(context: Context, list: List<ObjecteUE>) {
+        saveFullList(context, list, KEY_LIST_DB)
+    }
+
     private fun saveFullList(context: Context, list: List<ObjecteUE>, key: String) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = Gson().toJson(list)

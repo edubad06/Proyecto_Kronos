@@ -10,6 +10,8 @@ import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.iticbcn.kronos.databinding.ActivityMainBinding
 import com.iticbcn.kronos.ui.galeria.GaleriaActivity
 
@@ -24,11 +26,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         auth = FirebaseAuth.getInstance()
 
-        // --- COMPROBAR SESIÓN INICIADA AL ARRANCAR ---
         val prefs = getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE)
         val rememberMe = prefs.getBoolean("remember_me", false)
 
-        // Si el usuario marcó "Recordar" y Firebase tiene sesión activa, saltamos el login
         if (rememberMe && auth.currentUser != null) {
             irAGaleria()
             return
@@ -60,16 +60,19 @@ class MainActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // --- GUARDAR PREFERENCIA USANDO KTX ---
                     val prefs = getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE)
                     prefs.edit { 
                         putBoolean("remember_me", binding.cbRememberMe.isChecked) 
                     }
-
                     irAGaleria()
                 } else {
-                    Toast.makeText(this, "Error d'accés: ${task.exception?.message}", 
-                        Toast.LENGTH_LONG).show()
+                    val exception = task.exception
+                    val errorMessage = when (exception) {
+                        is FirebaseAuthInvalidUserException -> "L'adreça de correu no és vàlida o no existeix."
+                        is FirebaseAuthInvalidCredentialsException -> "La contrasenya és incorrecta."
+                        else -> "Error d'accés: ${exception?.localizedMessage}"
+                    }
+                    Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
                 }
             }
     }
