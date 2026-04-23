@@ -52,7 +52,7 @@ const id = params.get('id');
 
 let coleccio;
 if (tab === 'sector') coleccio = 'sectors';
-else if (tab === 'yacimiento') coleccio = 'jaciments';
+else if (tab === 'jaciment') coleccio = 'jaciments';
 else if (tab === 'ue') coleccio = 'unitats_estratigrafiques';
 
 const cargarFicha = async function() {
@@ -116,7 +116,7 @@ const cargarFicha = async function() {
                 contImg.textContent = "No hi ha cap imatge";
             }
 
-        }else if (tab === 'yacimiento'){
+        }else if (tab === 'jaciment'){
             //COLUMNA IZQUIERDA
             //nombre y directora
             const divNom = crearDiv('grupo-rejilla-interno');
@@ -409,7 +409,7 @@ btn_guardar.addEventListener('click', async function() {
                 codi_jaciment: document.getElementById('i-sec-codiJac').value,
                 descripcio: document.getElementById('i-sec-descr').value
             };
-        } else if (tab === 'yacimiento') {
+        } else if (tab === 'jaciment') {
             
             dadesActualitzades = {
                 nom: document.getElementById('i-jac-nom').value,

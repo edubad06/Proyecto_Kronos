@@ -39,6 +39,7 @@ btn_guardar.addEventListener("click", async function(){
                 codi_sector: document.getElementById('i-sec-codi').value,
                 codi_jaciment: document.getElementById('i-sec-codiJac').value,
                 descripcio: document.getElementById('i-sec-descr').value,
+                data: firebase.firestore.Timestamp.now()
                 //sincronitzat: false,
                 //imatges_urls: []
             };
@@ -47,7 +48,7 @@ btn_guardar.addEventListener("click", async function(){
                 await subirImatge(file, docRef.id, 'sectors');
             }
 
-        } else if (tab === 'yacimiento') {
+        } else if (tab === 'jaciment') {
             initMapa();
             const nouJaciment = {
                 nom: document.getElementById('i-jac-nom').value,
@@ -57,6 +58,7 @@ btn_guardar.addEventListener("click", async function(){
                 coordenada_y: document.getElementById('i-jac-lat').value,
                 coordenada_z: document.getElementById('i-jac-prof').value,
                 descripcio: document.getElementById('i-jac-descr').value,
+                data: firebase.firestore.Timestamp.now()
                 //sincronitzat: false,
                 //imatges_urls: []
             };
@@ -77,6 +79,7 @@ btn_guardar.addEventListener("click", async function(){
                 material: document.getElementById('i-ue-mat').value,
                 cronologia: document.getElementById('i-ue-cronolog').value,
                 estat_conservacio: document.getElementById('i-ue-estado').value,
+                data: firebase.firestore.Timestamp.now(),
                 //registrat_per: document.getElementById('i-ue-person').value,
                 //interpretacio: document.getElementById('i-ue-interpr').value,
                 descripcio: document.getElementById('i-ue-descr').value,
