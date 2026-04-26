@@ -12,6 +12,62 @@ body {
   color: #1a1a1a;
 }
 
+/*MODAL IMG -> hacerlas más grandes*/
+
+.modal-imatge {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-imatge.actiu {
+    display: flex;
+}
+
+.modal-imatge img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+}
+
+.modal-tancar {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.contenidor-imatge {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-eliminar-imatge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* =========================================
    BARRA DE NAVEGACIÓN GLOBAL
    ========================================= */
@@ -123,9 +179,11 @@ body {
 /* =========================================
    PÁGINA: LOGIN
    ========================================= */
+.body-login{
+  background-color: #b8a8a8;
+}
 .contenedor-login {
   min-height: calc(100vh - 74px);
-  background-color: #b8a8a8;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,22 +236,23 @@ body {
   box-shadow: 0 0 0 3px rgba(61, 31, 46, 0.1);
 }
 
-.opcion-recordar-login {
+.input-eye {
+  position: relative;
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
 }
 
-.opcion-recordar-login input {
-  accent-color: #3d1f2e;
+.passwd {
+  width: 100%;
+  padding-right: 40px; /*espacio para el icono */
+  height: 40px;
 }
 
-.opcion-recordar-login strong {
-  font-size: 0.9rem;
-}
-
-.opcion-recordar-login div {
-  font-size: 0.8rem;
-  color: #888888;
+#icon-eye {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: gray;
 }
 
 .boton-enviar-login {

@@ -3,9 +3,15 @@ const contenedor = document.getElementById('contenedor-fichas');
 const filtroTipo = document.getElementById('filtro-tipo');
 const filtroBuscar = document.querySelector('.barra-filtros input[type="text"]');
 const filtroFecha = document.getElementById('filtro-fecha');
+const menuJac = document.querySelector('.menu-jac');
 
 //VARIABLES
 let totesFitxes = []; //array con todas las fichas cargadas
+
+const rol = sessionStorage.getItem("rol");
+if (rol !== 'director') {
+    menuJac.style.display = 'none';
+}
 
 const crearFicha = function(id, titulo, subtitulo, categoria, infoDreta, tab) {
     const ficha = document.createElement('div');
@@ -55,6 +61,7 @@ const cargarFichas = async function() {
         jaciments.forEach(doc => {
             const d = doc.data();
             console.log("DATOS YACIMIENTO: ", d);
+            console.log("data de la UE:", d.data, typeof d.data);
             //id, titulo, subtitulo, categoria, infoDreta, tab
             totesFitxes.push({
                 id: doc.id,
@@ -116,7 +123,9 @@ cargarFichas();
 //FILTROS
 const aplicarFiltres = function() {
     let resultat = [...totesFitxes]; //copio el array original
-
+    console.log("tipus:", filtroTipo.value);
+    console.log("ordre:", filtroFecha.value);
+    console.log("total fitxes:", totesFitxes.length);
     //filtro por tipo
     const tipus = filtroTipo.value.toLowerCase();
     if (tipus !== 'totes') {

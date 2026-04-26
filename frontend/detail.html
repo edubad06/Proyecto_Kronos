@@ -23,7 +23,7 @@
                 <button class="boton-nueva-ficha">+ Nova fitxa</button>
                 <div class="contenido-desplegable">
                     <a href="ficha_nova.html?tab=ue">UE</a>
-                    <a href="ficha_nova.html?tab=jaciment">Jaciment</a>
+                    <a href="ficha_nova.html?tab=jaciment" class="menu-jac">Jaciment</a>
                     <a href="ficha_nova.html?tab=sector">Sector</a>
                 </div>
             </div>
@@ -33,6 +33,7 @@
 
     <!-- Contenedor principal de la ficha-->
     <section id="pagina-detalle" class="contenedor-detalle">
+        <h1 class="titulo-pagina"></h1>
         <a href="#" class="enlace-volver">← Fitxes</a>
 
         <div class="tarjeta-detalle-principal">
@@ -93,7 +94,12 @@
 
         </div>
     </section>
-    
+    <!-- imágenes en grande-->
+    <div class="modal-imatge" >
+        <span class="modal-tancar">✕</span>
+        <img src="" id="modal-img">
+    </div>
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="js/firebase-config.js"></script>

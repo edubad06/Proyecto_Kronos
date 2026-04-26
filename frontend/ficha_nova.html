@@ -26,7 +26,7 @@
                 <button class="boton-nueva-ficha">+ Nova fitxa</button>
                 <div class="contenido-desplegable">
                     <a href="ficha_nova.html?tab=ue">UE</a>
-                    <a href="ficha_nova.html?tab=jaciment">Jaciment</a>
+                    <a href="ficha_nova.html?tab=jaciment" class="menu-jac">Jaciment</a>
                     <a href="ficha_nova.html?tab=sector">Sector</a>
                 </div>
             </div>
@@ -36,7 +36,7 @@
 
     <!-- Contenedor principal de la página de detalle -->
     <section id="pagina-detalle" class="contenedor-detalle">
-        <a href="libreria.html" class="enlace-volver">← Fitxes</a>
+        <a href="#" class="enlace-volver">← Fitxes</a>
 
         <div class="tarjeta-detalle-principal">
 
@@ -60,6 +60,7 @@
                                     <option>Estrat</option>
                                     <option>Estructura</option>
                                     <option>Retall</option>
+                                    <option>Interestrat</option>
                                 </select>
                             </div>
                             <div class="campo-formulario-base"><label>Textura</label><input type="text" id="i-ue-text" placeholder="Textura"></div>
@@ -67,30 +68,8 @@
                             <div class="campo-formulario-base"><label>Material</label><input type="text" id="i-ue-mat" placeholder="Material"></div>
                             <div class="campo-formulario-base"><label>Estat conservació</label><input type="text" id="i-ue-estado" placeholder="Estat"></div>
                             <!-- <div class="campo-formulario-base"><label>Interpretació</label><input type="text" id="i-ue-interpr" placeholder="Interpretació"></div> -->
-                        </div>
-                           
-                        <!-- <div class="titulo-bloque-interno">Dades topográfiques</div>
-                        
-                        <div >    
-                            <div class="campo-formulario-base">
-                                <label><b>Dimensions (cm)</b></label>
-                                <label>Longitud x Amplada x Alçada </label>
-                                <div class="campo-doble-medida">
-                                    <input type="number" id="i-ue-long">
-                                    <span>x</span>
-                                    <input type="number" id="i-ue-ampl">
-                                    <span>x</span>
-                                    <input type="number" id="i-ue-alc">
-                                </div>
-                            </div>
-                        </div> 
-                        
-                        <div class="grupo-rejilla-interno">                           
-                            <div class="campo-formulario-base">
-                                <label><b>Cotes (m)</b> - Sup x Inf</label>
-                                <div class="campo-doble-medida"><input type="number" id="i-ue-cotaSup"> <span>x</span> <input type="number" id="i-ue-cotaInf"></div>
-                            </div>
-                        </div>   -->                   
+                        </div>                           
+                                         
                         <div class="campo-area-texto">
                             <label>Descripció</label>
                             <textarea id="i-ue-descr"></textarea>
@@ -128,16 +107,9 @@
                             <div class="campo-formulario-base"><label>Tallat per</label><input type="text" class="rel-tallat_per"></div>
                             <div class="campo-formulario-base"><label>Recolza</label><input type="text" class="rel-recolza"></div>
                             <div class="campo-formulario-base"><label>Se li recolza</label><input type="text" class="rel-se_li_recolza"></div>
-                            <div class="campo-formulario-base"><label>Lliura</label><input type="text" class="lliura"></div>
+                            <div class="campo-formulario-base"><label>Lliura</label><input type="text" class="rel-lliura"></div>
                             <div class="campo-formulario-base"><label>Se li lliura</label><input type="text" class="rel-se_li_lliura"></div>
                         </div>
-                        <!--
-                        <div class="imatges">
-                            <div class="titulo-bloque-interno">Imatges</div>
-                            <article class="caja-arrastrar-soltar dropZone">                             
-                                Arrossegar imatges aquí                              
-                            </article>
-                        </div>-->
                         
                     </div>
 
@@ -145,7 +117,7 @@
             </div>
 
             <!-- FORMULARIO YACIMIENTO -->
-            <div id="formulario-yacimiento" class="bloque-pestana">
+            <div id="formulario-jaciment" class="bloque-pestana">
                 <h2 class="nombre-usuario-perfil">Nou jaciment</h2>
                 <div class="rejilla-dos-columnas-detalle">
 
@@ -160,9 +132,9 @@
                         <div >    
                             <div class="campo-formulario-base">
                                 <label><b>Coordenades</b></label>
-                                <label>Altitud x Latitud x Profunditat </label>
+                                <label>Longitud x Latitud x Profunditat </label>
                                 <div class="campo-doble-medida">
-                                    <input type="number" id="i-jac-alt"><!-- altitud: coordenada_x -->
+                                    <input type="number" id="i-jac-long"><!-- longitud: coordenada_x -->
                                     <span>x</span>
                                     <input type="number" id="i-jac-lat"><!-- latitud: coordenada_y -->
                                     <span>x</span>
@@ -195,14 +167,7 @@
 
                     <!-- Columna Derecha YACIMIENTO -->
                     <div class="columna-detalle">    
-                        <!--                                             
-                        <div class="imatges">
-                            <div class="titulo-bloque-interno">Imatges</div>
-                            <article class="caja-arrastrar-soltar dropZone">                             
-                                Arrossegar imatges aquí                              
-                            </article>
-                        </div>-->
-
+                        
                         <div class="titulo-bloque-interno">Mapa</div>
                         
                         <div id="map" class="container-map"></div>
@@ -292,6 +257,11 @@
 
         </div>
     </section>
+    <!-- imágenes en grande-->
+    <div class="modal-imatge" >
+        <span class="modal-tancar">✕</span>
+        <img src="" id="modal-img">
+    </div>
 
     <script src="js/firebase-config.js"></script>
     <script src="js/script_ficha_nova.js"></script>

@@ -19,6 +19,14 @@ btnLogin.addEventListener("click", async function(event) {
         sessionStorage.setItem("token", token);
         sessionStorage.setItem("uid", user.uid);
 
+        //busco el rol del usuario y lo guardo en la sessionStorage
+        const usuariQuery = await db.collection('usuaris').where('email', '==', user.email).get();
+        if (!usuariQuery.empty) {
+            const usuariData = usuariQuery.docs[0].data();
+            sessionStorage.setItem("rol", usuariData.rol);
+            sessionStorage.setItem("nom", usuariData.nom);
+        }
+
         //redirijo a la librería
         window.location.assign("libreria.html");
 

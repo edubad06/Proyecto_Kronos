@@ -3,24 +3,24 @@ const form_ue = document.querySelector("#formulario-ue");
 const form_jaciment = document.querySelector("#formulario-yacimiento");
 const form_sector = document.querySelector("#formulario-sector");
 const btn_guardar = document.querySelector(".boton-accion-guardar");
+const btn_fitxes = document.querySelector(".enlace-volver");
 const dropZone = document.querySelector(".dropZone");
+const menuJac = document.querySelector('.menu-jac');
 
-//variables  
+//variables 
+let haCanviat = false;
+const rol = sessionStorage.getItem("rol");
 let map;
+let latDef = 41.386978;  
+let longDef = 2.170054; 
 let imatgesPendents = []; 
 /* es una variable temporal para que el usuario pueda arrastrar imágenes antes de darle a guardar 
 (en ese momento todavia no existe en Firestore y por tanto no hay id)*/
 
-//inicializar mapa 
-const initMapa = function() {
-    map = L.map('map').setView([41.402765, 2.194551], 8); //setView([latitud,longitud],zoom)
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    
+//ocultamos en el menu la opciÓn de jaciment si no es director
+if (rol !== 'director') {
+    menuJac.style.display = 'none';
 }
-
 
 //MOSTRAR FORMULARIO SEGÚN PARÁMETRO
 /*lee el tab de la URL, oculta todos los formularios, y muestra solo el que corresponde.*/
@@ -30,6 +30,40 @@ document.querySelectorAll('.bloque-pestana').forEach(f => f.style.display = 'non
 const formularioActivo = document.getElementById('formulario-' + tab);
 if (formularioActivo) formularioActivo.style.display = 'block';
 
+ 
+const initMapa = function(lat, long) {
+    const latNum = parseFloat(lat) || latDef;
+    const longNum = parseFloat(long) || longDef;
+    
+    if (map) {
+        map.setView([latNum, longNum], 12);
+        if (marcador) {
+            marcador.setLatLng([latNum, longNum]); // mover marcador existente
+        } else {
+            marcador = L.marker([latNum, longNum]).addTo(map); // crear si no existe
+        }
+    } else {
+        map = L.map('map').setView([latNum, longNum], 12);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        marcador = L.marker([latNum, longNum]).addTo(map);
+    }
+};
+//iniciamos mapa 
+if (tab === 'jaciment') {
+    initMapa(latDef, longDef); // coordenadas por defecto
+    
+    const latitud = document.getElementById('i-jac-lat');
+    const longitud = document.getElementById('i-jac-long');
+    
+    latitud.addEventListener('input', function() {
+        initMapa(latitud.value, longitud.value);
+    });
+    longitud.addEventListener('input', function() {
+        initMapa(latitud.value, longitud.value);
+    });
+}
 
 btn_guardar.addEventListener("click", async function(){
     try {
@@ -40,39 +74,34 @@ btn_guardar.addEventListener("click", async function(){
                 codi_jaciment: document.getElementById('i-sec-codiJac').value,
                 descripcio: document.getElementById('i-sec-descr').value,
                 data: firebase.firestore.Timestamp.now()
-                //sincronitzat: false,
-                //imatges_urls: []
             };
             const docRef = await db.collection('sectors').add(nouSector);
             for (const file of imatgesPendents) {
                 await subirImatge(file, docRef.id, 'sectors');
             }
 
-        } else if (tab === 'jaciment') {
-            initMapa();
+        } else if (tab === 'jaciment') {        
+            
             const nouJaciment = {
                 nom: document.getElementById('i-jac-nom').value,
                 codi_jaciment: document.getElementById('i-jac-codi').value,
                 director: document.getElementById('i-jac-director').value,
-                coordenada_x: document.getElementById('i-jac-alt').value,
+                coordenada_x: document.getElementById('i-jac-long').value,
                 coordenada_y: document.getElementById('i-jac-lat').value,
                 coordenada_z: document.getElementById('i-jac-prof').value,
                 descripcio: document.getElementById('i-jac-descr').value,
                 data: firebase.firestore.Timestamp.now()
-                //sincronitzat: false,
-                //imatges_urls: []
-            };
+            };    
+
             const docRef = await db.collection('jaciments').add(nouJaciment);
-    for (const file of imatgesPendents) {
-        await subirImatge(file, docRef.id, 'jaciments');
-    }
+            for (const file of imatgesPendents) {
+                await subirImatge(file, docRef.id, 'jaciments');
+            }
 
         } else if (tab === 'ue') {
             const novaUE = {
                 codi_ue: document.getElementById('i-ue-codi').value,
                 codi_sector: document.getElementById('i-ue-codiSec').value,
-                //codi_jaciment: document.getElementById('i-ue-codiJac').value,
-                //codi_intervencio: document.getElementById('i-ue-codiInterv').value,
                 tipus_ue: document.getElementById('i-ue-tipus').value,
                 textura: document.getElementById('i-ue-text').value,
                 color: document.getElementById('i-ue-color').value,
@@ -80,14 +109,9 @@ btn_guardar.addEventListener("click", async function(){
                 cronologia: document.getElementById('i-ue-cronolog').value,
                 estat_conservacio: document.getElementById('i-ue-estado').value,
                 data: firebase.firestore.Timestamp.now(),
-                //registrat_per: document.getElementById('i-ue-person').value,
-                //interpretacio: document.getElementById('i-ue-interpr').value,
                 descripcio: document.getElementById('i-ue-descr').value,
-                //longitud: document.getElementById('i-ue-long').value,
-                //amplada: document.getElementById('i-ue-ampl').value,
-                //alcada: document.getElementById('i-ue-alc').value,
-                //cota_sup: document.getElementById('i-ue-cotaSup').value,
-                //cota_inf: document.getElementById('i-ue-cotaInf').value,
+                registrat_per: sessionStorage.getItem("nom"),
+                
                 relacions: [
                     { tipus: 'igual_a', desti: document.querySelector('.rel-igual_a').value },
                     { tipus: 'cobreix', desti: document.querySelector('.rel-cobreix').value },
@@ -101,13 +125,15 @@ btn_guardar.addEventListener("click", async function(){
                     { tipus: 'lliura', desti: document.querySelector('.rel-lliura').value },
                     { tipus: 'se_li_lliura', desti: document.querySelector('.rel-se_li_lliura').value }
                 ].filter(rel => rel.desti !== ''),
-                //sincronitzat: false,
-                //imatges_urls: []
             };
-            await db.collection('unitats_estratigrafiques').add(novaUE);
+            const docRef = await db.collection('unitats_estratigrafiques').add(novaUE);
+            for (const file of imatgesPendents) {
+                await subirImatge(file, docRef.id, 'unitats_estratigrafiques'); 
+            }
         }
 
         alert("Desat correctament!");
+        haCanviat = false; //reseteo
         window.location.assign("libreria.html");
 
     } catch(error) {
@@ -115,6 +141,38 @@ btn_guardar.addEventListener("click", async function(){
         alert("Error en desar la fitxa");
     }
 });
+
+// Detectar si el usuario ha escrito algo en cualquier campo
+formularioActivo.addEventListener('input', function() {
+    haCanviat = true;
+});
+
+//botón fitxes - volver
+const volver = function (){ 
+    if (haCanviat) {
+        let respuesta = confirm("Tens canvis sense desar. Estàs segur que vols sortir?");
+        if (respuesta) window.location.assign("libreria.html");
+    } else {
+        window.location.assign("libreria.html");
+    }
+    
+};
+document.querySelectorAll('.cabecera-principal a, .cabecera-principal button').forEach(function(element) {
+    element.addEventListener("click", function(event) {
+        if (haCanviat) {
+            event.preventDefault();
+            let respuesta = confirm("Tens canvis sense desar. Estàs segur que vols sortir?");
+            if (respuesta) {
+                haCanviat = false;
+                window.location.assign(this.href || "libreria.html");
+            }
+        }
+    });
+});
+
+btn_fitxes.addEventListener("click", function(){
+    volver();
+})
 
 //ARRASTRAR Y SOLTAR IMÁGENES
 dropZone.addEventListener("dragover", (event) => {
@@ -124,17 +182,19 @@ dropZone.addEventListener("dragover", (event) => {
 dropZone.addEventListener("drop", (event) => {
     event.preventDefault();
     const files = event.dataTransfer.files;//para recuperar el fichero en binari
+    if (files.length > 0) {
+        dropZone.textContent = '';
+    };
     Array.from(files).forEach(file => {
         if (file.type.startsWith("image/")) {
             imatgesPendents.push(file); // guardamos para subir después
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = document.createElement("img");
-                img.src = e.target.result;
-                img.style.width = '100px';
-                img.style.height = '100px';
-                img.style.objectFit = 'cover';
-                dropZone.appendChild(img);
+                const imatge = crearImatge(e.target.result, function() {
+                    // eliminar del array de pendientes
+                    imatgesPendents = imatgesPendents.filter(f => f !== file);
+                });
+                dropZone.appendChild(imatge);
             };
             reader.readAsDataURL(file);
         } else {

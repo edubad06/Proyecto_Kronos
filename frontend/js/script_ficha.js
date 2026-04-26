@@ -9,18 +9,43 @@ const btn_fitxes = document.querySelector(".enlace-volver");
 const btnPDF = document.querySelector('.boton-accion-exportar');
 const contImg = document.querySelector('.caja-arrastrar-soltar');
 const dropZone = document.querySelector('.dropZone');
+const menuJac = document.querySelector('.menu-jac');
+const tituloFicha = document.querySelector('.titulo-pagina');
 
+//VARIABLES
 let modoEdicion = false;
+const rol = sessionStorage.getItem("rol");
+const uid = sessionStorage.getItem("uid");
+let map;
+let latDef = 41.386978;  
+let longDef = 2.170054; 
+
+//ocultamos en el menu la opciÓn de jaciment si no es director
+if (rol !== 'director') {
+    menuJac.style.display = 'none';
+}
 
 //inicializar mapa 
-const initMapa = function(latitud, altitud) {
-    let map = L.map('map').setView([latitud, altitud], 8); //setView([latitud,longitud],zoom)
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+//Leaflet -> setView([latitud,longitud],zoom) 
+const initMapa = function(lat, long) {
+    const latNum = parseFloat(lat) || latDef;
+    const longNum = parseFloat(long) || longDef;
     
-}
+    if (map) {
+        map.setView([latNum, longNum], 12);
+        if (marcador) {
+            marcador.setLatLng([latNum, longNum]); // mover marcador existente
+        } else {
+            marcador = L.marker([latNum, longNum]).addTo(map); // crear si no existe
+        }
+    } else {
+        map = L.map('map').setView([latNum, longNum], 12);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        marcador = L.marker([latNum, longNum]).addTo(map);
+    }
+};
 
 const crearDiv = function(classCSS){
     const div = document.createElement('div');
@@ -55,10 +80,37 @@ if (tab === 'sector') coleccio = 'sectors';
 else if (tab === 'jaciment') coleccio = 'jaciments';
 else if (tab === 'ue') coleccio = 'unitats_estratigrafiques';
 
-const cargarFicha = async function() {
-    try {
-        
+const cargarImg = async function(dades){
+    document.querySelector('.imatges').style.display = 'block';
+    if (dades.imatges_urls && dades.imatges_urls.length > 0) {
+        contImg.textContent = "";
+        dades.imatges_urls.forEach(url => {
+            const imatge = crearImatge(url, async function(urlEliminar) {
+                // Eliminar de Firestore
+                await db.collection(coleccio).doc(id).update({
+                    imatges_urls: firebase.firestore.FieldValue.arrayRemove(urlEliminar)
+                });
+            });
+            dropZone.appendChild(imatge);
+        });
+    };
+};
 
+const cargarDescrip = function(dades, idDesc){
+    const divDescrip = crearDiv('campo-area-texto');
+    const labelDescrip = document.createElement('label');
+    labelDescrip.textContent = "Descripció";
+    const inputDescrip = document.createElement('textarea');
+    inputDescrip.textContent = dades.descripcio;
+    inputDescrip.disabled = true;
+    inputDescrip.id=idDesc;
+    divDescrip.appendChild(labelDescrip);
+    divDescrip.appendChild(inputDescrip);
+    colIzq.appendChild(divDescrip);
+};
+
+const cargarFicha = async function() {
+    try {    
         const doc = await db.collection(coleccio).doc(id).get();
         
         if (!doc.exists) {
@@ -70,6 +122,7 @@ const cargarFicha = async function() {
         console.log("Dades:", dades); // para verificar qué llega
         
         if (tab === 'sector') {
+            tituloFicha.textContent = "Sector";
             //COLUMNA IZQUIERDA
             //nombre y yacimiento
             const divNom = crearDiv('grupo-rejilla-interno');
@@ -79,44 +132,14 @@ const cargarFicha = async function() {
             colIzq.appendChild(divNom);
 
             //descripcion
-            const divDescrip = crearDiv('campo-area-texto');
-            const labelDescrip = document.createElement('label');
-            labelDescrip.textContent = "Descripció";
-            const inputDescrip = document.createElement('textarea');
-            inputDescrip.textContent = dades.descripcio;
-            inputDescrip.disabled = true;
-            inputDescrip.id="i-sec-descr";
-            divDescrip.appendChild(labelDescrip);
-            divDescrip.appendChild(inputDescrip);
-            colIzq.appendChild(divDescrip);
+            cargarDescrip(dades, "i-sec-descr");
 
             //COLUMNA DERECHA
-            //imágenes
-            document.querySelector('.imatges').style.display = 'block';
-            
-            /*
-            const titulo = crearDiv('titulo-bloque-interno');
-            titulo.textContent="Imatges";
-            colDcha.appendChild(titulo);
-            const contImg = crearDiv('caja-arrastrar-soltar');
-            contImg.id="i-sec-img";
-            colDcha.appendChild(contImg);*/
-
-            if (dades.imatges_urls && dades.imatges_urls.length > 0) {
-                dades.imatges_urls.forEach(url => {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.style.width = '100px';
-                    img.style.height = '100px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
-                    contImg.appendChild(img);
-                });
-            }else{
-                contImg.textContent = "No hi ha cap imatge";
-            }
+            //imágenes       
+            cargarImg(dades);
 
         }else if (tab === 'jaciment'){
+            tituloFicha.textContent = "Jaciment";
             //COLUMNA IZQUIERDA
             //nombre y directora
             const divNom = crearDiv('grupo-rejilla-interno');
@@ -126,18 +149,17 @@ const cargarFicha = async function() {
             colIzq.appendChild(divNom);
             //coordenadas
             const divCoor = crearDiv('campo-formulario-base');
-
             const labelCoord = document.createElement('label');
             labelCoord.textContent = "Coordenades";
             const labelAltitud = document.createElement('label');
-            labelAltitud.textContent = "Altitud x Latitud x Profunditat";
+            labelAltitud.textContent = "Longitud x Latitud x Profunditat";
             const divMedidas = crearDiv('campo-doble-medida');
-
-            const altitud = document.createElement('input');
-            altitud.type = 'number';
-            altitud.value = dades.coordenada_x || '';
-            altitud.disabled = true;
-            altitud.id = "i-jac-alt";
+            // x longitud, y latitud, z profundidad
+            const longitud = document.createElement('input');
+            longitud.type = 'number';
+            longitud.value = dades.coordenada_x || '';
+            longitud.disabled = true;
+            longitud.id = "i-jac-long";
             const latitud = document.createElement('input');
             latitud.type = 'number';
             latitud.value = dades.coordenada_y || '';
@@ -148,7 +170,7 @@ const cargarFicha = async function() {
             profundidad.value = dades.coordenada_z || '';
             profundidad.disabled = true;
             profundidad.id = "i-jac-prof";
-            divMedidas.appendChild(altitud);
+            divMedidas.appendChild(longitud);
             divMedidas.appendChild(latitud);
             divMedidas.appendChild(profundidad);
             divCoor.appendChild(labelCoord);
@@ -157,40 +179,12 @@ const cargarFicha = async function() {
             colIzq.appendChild(divCoor);
 
             //descripcion
-            const divDescrip = crearDiv('campo-area-texto');
-            const labelDescrip = document.createElement('label');
-            labelDescrip.textContent = "Descripció";
-            const inputDescrip = document.createElement('textarea');
-            inputDescrip.textContent = dades.descripcio || 'No hi ha cap descripciò';
-            inputDescrip.disabled = true;
-            inputDescrip.id = "i-jac-descr";
-            divDescrip.appendChild(labelDescrip);
-            divDescrip.appendChild(inputDescrip);
-            colIzq.appendChild(divDescrip);
+            cargarDescrip(dades, "i-jac-descr");
 
-            //COLUMNA DERECHA
-            //imágenes
-            /*
-            const titIMG = crearDiv('titulo-bloque-interno');
-            titIMG.textContent="Imatges";
-            colDcha.appendChild(titIMG);
-            const contImg = crearDiv('caja-arrastrar-soltar');
-            contImg.id = "i-jac-img";
-            colDcha.appendChild(contImg);*/
-            document.querySelector('.imatges').style.display = 'block';
-            if (dades.imatges_urls && dades.imatges_urls.length > 0) {
-                dades.imatges_urls.forEach(url => {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.style.width = '100px';
-                    img.style.height = '100px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
-                    contImg.appendChild(img);
-                });
-            }else{
-                contImg.textContent = "No hi ha cap imatge";
-            }
+            //COLUMNA DERECHA      
+            //imágenes        
+            cargarImg(dades);
+
             //mapa
             const titMAP = crearDiv('titulo-bloque-interno');
             titMAP.textContent="Map";
@@ -198,103 +192,39 @@ const cargarFicha = async function() {
             const contMapa = crearDiv('container-map');
             contMapa.id = 'map';
             colDcha.appendChild(contMapa);
-            initMapa(latitud.value, altitud.value);
+            initMapa(latitud.value, longitud.value);
+            longitud.addEventListener('input', function() {
+                initMapa(latitud.value, longitud.value);
+            });
+            latitud.addEventListener('input', function() {
+                initMapa(latitud.value, longitud.value);
+            });
 
         }else if(tab === 'ue'){
+            tituloFicha.textContent = "Unitat estratigràfica";
             //COLUMNA IZQUIERDA
             //info basica
             const divInfo = crearDiv('grupo-rejilla-interno');
             divInfo.appendChild(crearCampo("campo-formulario-base","UE",dades.codi_ue,"i-ue-codi")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Sector",dades.codi_sector,"i-ue-codiSec")); //ok
-            //divInfo.appendChild(crearCampo("campo-formulario-base","Jaciment",dades.codi_jaciment,"i-ue-codiJac"));
-            //divInfo.appendChild(crearCampo("campo-formulario-base","Codi intervencio",dades.codi_intervencio,"i-ue-codiInterv"));
             divInfo.appendChild(crearCampo("campo-formulario-base","Datacio",dades.cronologia,"i-ue-cronolog")); //ok
-            //divInfo.appendChild(crearCampo("campo-formulario-base","Registrat per",dades.registrat_per,"i-ue-person")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Estat conservacio",dades.estat_conservacio,"i-ue-estado")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Tipus UE",dades.tipus_ue,"i-ue-tipus")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Textura",dades.textura,"i-ue-text")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Color",dades.color,"i-ue-color")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Material",dades.material,"i-ue-mat")); //ok
-            //divInfo.appendChild(crearCampo("campo-formulario-base","Interpretació",dades.interpretacio,"i-ue-interpr"));
+            divInfo.appendChild(crearCampo("campo-formulario-base","Registrat per",dades.registrat_per || 'No hi ha registre',"i-ue-person")); //ok
+            //convierto fecha Timestamp a fecha legible
+            const dataLlegible = dades.data ? dades.data.toDate().toLocaleDateString('ca-ES') : 'Sense data';
+            divInfo.appendChild(crearCampo("campo-formulario-base","Data de creació",dataLlegible,"i-ue-data"));
             colIzq.appendChild(divInfo);
             
             //descripcion
-            //ok
-            const divDescrip = crearDiv('campo-area-texto');
-            const labelDescrip = document.createElement('label');
-            labelDescrip.textContent = "Descripció";
-            const inputDescrip = document.createElement('textarea');
-            inputDescrip.textContent = dades.descripcio || 'No hi ha cap descripciò';
-            inputDescrip.disabled = true;
-            inputDescrip.id="i-ue-descr";
-            divDescrip.appendChild(labelDescrip);
-            divDescrip.appendChild(inputDescrip);
-            colIzq.appendChild(divDescrip);
-            /*
-            //medidas topograficas
-            const titTopo = crearDiv('titulo-bloque-interno');
-            titTopo.textContent="Dades topográfiques";
-            colIzq.appendChild(titTopo);
-            const divCoor = crearDiv('campo-formulario-base');
-
-            const labelCoord = document.createElement('label');
-            labelCoord.textContent = "Dimensions (cm)";
-            const labelAltitud = document.createElement('label');
-            labelAltitud.textContent = "Longitud x Amplada x Alçada";
-            const divMedidas = crearDiv('campo-doble-medida');
-
-            const longitud = document.createElement('input');
-            longitud.type = 'number';
-            longitud.value = 25;
-            longitud.disabled = true;
-            longitud.id="i-ue-long";
-            const amplada = document.createElement('input');
-            amplada.type = 'number';
-            amplada.value = 41.402765;
-            amplada.disabled = true;
-            amplada.id="i-ue-ampl";
-            const alcada = document.createElement('input');
-            alcada.type = 'number';
-            alcada.value = 55;
-            alcada.disabled = true;
-            alcada.id="i-ue-alc";
-            divMedidas.appendChild(longitud);
-            divMedidas.appendChild(amplada);
-            divMedidas.appendChild(alcada);
-            divCoor.appendChild(labelCoord);
-            divCoor.appendChild(labelAltitud);
-            divCoor.appendChild(divMedidas);
-            colIzq.appendChild(divCoor);
-
-            //cotes
-            const divCotes = crearDiv('grupo-rejilla-interno');
-            const cotes = crearDiv('campo-formulario-base');
-            const labelCotes = document.createElement('label');
-            labelCotes.textContent = "Cotes (m) - Sup x Inf";
-            cotes.appendChild(labelCotes);
-            const inputsCotes = crearDiv('campo-doble-medida');
+            cargarDescrip(dades, "i-ue-descr");
             
-            const sup = document.createElement('input');
-            sup.type = 'number';
-            sup.value = 25;
-            sup.disabled = true;
-            sup.id="i-ue-cotaSup";
-            const inf = document.createElement('input');
-            inf.type = 'number';
-            inf.value = 41.402765;
-            inf.disabled = true;
-            inf.id="i-ue-cotaInf";
-
-            inputsCotes.appendChild(sup);
-            inputsCotes.appendChild(inf);
-            cotes.appendChild(labelCotes);
-            cotes.appendChild(inputsCotes);
-            divCotes.appendChild(cotes);
-            colIzq.appendChild(divCotes);
-            */
             //COLUMNA DERECHA
             //relaciones
-            //ok
+            
             //muestro campos
             document.querySelector('.relacions').style.display = 'block';
             //relleno valores si existen
@@ -305,31 +235,23 @@ const cargarFicha = async function() {
                 });
             }
 
-            
-
-            //imágenes
-            /*
-            const titIMG = crearDiv('titulo-bloque-interno');
-            titIMG.textContent="Imatges";
-            colDcha.appendChild(titIMG);
-            const contImg = crearDiv('caja-arrastrar-soltar');
-            contImg.id="i-ue-img";
-            colDcha.appendChild(contImg);*/
-            document.querySelector('.imatges').style.display = 'block';
-            if (dades.imatges_urls && dades.imatges_urls.length > 0) {
-                dades.imatges_urls.forEach(url => {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.style.width = '100px';
-                    img.style.height = '100px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
-                    contImg.appendChild(img);
-                });
-            }else{
-                contImg.textContent = "No hi ha cap imatge";
+            //imágenes        
+            cargarImg(dades);
+        }
+        if (rol !== 'director') {
+            if (tab === 'jaciment') {
+                //técnico no puede modificar ni borrar jaciments
+                btn_modificar.style.display = 'none';
+                btn_borrar.style.display = 'none';
+                btn_guardar.style.display = 'none';
+            } else if (tab === 'ue') {
+                //para UE, solo puede modificar/borrar si lo ha creado él
+                if (dades.registrat_per !== uid) {
+                    btn_modificar.style.display = 'none';
+                    btn_borrar.style.display = 'none';
+                    btn_guardar.style.display = 'none';
+                }
             }
-
         }
     }catch (error){
         console.log("Error carregant la fitxa: ", error);
@@ -374,7 +296,10 @@ btn_modificar.addEventListener("click", function(){
     modoEdicion = true;
     //desbloquear todos los inputs
     document.querySelectorAll('.bloque-pestana input, .bloque-pestana textarea').forEach(camp => {
-        camp.disabled = false;
+        //los campos de fecha y presona no se modificn, el resto si
+        if (camp.id !== 'i-ue-data' && camp.id !== 'i-ue-person') {
+            camp.disabled = false;
+        }
     });
     
 });
@@ -401,13 +326,12 @@ btn_guardar.addEventListener('click', async function() {
         let dadesActualitzades = {};
 
         if (tab === 'sector') {
-            
-            
             dadesActualitzades = {
                 nom: document.getElementById('i-sec-nom').value,
                 codi_sector: document.getElementById('i-sec-codi').value,
                 codi_jaciment: document.getElementById('i-sec-codiJac').value,
-                descripcio: document.getElementById('i-sec-descr').value
+                descripcio: document.getElementById('i-sec-descr').value,
+                data: firebase.firestore.Timestamp.now()
             };
         } else if (tab === 'jaciment') {
             
@@ -415,36 +339,29 @@ btn_guardar.addEventListener('click', async function() {
                 nom: document.getElementById('i-jac-nom').value,
                 codi_jaciment: document.getElementById('i-jac-codi').value,
                 director: document.getElementById('i-jac-director').value,
-                coordenada_x: document.getElementById('i-jac-alt').value,
+                coordenada_x: document.getElementById('i-jac-long').value,
                 coordenada_y: document.getElementById('i-jac-lat').value,
                 coordenada_z: document.getElementById('i-jac-prof').value,
                 descripcio: document.getElementById('i-jac-descr').value,
+                data: firebase.firestore.Timestamp.now()
             };
         } else if (tab === 'ue') {
             
             dadesActualitzades = {
                 codi_ue: document.getElementById('i-ue-codi').value,
                 codi_sector: document.getElementById('i-ue-codiSec').value,
-                //codi_jaciment: document.getElementById('i-ue-codiJac').value,
-                //codi_intervencio: document.getElementById('i-ue-codiInterv').value,
+                data: firebase.firestore.Timestamp.now(),
                 tipus_ue: document.getElementById('i-ue-tipus').value,
                 textura: document.getElementById('i-ue-text').value,
                 color: document.getElementById('i-ue-color').value,
                 material: document.getElementById('i-ue-mat').value,
                 cronologia: document.getElementById('i-ue-cronolog').value,
                 estat_conservacio: document.getElementById('i-ue-estado').value,
-                //registrat_per: document.getElementById('i-ue-person').value,
-                //interpretacio: document.getElementById('i-ue-interpr').value,
                 descripcio: document.getElementById('i-ue-descr').value,
-                //longitud: document.getElementById('i-ue-long').value,
-                //amplada: document.getElementById('i-ue-ampl').value,
-                //alcada: document.getElementById('i-ue-alc').value,
-                //cota_sup: document.getElementById('i-ue-cotaSup').value,
-                //cota_inf: document.getElementById('i-ue-cotaInf').value,
                 //recogemos las relaciones y construimos el array
                 //pero con el filter solo guardamos las que tienen valor
                 relacions: [
-                    { tipus: 'igual_a', desti: document.querySelector('.rel-igual_a').value },
+                    { tipus: 'igual_a', desti: document.querySelector('.rel-igual-a').value },
                     { tipus: 'cobreix', desti: document.querySelector('.rel-cobreix').value },
                     { tipus: 'cobert_per', desti: document.querySelector('.rel-cobert_per').value },
                     { tipus: 'farceix', desti: document.querySelector('.rel-farceix').value },
@@ -487,17 +404,26 @@ dropZone.addEventListener("drop", async (event) => {
     const files = event.dataTransfer.files;
     Array.from(files).forEach(async file => {
         if (file.type.startsWith("image/")) {
+            //preview temporal mientras se sube
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = document.createElement("img");
-                img.src = e.target.result;
-                img.style.width = '100px';
-                img.style.height = '100px';
-                img.style.objectFit = 'cover';
-                dropZone.appendChild(img);
+                const imatge = crearImatge(e.target.result, null); // null porque aún no tiene URL de S3
+                imatge.dataset.temporal = 'true';//marco como temporal
+                dropZone.appendChild(imatge);
             };
             reader.readAsDataURL(file);
-            if (id) await subirImatge(file, id, coleccio);
+            //subo a S3
+            if (id) {
+                const publicUrl = await subirImatge(file, id, coleccio);
+                //actualizo la imagen temporal con la URL real
+                if (publicUrl) {
+                    const imatgesTemporal = dropZone.querySelector('[data-temporal="true"]');
+                    if (imatgesTemporal) {
+                        imatgesTemporal.querySelector('img').src = publicUrl;
+                        imatgesTemporal.removeAttribute('data-temporal');
+                    }
+                }
+            }
         }
     });
 });
