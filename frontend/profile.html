@@ -27,49 +27,65 @@
                     <a href="ficha_nova.html?tab=sector">Sector</a>
                 </div>
             </div>
-            <a href="#" class="avatar-cabecera">PR</a>
+            <div class="contenedor-desplegable">          
+                <button class="avatar-cabecera">PR</button>
+                <div class="contenido-desplegable">
+                    <a href="profile.html">El meu perfil</a>
+                    <a href="index.html">Tancar sesió</a>                  
+                </div>
+            </div>
         </div>
     </nav>
 
     <section id="pagina-perfil" class="contenedor-perfil">
         <div class="tarjeta-perfil">
             <div class="avatar-gigante-perfil"></div>
-            <h2 class="nombre-usuario-perfil">Paloma Ruiz</h2>
+            <h2 class="nombre-usuario-perfil"></h2>
 
             <div class="rejilla-datos-perfil">
                 <div class="columna-perfil">
                     <div class="titulo-bloque-interno">Dades personals</div>
+                    <div class="campo-formulario-base">
+                        <label>Nom</label>
+                        <input type="text" id="input-nom">
+                    </div>
                     <div class="campo-formulario-base campo-perfil-inactivo">
                         <label>Correu electrònic</label>
-                        <input type="email" value="paloma@kronos.cat" readonly>
-                    </div>
-                    <div class="campo-formulario-base">
-                        <label>Telèfon mòbil</label>
-                        <input type="text" value="+34 600 000 000">
-                    </div>
+                        <input type="email" id="input-email" readonly> <!-- readonly porque no se cambia -->
+                    </div>                   
                 </div>
-
+                
                 <div class="columna-perfil">
                     <div class="titulo-bloque-interno">Canviar contrasenya</div>
                     <div class="campo-formulario-base">
                         <label>Contrasenya actual</label>
-                        <input type="password">
+                        <div class="input-eye">
+                            <input type="password" id="input-passwd-actual">
+                            
+                        </div>
                     </div>
                     <div class="campo-formulario-base">
                         <label>Nova contrasenya</label>
-                        <input type="password">
+                        <div class="input-eye">
+                            <input type="password" id="input-passwd-nova">
+                            
+                        </div>
                     </div>
                     <div class="campo-formulario-base">
                         <label>Repetir nova contrasenya</label>
-                        <input type="password">
+                        <div class="input-eye">
+                            <input type="password" id="input-passwd-repetir">
+                            
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <a href="libreria.html" class="boton-guardar-perfil">Desar</a>
+            <button class="boton-guardar-perfil">Desar</button>
         </div>
     </section>
     <script src="js/firebase-config.js"></script>
+    <script src="js/script_profile.js"></script>
 </body>
 
 </html>

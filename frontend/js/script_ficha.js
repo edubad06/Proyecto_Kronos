@@ -181,6 +181,38 @@ const cargarFicha = async function() {
             //descripcion
             cargarDescrip(dades, "i-jac-descr");
 
+            //cargo tecnics y marco los que ya son editores
+            const titEditors = crearDiv('titulo-bloque-interno');
+            titEditors.textContent = 'Editors assignats';
+            colIzq.appendChild(titEditors);
+
+            const contenedorEditors = crearDiv('contenedor-checkbox-pildora');
+            contenedorEditors.id = 'contenedor-editors';
+            colIzq.appendChild(contenedorEditors);
+
+            const usuaris = await db.collection('usuaris').where('rol', '==', 'tecnic').get();
+            usuaris.forEach(doc => {
+                const u = doc.data();
+                const label = document.createElement('label');
+                label.classList.add('etiqueta-checkbox-pildora');
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = u.email;
+                //marco si ya es editor
+                if (dades.editors && dades.editors.includes(u.email)) {
+                    checkbox.checked = true;
+                }
+                checkbox.disabled = true; //bloqueado hasta que pulse modificar
+                
+                const span = document.createElement('span');
+                span.textContent = u.nom;
+                
+                label.appendChild(checkbox);
+                label.appendChild(span);
+                contenedorEditors.appendChild(label);
+            });
+
             //COLUMNA DERECHA      
             //imágenes        
             cargarImg(dades);
@@ -334,7 +366,9 @@ btn_guardar.addEventListener('click', async function() {
                 data: firebase.firestore.Timestamp.now()
             };
         } else if (tab === 'jaciment') {
-            
+            const editors = Array.from(
+                document.querySelectorAll('#contenedor-editors input:checked')
+            ).map(cb => cb.value);
             dadesActualitzades = {
                 nom: document.getElementById('i-jac-nom').value,
                 codi_jaciment: document.getElementById('i-jac-codi').value,
@@ -343,6 +377,7 @@ btn_guardar.addEventListener('click', async function() {
                 coordenada_y: document.getElementById('i-jac-lat').value,
                 coordenada_z: document.getElementById('i-jac-prof').value,
                 descripcio: document.getElementById('i-jac-descr').value,
+                editors: editors,
                 data: firebase.firestore.Timestamp.now()
             };
         } else if (tab === 'ue') {

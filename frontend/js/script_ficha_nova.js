@@ -50,20 +50,67 @@ const initMapa = function(lat, long) {
         marcador = L.marker([latNum, longNum]).addTo(map);
     }
 };
-//iniciamos mapa 
-if (tab === 'jaciment') {
-    initMapa(latDef, longDef); // coordenadas por defecto
-    
-    const latitud = document.getElementById('i-jac-lat');
-    const longitud = document.getElementById('i-jac-long');
-    
-    latitud.addEventListener('input', function() {
-        initMapa(latitud.value, longitud.value);
-    });
-    longitud.addEventListener('input', function() {
-        initMapa(latitud.value, longitud.value);
-    });
-}
+//iniciamos mapa y editores
+const inicialitzar = async function() {
+    if (tab === 'jaciment') {
+        initMapa(latDef, longDef); // coordenadas por defecto
+
+        // Cargar técnics de Firebase
+        const contenedorEditors = document.getElementById('contenedor-editors');
+        const tecnics = await db.collection('usuaris').where('rol', '==', 'tecnic').get();
+        tecnics.forEach(doc => {
+            const u = doc.data();
+            const label = document.createElement('label');
+            label.classList.add('etiqueta-checkbox-pildora');
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = u.email;
+            
+            const span = document.createElement('span');
+            span.textContent = u.nom;
+            
+            label.appendChild(checkbox);
+            label.appendChild(span);
+            contenedorEditors.appendChild(label);
+        });
+        
+        const latitud = document.getElementById('i-jac-lat');
+        const longitud = document.getElementById('i-jac-long');
+        
+        latitud.addEventListener('input', function() {
+            initMapa(latitud.value, longitud.value);
+        });
+        longitud.addEventListener('input', function() {
+            initMapa(latitud.value, longitud.value);
+        });
+    };
+    //cargamos los yacimientos en la select de sectores
+    if (tab === 'sector') {
+        const selectJac = document.getElementById('i-sec-codiJac');
+        const jaciments = await db.collection('jaciments').get();
+        jaciments.forEach(doc => {
+            const d = doc.data();
+            const option = document.createElement('option');
+            option.value = d.codi_jaciment;
+            option.textContent = d.nom;
+            selectJac.appendChild(option);
+        });        
+    };
+    //cargamos los sectores en la select de ues
+    if (tab === 'ue') {
+        const selectSec = document.getElementById('i-ue-codiSec');
+        const sectors = await db.collection('sectors').get();
+        sectors.forEach(doc => {
+            const d = doc.data();
+            const option = document.createElement('option');
+            option.value = d.codi_sector;
+            option.textContent = `${d.nom} (${d.codi_jaciment})`;
+            selectSec.appendChild(option);
+        });
+    }
+};
+inicialitzar();
 
 btn_guardar.addEventListener("click", async function(){
     try {
@@ -81,7 +128,11 @@ btn_guardar.addEventListener("click", async function(){
             }
 
         } else if (tab === 'jaciment') {        
-            
+            //cojo los editores marcados
+            const editors = Array.from(
+                document.querySelectorAll('#contenedor-editors input:checked')
+            ).map(cb => cb.value);
+
             const nouJaciment = {
                 nom: document.getElementById('i-jac-nom').value,
                 codi_jaciment: document.getElementById('i-jac-codi').value,
@@ -90,6 +141,7 @@ btn_guardar.addEventListener("click", async function(){
                 coordenada_y: document.getElementById('i-jac-lat').value,
                 coordenada_z: document.getElementById('i-jac-prof').value,
                 descripcio: document.getElementById('i-jac-descr').value,
+                editors: editors, //array
                 data: firebase.firestore.Timestamp.now()
             };    
 

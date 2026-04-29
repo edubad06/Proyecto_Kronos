@@ -50,9 +50,12 @@
 
                         <div class="grupo-rejilla-interno">
                             <div class="campo-formulario-base"><label>UE</label><input type="text" id="i-ue-codi" placeholder="Codi UE"></div>
-                            <div class="campo-formulario-base"><label>Sector</label><input type="text" id="i-ue-codiSec" placeholder="Sector"></div> <!--  ????????????????? aquÍ tienen que salir las que haya guardadas -->
-                            <!-- <div class="campo-formulario-base"><label>Jaciment</label><input type="text" id="i-ue-codiJac" placeholder="Jaciment"></div>  aquÍ tienen que salir las que haya guardadas
-                            <div class="campo-formulario-base"><label>Codi intervenció</label><input type="text" id="i-ue-codiInterv" placeholder="Sector"></div> -->
+                            <div class="campo-formulario-base">
+                                <label>Sector</label>
+                                <select id="i-ue-codiSec">
+                                    <option value="">Selecciona un sector...</option>
+                                </select>
+                            </div>
                             <div class="campo-formulario-base"><label>Datació</label><input type="text" id="i-ue-cronolog" placeholder="Datació"></div>
                             <div class="campo-formulario-base">
                                 <label>Tipus UE</label>
@@ -176,8 +179,8 @@
                             <div class="titulo-privacidad">Permisos</div>
                             <div class="campo-formulario-base">
                                 <label>Assignar editors</label>
-                                <div class="contenedor-checkbox-pildora">
-                                    <label class="etiqueta-checkbox-pildora">
+                                <div class="contenedor-checkbox-pildora" id="contenedor-editors">
+                                    <!-- <label class="etiqueta-checkbox-pildora">
                                         <input type="checkbox" value="usuari1">
                                         <span>Usuari 1</span>
                                     </label>
@@ -192,7 +195,7 @@
                                     <label class="etiqueta-checkbox-pildora">
                                         <input type="checkbox" value="usuari4">
                                         <span>Usuari 4</span>
-                                    </label>
+                                    </label> -->
                                 </div>
                             </div>
                         </div>
@@ -212,7 +215,12 @@
                         <div class="grupo-rejilla-interno">
                             <div class="campo-formulario-base"><label>Nom</label><input type="text" id="i-sec-nom"></div>
                             <div class="campo-formulario-base"><label>Codi</label><input type="text" id="i-sec-codi"></div>
-                            <div class="campo-formulario-base"><label>Jaciment</label><input type="text" id="i-sec-codiJac"></div>
+                            <div class="campo-formulario-base">
+                                <label>Jaciment</label>
+                                <select id="i-sec-codiJac">
+                                    <option value="">Selecciona un jaciment...</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="campo-area-texto">
                             <label>Descripció</label>

@@ -9,6 +9,7 @@ const menuJac = document.querySelector('.menu-jac');
 let totesFitxes = []; //array con todas las fichas cargadas
 
 const rol = sessionStorage.getItem("rol");
+const emailUsuari = sessionStorage.getItem("email");
 if (rol !== 'director') {
     menuJac.style.display = 'none';
 }
@@ -70,7 +71,9 @@ const cargarFichas = async function() {
                 subtitol: d.descripcio,
                 categoria: 'jaciment',
                 info: `Director/a: ${d.director}`,
-                data: d.data || null
+                data: d.data || null,
+                editors: d.editors || [],
+                codi_jaciment: d.codi_jaciment
             });
             
         });
@@ -88,7 +91,8 @@ const cargarFichas = async function() {
                 subtitol: d.codi_sector,
                 categoria: 'sector',
                 info: `Jaciment: ${d.codi_jaciment}`,
-                data: d.data || null
+                data: d.data || null,
+                codi_jaciment: d.codi_jaciment
             });
         });
 
@@ -105,10 +109,39 @@ const cargarFichas = async function() {
                 subtitol: d.tipus_ue,
                 categoria: 'ue',
                 info: `Sector: ${d.codi_sector || 'No hay sector'}`,
-                data: d.data || null
+                data: d.data || null,
+                codi_sector: d.codi_sector
             });
         });
 
+        // FILTRAR SEGÚN ROL
+
+        if (rol === 'tecnic') {
+            // Primero encontramos los jaciments donde es editor
+            const jacimentsPermesos = totesFitxes
+                .filter(f => f.tab === 'jaciment' && f.editors.includes(emailUsuari))
+                .map(f => f.codi_jaciment);
+
+            // Filtramos las fichas
+            totesFitxes = totesFitxes.filter(f => {
+                if (f.tab === 'jaciment') {
+                    return jacimentsPermesos.includes(f.codi_jaciment);
+                }
+                if (f.tab === 'sector') {
+                    return jacimentsPermesos.includes(f.codi_jaciment);
+                }
+                if (f.tab === 'ue') {
+                    // Para UE necesitamos saber el jaciment del sector
+                    const sector = totesFitxes.find(s => 
+                        s.tab === 'sector' && s.subtitol === f.codi_sector
+                    );
+                    return sector && jacimentsPermesos.includes(sector.codi_jaciment);
+                }
+                return true;
+            });
+        }
+        console.log("rol:", rol);
+        console.log("total antes de pintar:", totesFitxes.length);
         //pintamos todo al final
         pintarFitxes(totesFitxes);
 

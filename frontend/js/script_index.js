@@ -12,6 +12,8 @@ btnLogin.addEventListener("click", async function(event) {
     try {
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
         const user = userCredential.user;
+        //guardo el email en la sessionStorage
+        sessionStorage.setItem("email", user.email);
         
         //guardo el token para usarlo en los fetch
         //uso sessionStorage para guardar el token, así cuando se cierra el navegador se borra automáticamente
