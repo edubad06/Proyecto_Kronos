@@ -92,9 +92,20 @@ class GaleriaActivity : AppCompatActivity() {
         }
 
         // BOTON DEL FILTRE
+        // BOTON DEL FILTRE
         btnShowFilter.setOnClickListener {
             val isDatabase = viewPager.currentItem == 1
             val popup = FilterPopup(this, userJaciment, isDatabase) { sector, ueId, tipus, onlyMine ->
+
+                // CORRECCIÓN:
+                // Si NO es director y estamos en local, forzamos true.
+                // Si ES director, respetamos lo que haya marcado en el checkbox (onlyMine).
+                val finalOnlyMine = if (userRol.lowercase() != "director" && !isDatabase) {
+                    true
+                } else {
+                    onlyMine
+                }
+
                 val fragment = when (viewPager.currentItem) {
                     0 -> supportFragmentManager.findFragmentByTag("f0") as? UEFragment
                     1 -> supportFragmentManager.findFragmentByTag("f1") as? DBUEFragment
@@ -102,14 +113,18 @@ class GaleriaActivity : AppCompatActivity() {
                 }
 
                 when (fragment) {
-                    is UEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, onlyMine)
-                    is DBUEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, onlyMine)
+                    is UEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, finalOnlyMine)
+                    is DBUEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, finalOnlyMine)
                 }
             }
             popup.show()
         }
     }
 
+    // 1. Añade esta variable arriba en la clase
+    private var userRol: String = ""
+
+    // 2. Actualiza la función fetchUserJaciment
     private fun fetchUserJaciment() {
         val userEmail = FirebaseAuth.getInstance().currentUser?.email
         if (userEmail != null) {
@@ -118,7 +133,9 @@ class GaleriaActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { query ->
                     if (!query.isEmpty) {
-                        userJaciment = query.documents[0].get("excavacio")?.toString() ?: ""
+                        val doc = query.documents[0]
+                        userJaciment = doc.getString("excavacio") ?: ""
+                        userRol = doc.getString("rol") ?: ""
                     }
                 }
         }

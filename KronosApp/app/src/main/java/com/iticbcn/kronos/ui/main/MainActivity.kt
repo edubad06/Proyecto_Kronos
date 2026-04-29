@@ -26,9 +26,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         auth = FirebaseAuth.getInstance()
 
+        // --- COMPROBAR SESIÓN INICIADA AL ARRANCAR ---
         val prefs = getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE)
         val rememberMe = prefs.getBoolean("remember_me", false)
 
+        // Si el usuario marcó "Recordar" y Firebase tiene sesión activa, saltamos el login
         if (rememberMe && auth.currentUser != null) {
             irAGaleria()
             return
@@ -49,30 +51,55 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loginUser() {
+        // Limpiar errores previos
+        binding.tilUser.error = null
+        binding.tilPassword.error = null
+
         val email = binding.etUser.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Siusplau, omple tots els camps", Toast.LENGTH_SHORT).show()
-            return
+        var hasError = false
+        if (email.isEmpty()) {
+            binding.tilUser.error = "Siusplau, omple aquest camp"
+            hasError = true
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.tilUser.error = "L'adreça de correu no té un format vàlid"
+            hasError = true
         }
+
+        if (password.isEmpty()) {
+            binding.tilPassword.error = "Siusplau, omple aquest camp"
+            hasError = true
+        }
+
+        if (hasError) return
 
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    // --- GUARDAR PREFERENCIA USANDO KTX ---
                     val prefs = getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE)
                     prefs.edit { 
                         putBoolean("remember_me", binding.cbRememberMe.isChecked) 
                     }
+
                     irAGaleria()
                 } else {
                     val exception = task.exception
-                    val errorMessage = when (exception) {
-                        is FirebaseAuthInvalidUserException -> "L'adreça de correu no és vàlida o no existeix."
-                        is FirebaseAuthInvalidCredentialsException -> "La contrasenya és incorrecta."
-                        else -> "Error d'accés: ${exception?.localizedMessage}"
+                    val message = exception?.message ?: ""
+                    
+                    when {
+                        exception is FirebaseAuthInvalidUserException -> {
+                            binding.tilUser.error = "L'adreça de correu no està registrada."
+                        }
+                        exception is FirebaseAuthInvalidCredentialsException -> {
+                            binding.tilPassword.error = "La contrasenya és incorrecta."
+                        }
+                        else -> {
+                            Toast.makeText(this, "Error d'accés: ${exception?.localizedMessage}", 
+                                Toast.LENGTH_LONG).show()
+                        }
                     }
-                    Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
                 }
             }
     }

@@ -54,10 +54,12 @@
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilUser"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Email"
+                app:errorEnabled="true"
                 app:placeholderText=" ">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -67,11 +69,13 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilPassword"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="@string/Contrasenya"
+                app:errorEnabled="true"
                 app:endIconMode="password_toggle">
 
                 <com.google.android.material.textfield.TextInputEditText
