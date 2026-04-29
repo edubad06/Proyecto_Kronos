@@ -52,6 +52,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.firebase.auth)
     
+    // Coroutines Play Services for .await()
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
+    
     // Glide
     implementation(libs.glide)
     

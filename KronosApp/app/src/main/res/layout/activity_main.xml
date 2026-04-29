@@ -85,11 +85,25 @@
                     android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-8dp"
+                android:paddingHorizontal="4dp"
+                android:text="@string/forgot_password"
+                android:textColor="@color/primary_text"
+                android:textSize="14sp"
+                android:gravity="start"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground" />
+
             <CheckBox
                 android:id="@+id/cbRememberMe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:text="Recorda'm"
                 android:textColor="@color/primary_text" />
 

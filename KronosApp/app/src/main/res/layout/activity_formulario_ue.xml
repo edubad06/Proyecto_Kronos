@@ -60,7 +60,8 @@
                             android:id="@+id/et_jaciment"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="text" />
+                            android:inputType="text"
+                            android:enabled="false" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <LinearLayout
@@ -85,7 +86,7 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="none"
                                 tools:ignore="LabelFor"
-                                android:enabled="false"
+                                android:enabled="true"
                                 />
                         </com.google.android.material.textfield.TextInputLayout>
 

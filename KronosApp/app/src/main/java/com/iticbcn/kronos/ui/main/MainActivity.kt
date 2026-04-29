@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -48,6 +49,39 @@ class MainActivity : AppCompatActivity() {
         binding.buttonLogin.setOnClickListener {
             loginUser()
         }
+
+        binding.tvForgotPassword.setOnClickListener {
+            val email = binding.etUser.text.toString().trim()
+            if (email.isEmpty()) {
+                binding.tilUser.error = "Siusplau, introdueix el teu correu per restablir la contrasenya"
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                binding.tilUser.error = "L'adreça de correu no té un format vàlid"
+            } else {
+                binding.tilUser.error = null
+                enviarCorreuRestabliment(email)
+            }
+        }
+    }
+
+    private fun enviarCorreuRestabliment(email: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Canviar contrasenya")
+            .setMessage("Vols rebre un correu electrònic a $email per restablir la teva contrasenya?")
+            .setNegativeButton("Cancel·lar", null)
+            .setPositiveButton("Enviar correu") { _, _ ->
+                auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle("Correu enviat!")
+                            .setMessage("S'ha enviat un enllaç a la teva bústia. Si no el veus en uns minuts, si us plau, revisa la teva carpeta de correu brossa (SPAM).")
+                            .setPositiveButton("Entès", null)
+                            .show()
+                    } else {
+                        Toast.makeText(this, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .show()
     }
 
     private fun loginUser() {

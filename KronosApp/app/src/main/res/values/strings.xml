@@ -93,6 +93,8 @@
     <string name="error_carregar_dades">Error en carregar les dades</string>
     <string name="aplicar_filtre">Aplicar filtre</string>
 
+    <string name="forgot_password">T\'has oblidat de la contrasenya?</string>
+
     <!-- Arrays para los tipos de UE -->
     <string-array name="tipus_ue_options">
         <item>Interstrat</item>

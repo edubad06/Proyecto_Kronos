@@ -1,7 +1,10 @@
 package com.iticbcn.kronos.ui.ue
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,6 +44,17 @@ class UEFragment : Fragment() {
     private lateinit var tvEmptyMessage: TextView
     private var uploadJob: Job? = null
 
+    // Launcher para solicitar permisos de almacenamiento/imágenes (se mantiene por si acaso, pero no se usa en el FAB)
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            iniciarProcesoSubidaMasiva()
+        } else {
+            Toast.makeText(requireContext(), "Cal acceptar el permís per poder llegir i pujar les imatges", Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,7 +70,8 @@ class UEFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         originalList = DataManager.getUEListLocal(requireContext())
         
-        adapter = ObjecteAdapter(mutableListOf())
+        val emailActivo = FirebaseAuth.getInstance().currentUser?.email ?: ""
+        adapter = ObjecteAdapter(mutableListOf(), false, emailActivo)
         recyclerView.adapter = adapter
 
         fabAdd.setOnClickListener {
@@ -63,23 +80,27 @@ class UEFragment : Fragment() {
         }
 
         fabUploadAll.setOnClickListener {
-            val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
-            
-            // Filtro robusto para la subida (ignorando espacios y mayúsculas)
-            val listaAPujar = if (userRol == "director") {
-                originalList
-            } else {
-                originalList.filter { it.registrat_per.trim().equals(currentUserEmail.trim(), ignoreCase = true) }
-            }
-
-            if (listaAPujar.isEmpty()) {
-                Toast.makeText(requireContext(), "No hi ha UEs per pujar", Toast.LENGTH_SHORT).show()
-            } else {
-                mostrarConfirmacionSubidaMasiva(listaAPujar)
-            }
+            // Eliminada la verificación de permisos para evitar el diálogo molesto
+            // ya que las fotos ya tienen permisos persistentes.
+            iniciarProcesoSubidaMasiva()
         }
 
         return view
+    }
+
+    private fun iniciarProcesoSubidaMasiva() {
+        val email = FirebaseAuth.getInstance().currentUser?.email ?: ""
+        val listaAPujar = if (userRol == "director") {
+            originalList
+        } else {
+            originalList.filter { it.registrat_per.trim().equals(email.trim(), ignoreCase = true) }
+        }
+
+        if (listaAPujar.isEmpty()) {
+            Toast.makeText(requireContext(), "No hi ha UEs per pujar", Toast.LENGTH_SHORT).show()
+        } else {
+            mostrarConfirmacionSubidaMasiva(listaAPujar)
+        }
     }
 
     private fun mostrarConfirmacionSubidaMasiva(listaAPujar: List<ObjecteUE>) {
@@ -94,6 +115,7 @@ class UEFragment : Fragment() {
     }
 
     private fun subirTodasLasUEs(listaAPujar: List<ObjecteUE>) {
+
         uploadJob = CoroutineScope(Dispatchers.Main).launch {
             val progressDialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Pujant UEs...")
@@ -101,7 +123,6 @@ class UEFragment : Fragment() {
                 .setCancelable(false)
                 .setNegativeButton("Aturar") { _, _ ->
                     uploadJob?.cancel()
-                    Toast.makeText(requireContext(), "Pujada cancel·lada", Toast.LENGTH_SHORT).show()
                 }
                 .show()
 
@@ -109,42 +130,52 @@ class UEFragment : Fragment() {
             var fallidas = 0
 
             try {
+                // Obtenemos el token una vez para todas las fotos para mayor eficiencia
+                val user = FirebaseAuth.getInstance().currentUser
+                val token = user?.getIdToken(false)?.await()?.token
+                Log.d("UE_UPLOAD", "Token primeros 20 chars: ${token?.take(20)}")
+                Log.d("UE_UPLOAD", "Token es null: ${token == null}")
+
+
                 for (objecte in listaAPujar) {
                     val publicUrls = mutableListOf<String>()
-                    var hasError = false
+                    var todoCorrecto = true
 
-                    // 1. Subida a S3
-                    objecte.imatges_urls.forEach { uriString ->
+                    // Subida de imágenes: REGLA ESTRICTA (Si falla una, se aborta la UE)
+                    for (uriString in objecte.imatges_urls) {
                         try {
-                            val publicUrl = S3Service.uploadImage(requireContext(), Uri.parse(uriString))
-                            if (publicUrl != null) publicUrls.add(publicUrl) else hasError = true
+                            val publicUrl = S3Service.uploadImage(requireContext(), Uri.parse(uriString), token)
+                            if (publicUrl != null) {
+                                publicUrls.add(publicUrl)
+                            } else {
+                                Log.e("UE_UPLOAD", "Fallo al subir imagen de UE ${objecte.codi_ue}. Abortando UE.")
+                                todoCorrecto = false
+                                break
+                            }
                         } catch (e: Exception) {
-                            hasError = true
+                            Log.e("UE_UPLOAD", "Excepción subiendo imagen en UE ${objecte.codi_ue}: ${e.message}")
+                            todoCorrecto = false
+                            break
                         }
                     }
 
-                    if (hasError && publicUrls.isEmpty() && objecte.imatges_urls.isNotEmpty()) {
+                    if (!todoCorrecto) {
+                        Log.e("UE_UPLOAD", "UE ${objecte.codi_ue} saltada por error en imágenes.")
                         fallidas++
-                        continue
+                        continue 
                     }
 
-                    // 2. Firestore
                     val finalObjecte = objecte.copy(imatges_urls = publicUrls, sincronitzat = true)
                     val db = FirebaseFirestore.getInstance()
                     val docId = "${finalObjecte.jaciment}_${finalObjecte.codi_ue}".replace("/", "_")
 
                     try {
-                        db.collection("unitats_estratigrafiques")
-                            .document(docId)
-                            .set(finalObjecte)
-                            .await() // Espera real a la respuesta del servidor
-
-                        // 3. Borrado local solo tras el éxito
+                        db.collection("unitats_estratigrafiques").document(docId).set(finalObjecte).await()
                         DataManager.deleteUE(requireContext(), objecte.codi_ue, objecte.jaciment)
                         exitosas++
                         Log.d("UE_UPLOAD", "✔ Sincronitzada: ${objecte.codi_ue}")
                     } catch (e: Exception) {
-                        Log.e("UE_UPLOAD", "❌ Error subiendo ${objecte.codi_ue}: ${e.message}")
+                        Log.e("UE_UPLOAD", "❌ Error Firestore en UE ${objecte.codi_ue}: ${e.message}")
                         fallidas++
                     }
                 }
@@ -152,17 +183,17 @@ class UEFragment : Fragment() {
                 progressDialog.dismiss()
                 Toast.makeText(requireContext(), "Pujada finalitzada: $exitosas exitoses, $fallidas fallides.", Toast.LENGTH_LONG).show()
 
-                // REFRESCAR Y RE-FILTRAR (Crucial para la seguridad)
                 originalList = DataManager.getUEListLocal(requireContext())
                 aplicarFiltroPorRol()
 
             } catch (e: Exception) {
                 progressDialog.dismiss()
                 if (e !is kotlinx.coroutines.CancellationException) {
-                    Toast.makeText(requireContext(), "Error en la pujada massiva", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Error crític en la pujada massiva", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
     }
 
     override fun onResume() {
@@ -180,7 +211,6 @@ class UEFragment : Fragment() {
         val listaFiltrada = if (userRol == "director") {
             originalList
         } else {
-            // Filtro estricto por usuario activo
             originalList.filter { it.registrat_per.trim().equals(currentUserEmail.trim(), ignoreCase = true) }
         }
         updateUI(listaFiltrada)
@@ -189,7 +219,6 @@ class UEFragment : Fragment() {
     private fun cargarYFiltrarPorRol() {
         val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
         originalList = DataManager.getUEListLocal(requireContext())
-
         recyclerView.visibility = View.INVISIBLE
         tvEmptyMessage.visibility = View.GONE
 
@@ -197,14 +226,9 @@ class UEFragment : Fragment() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
 
         if (uid != null) {
-            db.collection("usuaris")
-                .whereEqualTo("email", currentUserEmail)
-                .get()
+            db.collection("usuaris").whereEqualTo("email", currentUserEmail).get()
                 .addOnSuccessListener { documents ->
-                    userRol = if (!documents.isEmpty) {
-                        documents.first().getString("rol")?.lowercase() ?: "tecnic"
-                    } else "tecnic"
-
+                    userRol = if (!documents.isEmpty) documents.first().getString("rol")?.lowercase() ?: "tecnic" else "tecnic"
                     rolYaCargado = true
                     aplicarFiltroPorRol()
                     recyclerView.visibility = View.VISIBLE
