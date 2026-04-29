@@ -1,13 +1,11 @@
 package com.iticbcn.kronos.ui.adapter
 
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -23,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class ObjecteAdapter(
     private var objectesList: List<ObjecteUE>,
@@ -39,7 +38,6 @@ class ObjecteAdapter(
         val tvTipus: TextView = view.findViewById(R.id.tvTipus)
         val ivPreview: ImageView = view.findViewById(R.id.ivObjetoIcon)
         val ivOptions: ImageView = view.findViewById(R.id.ivOptions)
-        val lLBody: LinearLayout = view.findViewById(R.id.lLBody)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ObjecteViewHolder {
@@ -59,36 +57,18 @@ class ObjecteAdapter(
                 .load(Uri.parse(objecte.imatges_urls[0]))
                 .placeholder(R.drawable.upload_document)
                 .into(holder.ivPreview)
-
-            holder.ivPreview.setOnClickListener {
-                showImageDialog(holder.itemView.context, Uri.parse(objecte.imatges_urls[0]))
-            }
         } else {
             holder.ivPreview.setImageResource(R.drawable.upload_document)
-            holder.ivPreview.setOnClickListener(null)
         }
 
-        // Listener para abrir el menú (desplegable)
         val menuClickListener = View.OnClickListener { view ->
             showPopupMenu(view, objecte, position)
         }
 
-        // Listener para abrir el formulario directamente
-        val openFormListener = View.OnClickListener { view ->
-            val intent = Intent(view.context, FormularioUE::class.java).apply {
-                putExtra("EXTRA_OBJETO", objecte)
-                putExtra("EXTRA_IS_DB", isDatabaseSource)
-            }
-            view.context.startActivity(intent)
-        }
-
         if (isDatabaseSource) {
-            // En la base de datos: ocultamos botón de tres puntos y clicamos para ir directo al formulario
             holder.ivOptions.visibility = View.GONE
-            
-            val canEdit = objecte.registrat_per == currentUserEmail || userRole == "director"
-            
-            val dbClickListener = View.OnClickListener { view ->
+            val canEdit = objecte.registrat_per.trim().equals(currentUserEmail.trim(), ignoreCase = true) || userRole == "director"
+            holder.itemView.setOnClickListener { view ->
                 val intent = Intent(view.context, FormularioUE::class.java).apply {
                     putExtra("EXTRA_OBJETO", objecte)
                     putExtra("EXTRA_IS_DB", isDatabaseSource)
@@ -96,32 +76,16 @@ class ObjecteAdapter(
                 }
                 view.context.startActivity(intent)
             }
-
-            holder.itemView.setOnClickListener(dbClickListener)
-            holder.lLBody.setOnClickListener(dbClickListener)
-            holder.tvJaciment.setOnClickListener(dbClickListener)
-            holder.tvSector.setOnClickListener(dbClickListener)
-            holder.tvCodiUE.setOnClickListener(dbClickListener)
-            holder.tvTipus.setOnClickListener(dbClickListener)
-
         } else {
-            // En local: mostramos botón de tres puntos y abrimos el menú al clicar en cualquier parte
             holder.ivOptions.visibility = View.VISIBLE
-            
             holder.itemView.setOnClickListener(menuClickListener)
-            holder.lLBody.setOnClickListener(menuClickListener)
             holder.ivOptions.setOnClickListener(menuClickListener)
-            holder.tvJaciment.setOnClickListener(menuClickListener)
-            holder.tvSector.setOnClickListener(menuClickListener)
-            holder.tvCodiUE.setOnClickListener(menuClickListener)
-            holder.tvTipus.setOnClickListener(menuClickListener)
         }
     }
 
     private fun showPopupMenu(view: View, objecte: ObjecteUE, position: Int) {
         val popup = PopupMenu(view.context, view)
         popup.menuInflater.inflate(R.menu.menu_item_options, popup.menu)
-
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_edit -> {
@@ -146,6 +110,59 @@ class ObjecteAdapter(
         popup.show()
     }
 
+    private fun subirAFirestore(context: android.content.Context, objecte: ObjecteUE, position: Int) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val dialog = MaterialAlertDialogBuilder(context)
+                .setTitle("Pujant UE...")
+                .setMessage("Si us plau espera")
+                .setCancelable(false).show()
+
+            try {
+                val publicUrls = mutableListOf<String>()
+                var hasError = false
+                
+                // 1. Subida a S3
+                for (uriString in objecte.imatges_urls) {
+                    val publicUrl = S3Service.uploadImage(context, Uri.parse(uriString))
+                    if (publicUrl != null) publicUrls.add(publicUrl) else hasError = true
+                }
+
+                if (hasError && publicUrls.isEmpty() && objecte.imatges_urls.isNotEmpty()) {
+                    throw Exception("Error pujant imatges. Comprova la teva conexió.")
+                }
+
+                // 2. Subida a Firestore con AWAIT (Sincronización real)
+                val finalObjecte = objecte.copy(imatges_urls = publicUrls, sincronitzat = true)
+                val docId = "${finalObjecte.jaciment}_${finalObjecte.codi_ue}".replace("/", "_")
+                
+                FirebaseFirestore.getInstance()
+                    .collection("unitats_estratigrafiques")
+                    .document(docId)
+                    .set(finalObjecte)
+                    .await()
+
+                // 3. Éxito: Borrar local y actualizar lista
+                DataManager.deleteUE(context, objecte.codi_ue, objecte.jaciment)
+                val mutableList = objectesList.toMutableList()
+                if (position < mutableList.size) {
+                    mutableList.removeAt(position)
+                    updateList(mutableList)
+                }
+                
+                dialog.dismiss()
+                Toast.makeText(context, "UE ${objecte.codi_ue} pujada correctament!", Toast.LENGTH_SHORT).show()
+
+            } catch (e: Exception) {
+                dialog.dismiss()
+                MaterialAlertDialogBuilder(context)
+                    .setTitle("Error en la pujada")
+                    .setMessage(e.message ?: "Error de conexió o de servidor")
+                    .setPositiveButton("D'acord", null)
+                    .show()
+            }
+        }
+    }
+
     private fun confirmarEliminacion(context: android.content.Context, objecte: ObjecteUE, position: Int) {
         MaterialAlertDialogBuilder(context)
             .setTitle("Eliminar UE")
@@ -153,8 +170,10 @@ class ObjecteAdapter(
             .setPositiveButton("Eliminar") { _, _ ->
                 DataManager.deleteUE(context, objecte.codi_ue, objecte.jaciment)
                 val mutableList = objectesList.toMutableList()
-                mutableList.removeAt(position)
-                updateList(mutableList)
+                if (position < mutableList.size) {
+                    mutableList.removeAt(position)
+                    updateList(mutableList)
+                }
                 Toast.makeText(context, "UE eliminada localment", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel·lar", null)
@@ -171,85 +190,5 @@ class ObjecteAdapter(
     fun setUserRole(role: String) {
         this.userRole = role
         notifyDataSetChanged()
-    }
-
-    private fun showImageDialog(context: android.content.Context, imageUri: Uri) {
-        val dialog = android.app.Dialog(context)
-        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
-        
-        val imageView = ImageView(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            adjustViewBounds = true
-            scaleType = ImageView.ScaleType.FIT_CENTER
-            setOnClickListener { dialog.dismiss() }
-        }
-
-        Glide.with(context)
-            .load(imageUri)
-            .placeholder(R.drawable.upload_document)
-            .error(R.drawable.delete)
-            .into(imageView)
-
-        dialog.setContentView(imageView)
-        
-        dialog.window?.let { window ->
-            window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
-            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            window.setDimAmount(0.85f)
-        }
-
-        dialog.setCanceledOnTouchOutside(true)
-        dialog.show()
-    }
-
-    private fun subirAFirestore(context: android.content.Context, objecte: ObjecteUE, position: Int) {
-        CoroutineScope(Dispatchers.Main).launch {
-            val dialog = MaterialAlertDialogBuilder(context)
-                .setTitle("Pujant UE...")
-                .setMessage("Si us plau espera")
-                .setCancelable(false).show()
-
-            val publicUrls = mutableListOf<String>()
-            var hasError = false
-            objecte.imatges_urls.forEach { uriString ->
-                val publicUrl = S3Service.uploadImage(context, Uri.parse(uriString))
-                if (publicUrl != null) publicUrls.add(publicUrl) else hasError = true
-            }
-
-            if (hasError && publicUrls.isEmpty() && objecte.imatges_urls.isNotEmpty()) {
-                dialog.dismiss()
-                MaterialAlertDialogBuilder(context)
-                    .setTitle("Error de connexió")
-                    .setMessage("Senyal massa fluixa o inexistent, torna a probar més endavant")
-                    .setPositiveButton("D'acord", null)
-                    .show()
-                return@launch
-            }
-
-            val finalObjecte = objecte.copy(imatges_urls = publicUrls, sincronitzat = true)
-            val db = FirebaseFirestore.getInstance()
-            val docId = "${finalObjecte.jaciment}_${finalObjecte.codi_ue}".replace("/", "_")
-            
-            db.collection("unitats_estratigrafiques").document(docId).set(finalObjecte)
-                .addOnSuccessListener {
-                    dialog.dismiss()
-                    Toast.makeText(context, "UE ${objecte.codi_ue} pujada correctament!", Toast.LENGTH_SHORT).show()
-                    DataManager.deleteUE(context, objecte.codi_ue, objecte.jaciment)
-                    val mutableList = objectesList.toMutableList()
-                    mutableList.removeAt(position)
-                    updateList(mutableList)
-                }
-                .addOnFailureListener { 
-                    dialog.dismiss()
-                    MaterialAlertDialogBuilder(context)
-                        .setTitle("Error de connexió")
-                        .setMessage("Senyal massa fluixa o inexistent, torna a probar més endavant")
-                        .setPositiveButton("D'acord", null)
-                        .show()
-                }
-        }
     }
 }
