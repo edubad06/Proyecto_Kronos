@@ -18,6 +18,7 @@ import com.iticbcn.kronos.ui.main.MainActivity
 import com.iticbcn.kronos.ui.ue.UEFragment
 import com.iticbcn.kronos.ui.ue.DBUEFragment
 import com.iticbcn.kronos.ui.accountConfig.AccountConfigActivity
+import androidx.core.view.get
 
 class GaleriaActivity : AppCompatActivity() {
 
@@ -46,7 +47,7 @@ class GaleriaActivity : AppCompatActivity() {
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                bottomNavigation.menu.getItem(position).isChecked = true
+                bottomNavigation.menu[position].isChecked = true
             }
         })
 

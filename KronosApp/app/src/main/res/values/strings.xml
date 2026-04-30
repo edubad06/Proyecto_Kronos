@@ -60,7 +60,7 @@
     <string name="sector">Sector</string>
     <string name="codi_ue">Codi UE</string>
     <string name="form_observacions_hint">Observacions</string>
-
+    <string name="eliminarUE">Eliminar Unitat Estratigràfica</string>
     <string name="filtrar">Filtrar</string>
     <string name="text_filtre_error">No s\'han trobat UE amb aquests filtres</string>
     <string name="text_ue_local_list_empty">No s\'han trobat UE locals</string>
@@ -94,6 +94,7 @@
     <string name="aplicar_filtre">Aplicar filtre</string>
 
     <string name="forgot_password">T\'has oblidat de la contrasenya?</string>
+    <string name="back">Enrera</string>
 
     <!-- Arrays para los tipos de UE -->
     <string-array name="tipus_ue_options">
@@ -110,14 +111,18 @@
         <item>Tarraco</item>
     </string-array>
 
-    <!-- Opciones para Sector -->
+    <!-- VESTIGIAL ____________ Opciones para Sector   -->
     <string-array name="sector_options">
         <item>A Rasa I</item>
         <item>Sector B</item>
         <item>Zona Nord</item>
     </string-array>
 
-
+    <!-- objecte adapter -->
+    <string name="jaciment_label">Jaciment: %1$s</string>
+    <string name="sector_label">Sector: %1$s</string>
+    <string name="ue_label">UE: %1$s</string>
+    <string name="tipus_label">Tipus UE: %1$s</string>
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit...
     </string>

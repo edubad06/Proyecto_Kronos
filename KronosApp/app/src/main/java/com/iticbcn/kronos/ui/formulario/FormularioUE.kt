@@ -11,11 +11,13 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -49,6 +51,7 @@ class FormularioUE : AppCompatActivity() {
     private var isFromDatabase: Boolean = false
     private var saveJob: Job? = null
     private var deleteJob: Job? = null
+    private lateinit var progressBar: ProgressBar
 
     // Solicitud de permisos
     private val requestPermissionLauncher = registerForActivityResult(
@@ -95,6 +98,7 @@ class FormularioUE : AppCompatActivity() {
         val actvSector = findViewById<AutoCompleteTextView>(R.id.actv_sector)
         val actvTipus = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue)
         val rvFotos = findViewById<RecyclerView>(R.id.rv_fotos_formulario)
+        progressBar = findViewById(R.id.progressBar)
         
         rvFotos.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         fotoAdapter = FotoAdapter(selectedUris, isReadOnly) { uriEliminada ->
@@ -112,14 +116,14 @@ class FormularioUE : AppCompatActivity() {
         } else {
             objetoAEditar = savedInstanceState.getSerializable("OBJETO_EDITAR") as? ObjecteUE
             val uriStrings = savedInstanceState.getStringArrayList("SELECTED_URIS")
-            uriStrings?.forEach { selectedUris.add(Uri.parse(it)) }
+            uriStrings?.forEach { selectedUris.add(it.toUri()) }
             fotoAdapter.notifyDataSetChanged()
         }
 
         if (isReadOnly) {
             bloquearFormulario()
             btnAddImage.visibility = View.GONE
-            btnSave.text = "Enrera"
+            btnSave.text = getString(R.string.back)
             btnSave.setOnClickListener { finish() }
         } else {
             btnAddImage.setOnClickListener { 
@@ -136,6 +140,7 @@ class FormularioUE : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        configurarBotonEliminar(btnDeleteFicha)
     }
 
     private fun checkAndRequestPermission() {
@@ -195,7 +200,7 @@ class FormularioUE : AppCompatActivity() {
         findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).setText(obj.tipus_ue, false)
 
         selectedUris.clear()
-        obj.imatges_urls.forEach { url -> if (url.isNotEmpty()) selectedUris.add(Uri.parse(url)) }
+        obj.imatges_urls.forEach { url -> if (url.isNotEmpty()) selectedUris.add(url.toUri()) }
         fotoAdapter.notifyDataSetChanged()
     }
 
@@ -259,6 +264,7 @@ class FormularioUE : AppCompatActivity() {
     }
 
     private fun actualizarEnBaseDeDatos(ueText: String, jacimentText: String) {
+        progressBar.visibility = View.VISIBLE
         saveJob = CoroutineScope(Dispatchers.Main).launch {
             val progress = MaterialAlertDialogBuilder(this@FormularioUE).setTitle("Actualitzant...").setCancelable(false).show()
             try {
@@ -275,11 +281,85 @@ class FormularioUE : AppCompatActivity() {
                     imatges_urls = finalUrls, sincronitzat = true, jaciment = jacimentText)
                 
                 val db = FirebaseFirestore.getInstance().collection("unitats_estratigrafiques")
-                val docId = "${jacimentText}_$ueText".replace("/", "_")
-                db.document(docId).set(obj).await()
+                val docRef = db.document() // genera ID automático
+                docRef.set(obj).await()
                 progress.dismiss()
                 finish()
-            } catch (e: Exception) { progress.dismiss() }
+            } catch (e: Exception) { progress.dismiss()
+            } finally {
+                progressBar.visibility = View.GONE
+            }
+        }
+    }
+    private fun configurarBotonEliminar(btnDeleteFicha: Button) {
+        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        // Solo tiene sentido si estamos editando una ficha existente
+        if (objetoAEditar == null || isReadOnly) return
+
+        FirebaseFirestore.getInstance().collection("usuaris")
+            .whereEqualTo("email", currentUserEmail)
+            .get()
+            .addOnSuccessListener { documents ->
+                val rol = if (!documents.isEmpty) {
+                    documents.first().getString("rol")?.lowercase() ?: "tecnic"
+                } else "tecnic"
+
+                val esCreador = objetoAEditar?.registrat_per
+                    ?.trim()?.equals(currentUserEmail.trim(), ignoreCase = true) == true
+                val esDirector = rol == "director"
+
+                if (esCreador || esDirector) {
+                    btnDeleteFicha.visibility = View.VISIBLE
+                    btnDeleteFicha.setOnClickListener {
+                        mostrarConfirmacioEliminar()
+                    }
+                }
+            }
+    }
+
+    private fun mostrarConfirmacioEliminar() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Eliminar fitxa")
+            .setMessage("Estàs segur que vols eliminar aquesta UE? Aquesta acció no es pot desfer.")
+            .setNegativeButton("Cancel·lar", null)
+            .setPositiveButton("Eliminar") { _, _ ->
+                eliminarFitxa()
+            }
+            .show()
+    }
+
+    private fun eliminarFitxa() {
+        val obj = objetoAEditar ?: return
+
+        if (isFromDatabase) {
+            // Eliminar de Firestore
+            deleteJob = CoroutineScope(Dispatchers.Main).launch {
+                val progress = MaterialAlertDialogBuilder(this@FormularioUE)
+                    .setTitle("Eliminant...")
+                    .setCancelable(false)
+                    .show()
+                try {
+                    val docId = "${obj.jaciment}_${obj.codi_ue}".replace("/", "_")
+                    FirebaseFirestore.getInstance()
+                        .collection("unitats_estratigrafiques")
+                        .document(docId)
+                        .delete()
+                        .await()
+                    progress.dismiss()
+                    Toast.makeText(this@FormularioUE, "UE eliminada", Toast.LENGTH_SHORT).show()
+                    finish()
+                } catch (e: Exception) {
+                    progress.dismiss()
+                    Toast.makeText(this@FormularioUE, "Error en eliminar", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            // Eliminar local
+            DataManager.deleteUE(this, obj.codi_ue, obj.jaciment)
+            Toast.makeText(this, "UE eliminada", Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 }

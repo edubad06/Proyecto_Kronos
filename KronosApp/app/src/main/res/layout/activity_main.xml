@@ -76,7 +76,8 @@
                 android:layout_marginTop="16dp"
                 android:hint="@string/Contrasenya"
                 app:errorEnabled="true"
-                app:endIconMode="password_toggle">
+                app:endIconMode="password_toggle"
+                app:errorIconDrawable="@null">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
@@ -89,7 +90,7 @@
                 android:id="@+id/tvForgotPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-8dp"
+                android:layout_marginTop="8dp"
                 android:paddingHorizontal="4dp"
                 android:text="@string/forgot_password"
                 android:textColor="@color/primary_text"

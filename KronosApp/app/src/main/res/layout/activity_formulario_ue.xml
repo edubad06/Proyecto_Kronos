@@ -6,7 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.formulario.FormularioUE">
-
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
@@ -54,14 +62,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/jaciment"
+                        android:enabled="false"
                         app:errorEnabled="false">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_jaciment"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="text"
-                            android:enabled="false" />
+                            android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <LinearLayout
@@ -78,6 +86,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:hint="@string/form_sector_hint"
+                            android:enabled="true"
                             app:errorEnabled="false">
 
                             <AutoCompleteTextView
@@ -86,7 +95,6 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="none"
                                 tools:ignore="LabelFor"
-                                android:enabled="true"
                                 />
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -430,17 +438,17 @@
 
                     <Button
                         android:id="@+id/button_delete_ficha"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="32dp"
                         android:layout_marginBottom="16dp"
-                        android:text="ELIMINAR FITXA"
+                        android:text="@string/eliminarUE"
                         android:textColor="#D32F2F"
+                        app:strokeColor="#D32F2F"
                         android:textStyle="bold"
                         android:visibility="gone"
                         tools:visibility="visible" />
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>

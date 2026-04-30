@@ -13,6 +13,8 @@ import com.iticbcn.kronos.data.local.DataManager
 import com.iticbcn.kronos.domain.model.TipusUEOptions
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.switchmaterial.SwitchMaterial
+import androidx.core.graphics.drawable.toDrawable
+
 
 class FilterPopup(
     context: Context,
@@ -25,6 +27,9 @@ class FilterPopup(
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.popup_filter)
+
+        // ✅ Elimina el fondo blanco con esquinas detrás de la card
+        window?.setBackgroundDrawable(android.graphics.Color.TRANSPARENT.toDrawable())
 
         val actvSector = findViewById<AutoCompleteTextView>(R.id.actv_popup_sector)
         val etUe = findViewById<TextInputEditText>(R.id.et_popup_ue)
