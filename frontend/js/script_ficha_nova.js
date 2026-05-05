@@ -120,9 +120,11 @@ btn_guardar.addEventListener("click", async function(){
                 codi_sector: document.getElementById('i-sec-codi').value,
                 codi_jaciment: document.getElementById('i-sec-codiJac').value,
                 descripcio: document.getElementById('i-sec-descr').value,
-                data: firebase.firestore.Timestamp.now()
+                data: firebase.firestore.Timestamp.now(),
+                sincronitzat: false
             };
             const docRef = await db.collection('sectors').add(nouSector);
+            await sincronitzar(); //llamo a la función para actualizar bd
             for (const file of imatgesPendents) {
                 await subirImatge(file, docRef.id, 'sectors');
             }
@@ -142,10 +144,12 @@ btn_guardar.addEventListener("click", async function(){
                 coordenada_z: document.getElementById('i-jac-prof').value,
                 descripcio: document.getElementById('i-jac-descr').value,
                 editors: editors, //array
-                data: firebase.firestore.Timestamp.now()
+                data: firebase.firestore.Timestamp.now(),
+                sincronitzat: false
             };    
 
             const docRef = await db.collection('jaciments').add(nouJaciment);
+            await sincronitzar(); //llamo a la función para actualizar bd
             for (const file of imatgesPendents) {
                 await subirImatge(file, docRef.id, 'jaciments');
             }
@@ -163,6 +167,7 @@ btn_guardar.addEventListener("click", async function(){
                 data: firebase.firestore.Timestamp.now(),
                 descripcio: document.getElementById('i-ue-descr').value,
                 registrat_per: sessionStorage.getItem("nom"),
+                sincronitzat: false,
                 
                 relacions: [
                     { tipus: 'igual_a', desti: document.querySelector('.rel-igual_a').value },
@@ -179,6 +184,7 @@ btn_guardar.addEventListener("click", async function(){
                 ].filter(rel => rel.desti !== ''),
             };
             const docRef = await db.collection('unitats_estratigrafiques').add(novaUE);
+            await sincronitzar(); //llamo a la función para actualizar bd
             for (const file of imatgesPendents) {
                 await subirImatge(file, docRef.id, 'unitats_estratigrafiques'); 
             }

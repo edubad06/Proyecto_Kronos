@@ -363,7 +363,8 @@ btn_guardar.addEventListener('click', async function() {
                 codi_sector: document.getElementById('i-sec-codi').value,
                 codi_jaciment: document.getElementById('i-sec-codiJac').value,
                 descripcio: document.getElementById('i-sec-descr').value,
-                data: firebase.firestore.Timestamp.now()
+                data: firebase.firestore.Timestamp.now(),
+                sincronitzat: false
             };
         } else if (tab === 'jaciment') {
             const editors = Array.from(
@@ -378,7 +379,8 @@ btn_guardar.addEventListener('click', async function() {
                 coordenada_z: document.getElementById('i-jac-prof').value,
                 descripcio: document.getElementById('i-jac-descr').value,
                 editors: editors,
-                data: firebase.firestore.Timestamp.now()
+                data: firebase.firestore.Timestamp.now(),
+                sincronitzat: false
             };
         } else if (tab === 'ue') {
             
@@ -393,6 +395,7 @@ btn_guardar.addEventListener('click', async function() {
                 cronologia: document.getElementById('i-ue-cronolog').value,
                 estat_conservacio: document.getElementById('i-ue-estado').value,
                 descripcio: document.getElementById('i-ue-descr').value,
+                sincronitzat: false,
                 //recogemos las relaciones y construimos el array
                 //pero con el filter solo guardamos las que tienen valor
                 relacions: [
@@ -412,6 +415,7 @@ btn_guardar.addEventListener('click', async function() {
         }
 
         await db.collection(coleccio).doc(id).update(dadesActualitzades);
+        await sincronitzar(); //llamo a la función para actualizar bd
         alert("Desat correctament!");
 
     } catch (error) {

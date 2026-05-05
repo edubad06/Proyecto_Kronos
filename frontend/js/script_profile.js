@@ -3,7 +3,7 @@ const inputNom = document.getElementById('input-nom');
 const inputEmail = document.getElementById('input-email');
 const inputPasswdActual = document.getElementById('input-passwd-actual');
 const inputPasswdNova = document.getElementById('input-passwd-nova');
-const inputPasswdRepetir = document.getElementById('input-passwd-repetir');
+const inputPasswdRepe = document.getElementById('input-passwd-repetir');
 //const iconEye = document.querySelector(".material-symbols-outlined"); 
 const btnDesar = document.querySelector('.boton-guardar-perfil');
 const nomPerfil = document.querySelector('.nombre-usuario-perfil');
@@ -95,5 +95,36 @@ auth.onAuthStateChanged(async function(user) {
     }
 });
 
+const enlacePassActual = document.querySelector(".ver-passwd-actual");
+const enlacePassNova = document.querySelector(".ver-passwd-nova");
+const enlacePassRepe = document.querySelector(".ver-passwd-repe");
 
+enlacePassActual.addEventListener('click', function(){ 
+    //lo convertimos en un input type="password", para que salgan puntitos
+    //y al clickar el ojo se convierta en texto y viceversa
+    if (inputPasswdActual.type==="password"){
+        inputPasswdActual.setAttribute("type","text");
+    }else{
+        inputPasswdActual.setAttribute("type","password");
+    }
+});
 
+enlacePassNova.addEventListener('click', function(){ 
+    //lo convertimos en un input type="password", para que salgan puntitos
+    //y al clickar el ojo se convierta en texto y viceversa
+    if (inputPasswdNova.type==="password"){
+        inputPasswdNova.setAttribute("type","text");
+    }else{
+        inputPasswdNova.setAttribute("type","password");
+    }
+});
+
+enlacePassRepe.addEventListener('click', function(){ 
+    //lo convertimos en un input type="password", para que salgan puntitos
+    //y al clickar el ojo se convierta en texto y viceversa
+    if (inputPasswdRepe.type==="password"){
+        inputPasswdRepe.setAttribute("type","text");
+    }else{
+        inputPasswdRepe.setAttribute("type","password");
+    }
+});
