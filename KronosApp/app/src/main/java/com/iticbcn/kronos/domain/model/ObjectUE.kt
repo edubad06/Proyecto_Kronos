@@ -8,6 +8,7 @@ data class RelacioUE(
 ) : Serializable
 
 data class ObjecteUE(
+    var firestoreId: String? = null,
     val codi_ue: String = "",
     val codi_sector: String = "",
     val tipus_ue: String = "",

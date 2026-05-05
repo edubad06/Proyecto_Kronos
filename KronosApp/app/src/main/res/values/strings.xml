@@ -127,4 +127,5 @@
         Lorem ipsum dolor sit amet, consectetur adipiscing elit...
     </string>
     <string name="hello_blank_fragment">Hola fragment en blanc</string>
+    <string name="enviar">Enviar</string>
 </resources>
