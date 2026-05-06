@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitxes</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <!-- Librería Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+</head>
+
+<body>
+
+    <nav class="cabecera-principal" id="navbar">
+        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        <div class="cabecera-acciones">
+            <a href="libreria.html" class="enlace-menu">Fitxes</a>
+            <div class="contenedor-desplegable">
+                <button class="boton-nueva-ficha">+ Nova fitxa</button>
+                <div class="contenido-desplegable">
+                    <a href="ficha_nova.html?tab=ue">UE</a>
+                    <a href="ficha_nova.html?tab=jaciment" class="menu-jac">Jaciment</a>
+                    <a href="ficha_nova.html?tab=sector">Sector</a>
+                </div>
+            </div>
+            <a href="profile.html" class="avatar-cabecera">PR</a>
+        </div>
+    </nav>
+
+    <section id="pagina-listado" class="contenedor-listado">
+        <h1 class="titulo-pagina">Fitxes</h1>
+
+        <div class="barra-filtros">
+            <div class="campo-formulario-base">
+                <label>Ordenar per</label>
+                <select id="filtro-fecha">
+                    <option value="cap">sense ordre</option>
+                    <option value="recent">més recent primer</option>
+                    <option value="antic">més antiga primera</option>
+                </select>
+            </div>
+            <div class="campo-formulario-base">
+                <label>Tipus de fitxa</label>
+                <select id="filtro-tipo">
+                    <option>Totes</option>
+                    <option>Jaciment</option>
+                    <option>Sector</option>
+                    <option>UE</option>
+                </select>
+            </div>
+            
+            <div class="campo-formulario-base">
+                <label>Unitat estratigràfica</label>
+                <input type="text" placeholder="Filtrar per nom...">
+                
+            </div>
+        </div>
+        <div id="contenedor-fichas"></div>
+        
+    </section>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/script_libreria.js"></script>
+
+</body>
+
+</html>

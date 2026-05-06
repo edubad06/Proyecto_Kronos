@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRONOS - Fitxa</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <!-- Librería Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+</head>
+
+<body>
+    <!-- Barra de menu -->
+    <nav class="cabecera-principal" id="navbar">
+        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        <div class="cabecera-acciones">
+            <a href="libreria.html" class="enlace-menu">Fitxes</a>
+            <div class="contenedor-desplegable">
+                <button class="boton-nueva-ficha">+ Nova fitxa</button>
+                <div class="contenido-desplegable">
+                    <a href="ficha_nova.html?tab=ue">UE</a>
+                    <a href="ficha_nova.html?tab=jaciment" class="menu-jac">Jaciment</a>
+                    <a href="ficha_nova.html?tab=sector">Sector</a>
+                </div>
+            </div>
+            <a href="profile.html" class="avatar-cabecera">PR</a>
+        </div>
+    </nav>
+
+    <!-- Contenedor principal de la ficha-->
+    <section id="pagina-detalle" class="contenedor-detalle">
+        <h1 class="titulo-pagina"></h1>
+        <a href="#" class="enlace-volver">← Fitxes</a>
+
+        <div class="tarjeta-detalle-principal">
+            
+            <div class="enlaces-modificar-borrar">
+                <span class="modificar">Modificar</span>
+                <span class="borrar">Esborrar</span>
+            </div>         
+
+            <!-- FORMULARIO -->
+            <div class="bloque-pestana">
+                <div class="rejilla-dos-columnas-detalle">                    
+                    <!-- Columna Izquierda UE -->
+                    <div class="columna-detalle col-izq">
+                        <div class="titulo-bloque-interno">Informació bàsica</div>
+                        
+                    </div>
+                    <!-- Columna Derecha UE -->
+                    <div class="columna-detalle col-dcha">
+                        <!-- Relacions - siempre visibles, solo para UE -->
+                        <div class="relacions" style="display:none">
+                            <div class="titulo-bloque-interno">Relacions</div>
+                            <div class="campo-formulario-base">
+                                <label>Igual a</label>
+                                <input type="text" class="rel-igual-a" disabled>
+                            </div>
+                            <div class="grupo-rejilla-interno">
+                                <div class="campo-formulario-base"><label>Cobreix</label><input type="text" class="rel-cobreix" disabled></div>
+                                <div class="campo-formulario-base"><label>Cobert per</label><input type="text" class="rel-cobert_per" disabled></div>
+                                <div class="campo-formulario-base"><label>Farceix</label><input type="text" class="rel-farceix" disabled></div>
+                                <div class="campo-formulario-base"><label>Farcit per</label><input type="text" class="rel-farcit_per" disabled></div>
+                                <div class="campo-formulario-base"><label>Talla</label><input type="text" class="rel-talla" disabled></div>
+                                <div class="campo-formulario-base"><label>Tallat per</label><input type="text" class="rel-tallat_per" disabled></div>
+                                <div class="campo-formulario-base"><label>Recolza</label><input type="text" class="rel-recolza" disabled></div>
+                                <div class="campo-formulario-base"><label>Se li recolza</label><input type="text" class="rel-se_li_recolza" disabled></div>
+                                <div class="campo-formulario-base"><label>Lliura</label><input type="text" class="rel-lliura" disabled></div>
+                                <div class="campo-formulario-base"><label>Se li lliura</label><input type="text" class="rel-se_li_lliura" disabled></div>
+                            </div>
+                        </div>
+                        
+                        <div class="imatges" style="display:none">
+                            <div class="titulo-bloque-interno">Imatges</div>
+                            <article class="caja-arrastrar-soltar dropZone">
+                                
+                                Arrossegar imatges aquí
+                                
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones guardar y exportar PDF -->
+            <div class="contenedor-botones-finales">
+                <button class="boton-accion-guardar">Desar</button>
+                <button class="boton-accion-exportar">Exportar PDF</button>
+            </div> 
+
+        </div>
+    </section>
+    <!-- imágenes en grande-->
+    <div class="modal-imatge" >
+        <span class="modal-tancar">✕</span>
+        <img src="" id="modal-img">
+    </div>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/script_ficha.js"></script>
+</body>
+
+</html>
