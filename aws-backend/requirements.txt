@@ -1,0 +1,3 @@
+firebase-admin
+oracledb
+boto3
