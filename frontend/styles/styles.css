@@ -75,7 +75,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0.5rem 2rem;
   background-color: #ffffff;
   border-bottom: 1px solid #e0d8d8;
 }
@@ -204,11 +204,10 @@ body {
 }
 
 .logo-login {
-  font-family: 'Playfair Display', serif;
-  font-size: 52px;
-  font-weight: bold;
-  color: #634454;
-  text-align: center;
+  
+  width: 200px; 
+  margin: 0 auto; 
+  display: block;
 }
 
 .campo-formulario-base {
