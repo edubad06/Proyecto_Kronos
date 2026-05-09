@@ -10,9 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=visibility" />
-
-
 </head>
 
 <body>
@@ -33,7 +30,7 @@
                 <button class="avatar-cabecera"></button>
                 <div class="contenido-desplegable">
                     <a href="profile.html">El meu perfil</a>
-                    <a href="index.html">Tancar sesió</a>                  
+                    <a href="index.html">Tancar sessió</a>                  
                 </div>
             </div>
         </div>
@@ -61,25 +58,20 @@
                     <div class="titulo-bloque-interno">Canviar contrasenya</div>
                     <div class="campo-formulario-base">
                         <label>Contrasenya actual</label>
-                        <div class="input-eye">
-                            <input type="password" id="input-passwd-actual">
-                            <span id="icon-eye" class="material-symbols-outlined ver-passwd-actual">visibility</span>
-                        </div>
+                        <input type="password" id="input-passwd-actual">
+                        <a href="#" class="ver-passwd-actual enlace-mostrar">Mostrar contrasenya</a>
                     </div>
+
                     <div class="campo-formulario-base">
                         <label>Nova contrasenya</label>
-                        <div class="input-eye">
-                            <input type="password" id="input-passwd-nova">
-                            <span id="icon-eye" class="material-symbols-outlined ver-passwd-nova">visibility</span>
-                        
-                        </div>
+                        <input type="password" id="input-passwd-nova">
+                        <a href="#" class="ver-passwd-nova enlace-mostrar">Mostrar contrasenya</a>
                     </div>
+
                     <div class="campo-formulario-base">
                         <label>Repetir nova contrasenya</label>
-                        <div class="input-eye">
-                            <input type="password" id="input-passwd-repetir">
-                            <span id="icon-eye" class="material-symbols-outlined ver-passwd-repe">visibility</span>
-                        </div>
+                        <input type="password" id="input-passwd-repetir">
+                        <a href="#" class="ver-passwd-repe enlace-mostrar">Mostrar contrasenya</a>
                     </div>
                 </div>
             </div>
@@ -88,6 +80,7 @@
         </div>
     </section>
     <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/script_profile.js"></script>
 </body>
 

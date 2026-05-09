@@ -4,32 +4,21 @@ const inputEmail = document.getElementById('input-email');
 const inputPasswdActual = document.getElementById('input-passwd-actual');
 const inputPasswdNova = document.getElementById('input-passwd-nova');
 const inputPasswdRepe = document.getElementById('input-passwd-repetir');
-//const iconEye = document.querySelector(".material-symbols-outlined"); 
+const enlacePassActual = document.querySelector(".ver-passwd-actual");//iconEye
+const enlacePassNova = document.querySelector(".ver-passwd-nova");//iconEye
+const enlacePassRepe = document.querySelector(".ver-passwd-repe");//iconEye
 const btnDesar = document.querySelector('.boton-guardar-perfil');
 const nomPerfil = document.querySelector('.nombre-usuario-perfil');
-const menuJac = document.querySelector('.menu-jac');
-
-
-// Ocultar jaciment si no es director
-const rol = sessionStorage.getItem("rol");
-if (rol !== 'director') {
-    menuJac.style.display = 'none';
-}
 
 // CARGAR DATOS DEL USUARIO
 
-//const user = auth.currentUser;// auth.currentUser tiene el usuario logueado de Firebase Authentication
-//import { getAuth, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "firebase/auth";
-
-//const auth = getAuth();
-//const user = auth.currentUser;
-
+//onAuthStateChanged espera a que Firebase confirme si hay un usuario logueado.
 auth.onAuthStateChanged(async function(user) {
     
     if (user) {
+        //relleno los campos con los datos del usuario
         inputEmail.value = user.email;
-        //el nombre lo cogemos de sessionStorage que guardamos al hacer login
-        const nom = sessionStorage.getItem("nom");
+        const nom = sessionStorage.getItem("nom"); //el nombre lo cogemos de sessionStorage que guardamos al hacer login
         inputNom.value = nom || '';
         nomPerfil.textContent = nom || user.email;
 
@@ -54,7 +43,7 @@ auth.onAuthStateChanged(async function(user) {
                 // Solo si ha rellenado los campos de contraseña
                 const passwdActual = inputPasswdActual.value;
                 const passwdNova = inputPasswdNova.value;
-                const passwdRepetir = inputPasswdRepetir.value;
+                const passwdRepetir = inputPasswdRepe.value;
 
                 if (passwdActual || passwdNova || passwdRepetir) {
                     if (passwdNova !== passwdRepetir) {
@@ -65,16 +54,18 @@ auth.onAuthStateChanged(async function(user) {
                         alert("La contrasenya ha de tenir mínim 6 caràcters");
                         return;
                     }
+                    //Firebase requiere reautenticar antes de cambiar la contraseña
+                    //porque es una operación sensible de seguridad
                     const credential = firebase.auth.EmailAuthProvider.credential(
                         user.email,
                         passwdActual
                     );
                     await user.reauthenticateWithCredential(credential);
                     await user.updatePassword(passwdNova);
-
+                    //limpiamos campos
                     inputPasswdActual.value = '';
                     inputPasswdNova.value = '';
-                    inputPasswdRepetir.value = '';
+                    inputPasswdRepe.value = '';
                 }
 
                 alert("Perfil desat correctament!");
@@ -95,36 +86,36 @@ auth.onAuthStateChanged(async function(user) {
     }
 });
 
-const enlacePassActual = document.querySelector(".ver-passwd-actual");
-const enlacePassNova = document.querySelector(".ver-passwd-nova");
-const enlacePassRepe = document.querySelector(".ver-passwd-repe");
-
-enlacePassActual.addEventListener('click', function(){ 
-    //lo convertimos en un input type="password", para que salgan puntitos
-    //y al clickar el ojo se convierta en texto y viceversa
-    if (inputPasswdActual.type==="password"){
-        inputPasswdActual.setAttribute("type","text");
-    }else{
-        inputPasswdActual.setAttribute("type","password");
+//funciones para ver la contraseña 
+enlacePassActual.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (inputPasswdActual.type === "password") {
+        inputPasswdActual.type = "text";
+        this.textContent = "Amagar contrasenya";
+    } else {
+        inputPasswdActual.type = "password";
+        this.textContent = "Mostrar contrasenya";
     }
 });
 
-enlacePassNova.addEventListener('click', function(){ 
-    //lo convertimos en un input type="password", para que salgan puntitos
-    //y al clickar el ojo se convierta en texto y viceversa
-    if (inputPasswdNova.type==="password"){
-        inputPasswdNova.setAttribute("type","text");
-    }else{
-        inputPasswdNova.setAttribute("type","password");
+enlacePassNova.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (inputPasswdNova.type === "password") {
+        inputPasswdNova.type = "text";
+        this.textContent = "Amagar contrasenya";
+    } else {
+        inputPasswdNova.type = "password";
+        this.textContent = "Mostrar contrasenya";
     }
 });
 
-enlacePassRepe.addEventListener('click', function(){ 
-    //lo convertimos en un input type="password", para que salgan puntitos
-    //y al clickar el ojo se convierta en texto y viceversa
-    if (inputPasswdRepe.type==="password"){
-        inputPasswdRepe.setAttribute("type","text");
-    }else{
-        inputPasswdRepe.setAttribute("type","password");
+enlacePassRepe.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (inputPasswdRepe.type === "password") {
+        inputPasswdRepe.type = "text";
+        this.textContent = "Amagar contrasenya";
+    } else {
+        inputPasswdRepe.type = "password";
+        this.textContent = "Mostrar contrasenya";
     }
 });

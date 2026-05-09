@@ -3,17 +3,18 @@ const contenedor = document.getElementById('contenedor-fichas');
 const filtroTipo = document.getElementById('filtro-tipo');
 const filtroBuscar = document.querySelector('.barra-filtros input[type="text"]');
 const filtroFecha = document.getElementById('filtro-fecha');
-const menuJac = document.querySelector('.menu-jac');
 
 //VARIABLES
-let totesFitxes = []; //array con todas las fichas cargadas
-
+let totesFitxes = []; //array con todas las fichas cargadas. Los filtros trabajan sobre este array
 const rol = sessionStorage.getItem("rol");
 const emailUsuari = sessionStorage.getItem("email");
-if (rol !== 'director') {
-    menuJac.style.display = 'none';
-}
 
+/*
+ * CREAR FICHA
+ * Crea un elemento HTML con la información de una ficha (jaciment, sector o UE)
+ * y lo añade al contenedor de la librería.
+ * Al hacer click navega a la página de detalle pasando el tab y el id por la URL.
+ */
 const crearFicha = function(id, titulo, subtitulo, categoria, infoDreta, tab) {
     const ficha = document.createElement('div');
     ficha.classList.add('ficha-lista');
@@ -27,7 +28,8 @@ const crearFicha = function(id, titulo, subtitulo, categoria, infoDreta, tab) {
     const divSubtitulo = document.createElement('div');
     divSubtitulo.classList.add('subtitulo-ficha');
     divSubtitulo.textContent = subtitulo;
-
+    
+    //etiqueta de color según la categoría
     const etiqueta = document.createElement('span');
     etiqueta.classList.add('etiqueta-categoria', categoria);
     etiqueta.textContent = categoria === 'jaciment' ? 'Jaciment' : categoria === 'sector' ? 'Sector' : 'UE';
@@ -42,27 +44,41 @@ const crearFicha = function(id, titulo, subtitulo, categoria, infoDreta, tab) {
 
     ficha.appendChild(divIzq);
     ficha.appendChild(divDcha);
-
+    
+    //al hacer click navega al detalle con el tab y el id del documento
     ficha.addEventListener('click', function() {
         window.location.assign(`detail.html?tab=${tab}&id=${id}`);
     });
 
     contenedor.appendChild(ficha);
 };
+
+/*
+ * PINTAR FICHAS
+ * Limpia el contenedor y pinta las fichas del array que recibe.
+ * Se usa tanto para la carga inicial como para los filtros.
+ */
 const pintarFitxes = function(fitxes) {
     contenedor.replaceChildren(); // limpio antes de pintar
     fitxes.forEach(f => {
         crearFicha(f.id, f.nom, f.subtitol, f.categoria, f.info, f.tab);
     });
 };
+
+/*
+ * CARGAR FICHAS
+ * Carga todos los jaciments, sectors y UEs de Firestore y los guarda en totesFitxes.
+ * Solo se ejecuta una vez al cargar la página. 
+ * 
+ * Si el usuario es técnico, filtra para mostrar solo las fichas
+ * de los jaciments donde está asignado como editor.
+ */
 const cargarFichas = async function() {
     try {
         //CARGO YACIMIENTOS
         const jaciments = await db.collection('jaciments').get();
         jaciments.forEach(doc => {
             const d = doc.data();
-            console.log("DATOS YACIMIENTO: ", d);
-            console.log("data de la UE:", d.data, typeof d.data);
             //id, titulo, subtitulo, categoria, infoDreta, tab
             totesFitxes.push({
                 id: doc.id,
@@ -82,7 +98,6 @@ const cargarFichas = async function() {
         const sectors = await db.collection('sectors').get();
         sectors.forEach(doc => {
             const d = doc.data();
-            console.log("DATOS SECTOR: ", d);
             //id, titulo, subtitulo, categoria, infoDreta, tab
             totesFitxes.push({
                 id: doc.id,
@@ -92,7 +107,8 @@ const cargarFichas = async function() {
                 categoria: 'sector',
                 info: `Jaciment: ${d.codi_jaciment}`,
                 data: d.data || null,
-                codi_jaciment: d.codi_jaciment
+                codi_jaciment: d.codi_jaciment,
+                codi_sector: d.codi_sector //campo para el filtro
             });
         });
 
@@ -100,7 +116,6 @@ const cargarFichas = async function() {
         const ues = await db.collection('unitats_estratigrafiques').get();
         ues.forEach(doc => {
             const d = doc.data();
-            console.log("DATOS UE: ", d);
             //id, titulo, subtitulo, categoria, infoDreta, tab
             totesFitxes.push({
                 id: doc.id,
@@ -115,7 +130,6 @@ const cargarFichas = async function() {
         });
 
         // FILTRAR SEGÚN ROL
-
         if (rol === 'tecnic') {
             // Primero encontramos los jaciments donde es editor
             const jacimentsPermesos = totesFitxes
@@ -133,15 +147,13 @@ const cargarFichas = async function() {
                 if (f.tab === 'ue') {
                     // Para UE necesitamos saber el jaciment del sector
                     const sector = totesFitxes.find(s => 
-                        s.tab === 'sector' && s.subtitol === f.codi_sector
+                        s.tab === 'sector' && s.codi_sector === f.codi_sector
                     );
                     return sector && jacimentsPermesos.includes(sector.codi_jaciment);
                 }
                 return true;
             });
         }
-        console.log("rol:", rol);
-        console.log("total antes de pintar:", totesFitxes.length);
         //pintamos todo al final
         pintarFitxes(totesFitxes);
 
@@ -150,21 +162,15 @@ const cargarFichas = async function() {
     }
 };
 
-
-cargarFichas();
-
 //FILTROS
 const aplicarFiltres = function() {
     let resultat = [...totesFitxes]; //copio el array original
-    console.log("tipus:", filtroTipo.value);
-    console.log("ordre:", filtroFecha.value);
-    console.log("total fitxes:", totesFitxes.length);
+    
     //filtro por tipo
     const tipus = filtroTipo.value.toLowerCase();
     if (tipus !== 'totes') {
         resultat = resultat.filter(f => f.tab === tipus);
     }
-    
 
     //filtro por nombre
     const text = filtroBuscar.value.toLowerCase();
@@ -191,6 +197,8 @@ const aplicarFiltres = function() {
     }
     pintarFitxes(resultat);
 };
+
+cargarFichas();
 
 //filtro por tipo
 filtroTipo.addEventListener('change', function() {

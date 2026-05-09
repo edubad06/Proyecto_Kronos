@@ -9,7 +9,6 @@ const btn_fitxes = document.querySelector(".enlace-volver");
 const btnPDF = document.querySelector('.boton-accion-exportar');
 const contImg = document.querySelector('.caja-arrastrar-soltar');
 const dropZone = document.querySelector('.dropZone');
-const menuJac = document.querySelector('.menu-jac');
 const tituloFicha = document.querySelector('.titulo-pagina');
 
 //VARIABLES
@@ -17,22 +16,34 @@ let modoEdicion = false;
 const rol = sessionStorage.getItem("rol");
 const uid = sessionStorage.getItem("uid");
 let map;
+let marcador;
 let latDef = 41.386978;  
 let longDef = 2.170054; 
+//leo el tab y el id de la URL para saber qué ficha cargar
+const params = new URLSearchParams(window.location.search);
+const tab = params.get('tab');
+const id = params.get('id');
+// Determinamos la colección de Firestore según el tab
+let coleccio;
+if (tab === 'sector') coleccio = 'sectors';
+else if (tab === 'jaciment') coleccio = 'jaciments';
+else if (tab === 'ue') coleccio = 'unitats_estratigrafiques';
 
-//ocultamos en el menu la opciÓn de jaciment si no es director
-if (rol !== 'director') {
-    menuJac.style.display = 'none';
-}
-
-//inicializar mapa 
-//Leaflet -> setView([latitud,longitud],zoom) 
+/*
+ * INIT MAPA
+ * Inicializa el mapa Leaflet o actualiza su posición si ya existe.
+ * Si el mapa ya existe, mueve la vista y el marcador a las nuevas coordenadas.
+ * Si no existe, crea el mapa desde cero.
+ * Parámetros:
+ *   - lat: si es 0 o vacío usa latDef
+ *   - long: si es 0 o vacío usa longDef
+ */  
 const initMapa = function(lat, long) {
     const latNum = parseFloat(lat) || latDef;
     const longNum = parseFloat(long) || longDef;
     
     if (map) {
-        map.setView([latNum, longNum], 12);
+        map.setView([latNum, longNum], 12);//Leaflet -> setView([latitud,longitud],zoom)
         if (marcador) {
             marcador.setLatLng([latNum, longNum]); // mover marcador existente
         } else {
@@ -71,15 +82,6 @@ const crearCampo = function(classCSS, labelText, value, inputId) {
     return div;
 };
 
-const params = new URLSearchParams(window.location.search);
-const tab = params.get('tab');
-const id = params.get('id');
-
-let coleccio;
-if (tab === 'sector') coleccio = 'sectors';
-else if (tab === 'jaciment') coleccio = 'jaciments';
-else if (tab === 'ue') coleccio = 'unitats_estratigrafiques';
-
 const cargarImg = async function(dades){
     document.querySelector('.imatges').style.display = 'block';
     if (dades.imatges_urls && dades.imatges_urls.length > 0) {
@@ -109,6 +111,12 @@ const cargarDescrip = function(dades, idDesc){
     colIzq.appendChild(divDescrip);
 };
 
+/*
+ * CARGAR FICHA
+ * Función principal que carga los datos de la ficha desde Firestore
+ * y los pinta en el formulario según el tab (sector, jaciment o ue).
+ * También controla los permisos de modificar/borrar según el rol del usuario.
+ */
 const cargarFicha = async function() {
     try {    
         const doc = await db.collection(coleccio).doc(id).get();
@@ -119,7 +127,6 @@ const cargarFicha = async function() {
         }
         
         const dades = doc.data();
-        console.log("Dades:", dades); // para verificar qué llega
         
         if (tab === 'sector') {
             tituloFicha.textContent = "Sector";
@@ -305,6 +312,7 @@ const volver = function (){
     }
     
 };
+
 //si estamos editando y da click a otro botón, sale alerta
 document.querySelectorAll('.cabecera-principal a, .cabecera-principal button').forEach(function(element) {
     element.addEventListener("click", function(event) {
@@ -324,8 +332,14 @@ btn_fitxes.addEventListener("click", function(){
     volver();
 })
 
+/*
+ * MODIFICAR
+ * Activa el modo edición y desbloquea todos los inputs excepto
+ * los campos de solo lectura (fecha y persona que registró).
+ */
 btn_modificar.addEventListener("click", function(){
     modoEdicion = true;
+    btn_modificar.classList.add('actiu');
     //desbloquear todos los inputs
     document.querySelectorAll('.bloque-pestana input, .bloque-pestana textarea').forEach(camp => {
         //los campos de fecha y presona no se modificn, el resto si
@@ -336,6 +350,11 @@ btn_modificar.addEventListener("click", function(){
     
 });
 
+/*
+ * BORRAR
+ * Pide confirmación y elimina el documento de Firestore.
+ * Después redirige a la librería.
+ */
 btn_borrar.addEventListener('click', async function() {
     const confirmacio = confirm("Estàs segur que vols esborrar aquesta fitxa? Aquesta acció no es pot desfer.");
     if (!confirmacio) return;
@@ -350,9 +369,14 @@ btn_borrar.addEventListener('click', async function() {
     }
 });
 
+/*
+ * GUARDAR
+ * Recoge los valores actuales de los inputs y actualiza el documento en Firestore.
+ * Después sincroniza con Oracle y bloquea los inputs otra vez.
+ */
 btn_guardar.addEventListener('click', async function() {
     modoEdicion = false;
-
+    btn_modificar.classList.remove('actiu');
     try {
         // Recogemos los valores actuales de los inputs
         let dadesActualitzades = {};
@@ -367,9 +391,11 @@ btn_guardar.addEventListener('click', async function() {
                 sincronitzat: false
             };
         } else if (tab === 'jaciment') {
+            // Recogemos los emails de los técnicos marcados como editores
             const editors = Array.from(
                 document.querySelectorAll('#contenedor-editors input:checked')
             ).map(cb => cb.value);
+
             dadesActualitzades = {
                 nom: document.getElementById('i-jac-nom').value,
                 codi_jaciment: document.getElementById('i-jac-codi').value,
@@ -415,7 +441,7 @@ btn_guardar.addEventListener('click', async function() {
         }
 
         await db.collection(coleccio).doc(id).update(dadesActualitzades);
-        await sincronitzar(); //llamo a la función para actualizar bd
+        sincronitzar(); //llamo a la función para actualizar bd
         alert("Desat correctament!");
 
     } catch (error) {
@@ -429,6 +455,11 @@ btn_guardar.addEventListener('click', async function() {
     });
 });
 
+/*
+ * EXPORTAR PDF
+ * Abre el diálogo de impresión del navegador.
+ * El CSS tiene un bloque @media print que oculta el navbar y los botones.
+ */
 btnPDF.addEventListener('click', function() {
     window.print();
 });
@@ -437,7 +468,6 @@ btnPDF.addEventListener('click', function() {
 dropZone.addEventListener("dragover", (event) => {
     event.preventDefault();
 });
-
 dropZone.addEventListener("drop", async (event) => {
     event.preventDefault();
     const files = event.dataTransfer.files;
