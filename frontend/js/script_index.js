@@ -47,3 +47,9 @@ iconEye.addEventListener('click', function(){
         inputPassword.setAttribute("type","password");
     }
 });
+//para que funcione el intro, llama arriba
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        btnLogin.click();
+    }
+});

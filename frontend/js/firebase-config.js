@@ -9,6 +9,7 @@ const firebaseConfig = {
   measurementId: "G-WJGGT2H6W9"
 };
 
+
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -149,3 +150,22 @@ const sincronitzar = async function() {
         console.error("Error sincronitzant:", error);
     }
 };
+
+/**
+ * auth.onAuthStateChanged es un listener que Firebase llama automáticamente 
+ * cada vez que cambia el estado de autenticación, es decir cuando el usuario inicia o cierra sesión. 
+ * No hace falta llamarlo explícitamente, Firebase lo ejecuta solo cuando carga la página.
+ */
+//Mostrar inicial del nombre en el avatar
+auth.onAuthStateChanged(function(user) {
+    if (!user) return; // si no hay usuario, no hacemos nada
+    const nom = sessionStorage.getItem("nom");
+    
+    // Avatar pequeño del navbar
+    const avatar = document.querySelector('.avatar-cabecera');
+    if (avatar && nom) {
+        avatar.textContent = nom.charAt(0).toUpperCase();
+    }
+    
+    
+});
