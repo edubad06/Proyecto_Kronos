@@ -10,15 +10,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=visibility" />
-
-
 </head>
 
 <body>
 
     <nav class="cabecera-principal" id="navbar">
-        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        <a href="libreria.html" class="cabecera-logo">
+            <img src="img/logo_2_b.png" alt="KRONOS" style="height: 55px;">
+        </a>
         <div class="cabecera-acciones">
             <a href="libreria.html" class="enlace-menu">Fitxes</a>
             <div class="contenedor-desplegable">
@@ -30,10 +29,10 @@
                 </div>
             </div>
             <div class="contenedor-desplegable">          
-                <button class="avatar-cabecera">PR</button>
+                <button class="avatar-cabecera"></button>
                 <div class="contenido-desplegable">
                     <a href="profile.html">El meu perfil</a>
-                    <a href="index.html">Tancar sesió</a>                  
+                    <a href="index.html">Tancar sessió</a>                  
                 </div>
             </div>
         </div>
@@ -41,7 +40,7 @@
 
     <section id="pagina-perfil" class="contenedor-perfil">
         <div class="tarjeta-perfil">
-            <div class="avatar-gigante-perfil"></div>
+            
             <h2 class="nombre-usuario-perfil"></h2>
 
             <div class="rejilla-datos-perfil">
@@ -61,25 +60,20 @@
                     <div class="titulo-bloque-interno">Canviar contrasenya</div>
                     <div class="campo-formulario-base">
                         <label>Contrasenya actual</label>
-                        <div class="input-eye">
-                            <input type="password" id="input-passwd-actual">
-                            <span id="icon-eye" class="material-symbols-outlined ver-passwd-actual">visibility</span>
-                        </div>
+                        <input type="password" id="input-passwd-actual">
+                        <a href="#" class="ver-passwd-actual enlace-mostrar">Mostrar contrasenya</a>
                     </div>
+
                     <div class="campo-formulario-base">
                         <label>Nova contrasenya</label>
-                        <div class="input-eye">
-                            <input type="password" id="input-passwd-nova">
-                            <span id="icon-eye" class="material-symbols-outlined ver-passwd-nova">visibility</span>
-                        
-                        </div>
+                        <input type="password" id="input-passwd-nova">
+                        <a href="#" class="ver-passwd-nova enlace-mostrar">Mostrar contrasenya</a>
                     </div>
+
                     <div class="campo-formulario-base">
                         <label>Repetir nova contrasenya</label>
-                        <div class="input-eye">
-                            <input type="password" id="input-passwd-repetir">
-                            <span id="icon-eye" class="material-symbols-outlined ver-passwd-repe">visibility</span>
-                        </div>
+                        <input type="password" id="input-passwd-repetir">
+                        <a href="#" class="ver-passwd-repe enlace-mostrar">Mostrar contrasenya</a>
                     </div>
                 </div>
             </div>
@@ -88,6 +82,7 @@
         </div>
     </section>
     <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/script_profile.js"></script>
 </body>
 

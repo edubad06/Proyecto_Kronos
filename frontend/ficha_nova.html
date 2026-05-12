@@ -19,7 +19,9 @@
 
     <!-- Barra de navegación global -->
     <nav class="cabecera-principal" id="navbar">
-        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        <a href="libreria.html" class="cabecera-logo">
+            <img src="img/logo_2_b.png" alt="KRONOS" style="height: 55px;">
+        </a>
         <div class="cabecera-acciones">
             <a href="libreria.html" class="enlace-menu">Fitxes</a>
             <div class="contenedor-desplegable">
@@ -30,7 +32,13 @@
                     <a href="ficha_nova.html?tab=sector">Sector</a>
                 </div>
             </div>
-            <a href="profile.html" class="avatar-cabecera">PR</a>
+            <div class="contenedor-desplegable">          
+                <button class="avatar-cabecera"></button>
+                <div class="contenido-desplegable">
+                    <a href="profile.html">El meu perfil</a>
+                    <a href="index.html">Tancar sessió</a>                  
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -208,6 +216,7 @@
     </div>
 
     <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/script_ficha_nova.js"></script>
 
 </body>

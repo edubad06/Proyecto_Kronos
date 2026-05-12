@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitxes</title>
+    <title>KRONOS - Fitxes</title>
     <link rel="stylesheet" href="styles/styles.css">
     <!-- Librería Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -16,7 +16,10 @@
 <body>
 
     <nav class="cabecera-principal" id="navbar">
-        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        
+        <a href="libreria.html" class="cabecera-logo">
+            <img src="img/logo_2_b.png" alt="KRONOS" style="height: 55px;">
+        </a>
         <div class="cabecera-acciones">
             <a href="libreria.html" class="enlace-menu">Fitxes</a>
             <div class="contenedor-desplegable">
@@ -27,7 +30,13 @@
                     <a href="ficha_nova.html?tab=sector">Sector</a>
                 </div>
             </div>
-            <a href="profile.html" class="avatar-cabecera">PR</a>
+            <div class="contenedor-desplegable">          
+                <button class="avatar-cabecera"></button>
+                <div class="contenido-desplegable">
+                    <a href="profile.html">El meu perfil</a>
+                    <a href="index.html">Tancar sessió</a>                  
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -38,9 +47,9 @@
             <div class="campo-formulario-base">
                 <label>Ordenar per</label>
                 <select id="filtro-fecha">
-                    <option value="cap">sense ordre</option>
-                    <option value="recent">més recent primer</option>
-                    <option value="antic">més antiga primera</option>
+                    <option value="cap">Sense ordre</option>
+                    <option value="recent">Més recent</option>
+                    <option value="antic">Més antiga</option>
                 </select>
             </div>
             <div class="campo-formulario-base">
@@ -63,6 +72,7 @@
         
     </section>
     <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/script_libreria.js"></script>
 
 </body>

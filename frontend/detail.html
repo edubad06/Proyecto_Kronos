@@ -16,7 +16,9 @@
 <body>
     <!-- Barra de menu -->
     <nav class="cabecera-principal" id="navbar">
-        <a href="libreria.html" class="cabecera-logo">KRONOS</a>
+        <a href="libreria.html" class="cabecera-logo">
+            <img src="img/logo_2_b.png" alt="KRONOS" style="height: 55px;">
+        </a>
         <div class="cabecera-acciones">
             <a href="libreria.html" class="enlace-menu">Fitxes</a>
             <div class="contenedor-desplegable">
@@ -27,7 +29,13 @@
                     <a href="ficha_nova.html?tab=sector">Sector</a>
                 </div>
             </div>
-            <a href="profile.html" class="avatar-cabecera">PR</a>
+            <div class="contenedor-desplegable">          
+                <button class="avatar-cabecera"></button>
+                <div class="contenido-desplegable">
+                    <a href="profile.html">El meu perfil</a>
+                    <a href="index.html">Tancar sessió</a>                  
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -103,6 +111,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
     <script src="js/script_ficha.js"></script>
 </body>
 

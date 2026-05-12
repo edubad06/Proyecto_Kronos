@@ -1,26 +1,22 @@
 //DOM
 const form_ue = document.querySelector("#formulario-ue");
-const form_jaciment = document.querySelector("#formulario-yacimiento");
+const form_jaciment = document.querySelector("#formulario-jaciment");
 const form_sector = document.querySelector("#formulario-sector");
 const btn_guardar = document.querySelector(".boton-accion-guardar");
 const btn_fitxes = document.querySelector(".enlace-volver");
 const dropZone = document.querySelector(".dropZone");
-const menuJac = document.querySelector('.menu-jac');
 
 //variables 
-let haCanviat = false;
+let haCanviat = false; //controla si el usuario ha escrito algo, para avisar al salir
 const rol = sessionStorage.getItem("rol");
 let map;
-let latDef = 41.386978;  
+let marcador;
+let latDef = 41.386978;//coordenadas por defecto: Barcelona  
 let longDef = 2.170054; 
 let imatgesPendents = []; 
 /* es una variable temporal para que el usuario pueda arrastrar imágenes antes de darle a guardar 
 (en ese momento todavia no existe en Firestore y por tanto no hay id)*/
 
-//ocultamos en el menu la opciÓn de jaciment si no es director
-if (rol !== 'director') {
-    menuJac.style.display = 'none';
-}
 
 //MOSTRAR FORMULARIO SEGÚN PARÁMETRO
 /*lee el tab de la URL, oculta todos los formularios, y muestra solo el que corresponde.*/
@@ -30,12 +26,21 @@ document.querySelectorAll('.bloque-pestana').forEach(f => f.style.display = 'non
 const formularioActivo = document.getElementById('formulario-' + tab);
 if (formularioActivo) formularioActivo.style.display = 'block';
 
- 
+/*
+ * INIT MAPA
+ * Inicializa el mapa Leaflet o actualiza su posición si ya existe.
+ * Si el mapa ya existe, mueve la vista y el marcador a las nuevas coordenadas.
+ * Si no existe, crea el mapa desde cero.
+ * Parámetros:
+ *   - lat: si es 0 o vacío usa latDef
+ *   - long: si es 0 o vacío usa longDef
+ */ 
 const initMapa = function(lat, long) {
     const latNum = parseFloat(lat) || latDef;
     const longNum = parseFloat(long) || longDef;
     
     if (map) {
+        //el mapa ya existe: solo movemos la vista y el marcador
         map.setView([latNum, longNum], 12);
         if (marcador) {
             marcador.setLatLng([latNum, longNum]); // mover marcador existente
@@ -43,6 +48,7 @@ const initMapa = function(lat, long) {
             marcador = L.marker([latNum, longNum]).addTo(map); // crear si no existe
         }
     } else {
+        //primera vez: creamos el mapa y el marcador
         map = L.map('map').setView([latNum, longNum], 12);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
@@ -50,12 +56,21 @@ const initMapa = function(lat, long) {
         marcador = L.marker([latNum, longNum]).addTo(map);
     }
 };
-//iniciamos mapa y editores
-const inicialitzar = async function() {
-    if (tab === 'jaciment') {
-        initMapa(latDef, longDef); // coordenadas por defecto
 
-        // Cargar técnics de Firebase
+/*
+ * INICIALITZAR
+ * Se ejecuta al cargar la página. Según el tab activo:
+ *   - jaciment: inicializa el mapa y carga los técnicos de Firebase como checkboxes
+ *   - sector: carga los jaciments en el select
+ *   - ue: carga los sectors en el select
+ */
+const inicialitzar = async function() { //Es asíncrona porque necesita consultar Firebase.
+    if (tab === 'jaciment') {
+        // Inicializamos el mapa con coordenadas por defecto
+        initMapa(latDef, longDef);
+
+        //cargo los técnicos de Firebase y los muestro como checkboxes
+        //para que el director pueda asignarlos como editores del jaciment
         const contenedorEditors = document.getElementById('contenedor-editors');
         const tecnics = await db.collection('usuaris').where('rol', '==', 'tecnic').get();
         tecnics.forEach(doc => {
@@ -74,10 +89,10 @@ const inicialitzar = async function() {
             label.appendChild(span);
             contenedorEditors.appendChild(label);
         });
-        
+
+        //actualizo el mapa en tiempo real cuando el usuario escribe coordenadas
         const latitud = document.getElementById('i-jac-lat');
         const longitud = document.getElementById('i-jac-long');
-        
         latitud.addEventListener('input', function() {
             initMapa(latitud.value, longitud.value);
         });
@@ -85,7 +100,7 @@ const inicialitzar = async function() {
             initMapa(latitud.value, longitud.value);
         });
     };
-    //cargamos los yacimientos en la select de sectores
+    //cargo los yacimientos en la select de sectores
     if (tab === 'sector') {
         const selectJac = document.getElementById('i-sec-codiJac');
         const jaciments = await db.collection('jaciments').get();
@@ -97,7 +112,7 @@ const inicialitzar = async function() {
             selectJac.appendChild(option);
         });        
     };
-    //cargamos los sectores en la select de ues
+    //cargo los sectores en la select de ues
     if (tab === 'ue') {
         const selectSec = document.getElementById('i-ue-codiSec');
         const sectors = await db.collection('sectors').get();
@@ -112,25 +127,41 @@ const inicialitzar = async function() {
 };
 inicialitzar();
 
+/* BOTÓN GUARDAR
+ * Recoge los valores del formulario y los guarda en Firestore.
+ * Después sincroniza con Oracle y sube las imágenes pendientes a S3.
+ */
 btn_guardar.addEventListener("click", async function(){
     try {
         if (tab === 'sector') {
+            if (!document.getElementById('i-sec-nom').value.trim() ||
+                !document.getElementById('i-sec-codi').value.trim() ||
+                !document.getElementById('i-sec-codiJac').value) {
+                alert("Els camps Nom, Codi i Jaciment són obligatoris.");
+                return;
+            }
             const nouSector = {
                 nom: document.getElementById('i-sec-nom').value,
                 codi_sector: document.getElementById('i-sec-codi').value,
                 codi_jaciment: document.getElementById('i-sec-codiJac').value,
                 descripcio: document.getElementById('i-sec-descr').value,
+                registrat_per: sessionStorage.getItem("uid"),
                 data: firebase.firestore.Timestamp.now(),
                 sincronitzat: false
             };
             const docRef = await db.collection('sectors').add(nouSector);
-            await sincronitzar(); //llamo a la función para actualizar bd
+            sincronitzar(); //llamo a la función para actualizar bd
             for (const file of imatgesPendents) {
                 await subirImatge(file, docRef.id, 'sectors');
             }
 
-        } else if (tab === 'jaciment') {        
-            //cojo los editores marcados
+        } else if (tab === 'jaciment') {
+            if (!document.getElementById('i-jac-nom').value.trim() ||
+                !document.getElementById('i-jac-codi').value.trim()) {
+                alert("Els camps Nom i Codi són obligatoris.");
+                return;
+            }
+            //cojo los editores marcados (EMAIL)
             const editors = Array.from(
                 document.querySelectorAll('#contenedor-editors input:checked')
             ).map(cb => cb.value);
@@ -149,12 +180,17 @@ btn_guardar.addEventListener("click", async function(){
             };    
 
             const docRef = await db.collection('jaciments').add(nouJaciment);
-            await sincronitzar(); //llamo a la función para actualizar bd
+            sincronitzar(); //llamo a la función para actualizar bd
             for (const file of imatgesPendents) {
                 await subirImatge(file, docRef.id, 'jaciments');
             }
 
         } else if (tab === 'ue') {
+            if (!document.getElementById('i-ue-codi').value.trim() ||
+                !document.getElementById('i-ue-codiSec').value) {
+                alert("Els camps UE i Sector són obligatoris.");
+                return;
+            }
             const novaUE = {
                 codi_ue: document.getElementById('i-ue-codi').value,
                 codi_sector: document.getElementById('i-ue-codiSec').value,
@@ -166,9 +202,9 @@ btn_guardar.addEventListener("click", async function(){
                 estat_conservacio: document.getElementById('i-ue-estado').value,
                 data: firebase.firestore.Timestamp.now(),
                 descripcio: document.getElementById('i-ue-descr').value,
-                registrat_per: sessionStorage.getItem("nom"),
+                registrat_per: sessionStorage.getItem("uid"),
                 sincronitzat: false,
-                
+                //recojo las relaciones y filtro las que están vacías
                 relacions: [
                     { tipus: 'igual_a', desti: document.querySelector('.rel-igual_a').value },
                     { tipus: 'cobreix', desti: document.querySelector('.rel-cobreix').value },
@@ -184,7 +220,7 @@ btn_guardar.addEventListener("click", async function(){
                 ].filter(rel => rel.desti !== ''),
             };
             const docRef = await db.collection('unitats_estratigrafiques').add(novaUE);
-            await sincronitzar(); //llamo a la función para actualizar bd
+            sincronitzar(); //llamo a la función para actualizar bd
             for (const file of imatgesPendents) {
                 await subirImatge(file, docRef.id, 'unitats_estratigrafiques'); 
             }
@@ -207,6 +243,7 @@ formularioActivo.addEventListener('input', function() {
 
 //botón fitxes - volver
 const volver = function (){ 
+    //Si el usuario ha hecho cambios, pide confirmación antes de salir
     if (haCanviat) {
         let respuesta = confirm("Tens canvis sense desar. Estàs segur que vols sortir?");
         if (respuesta) window.location.assign("libreria.html");
@@ -215,6 +252,7 @@ const volver = function (){
     }
     
 };
+//Si el usuario ha hecho cambios, pide confirmación antes de salir
 document.querySelectorAll('.cabecera-principal a, .cabecera-principal button').forEach(function(element) {
     element.addEventListener("click", function(event) {
         if (haCanviat) {
@@ -236,7 +274,6 @@ btn_fitxes.addEventListener("click", function(){
 dropZone.addEventListener("dragover", (event) => {
     event.preventDefault();//para que no abra el documento que arrastramos
 });
-
 dropZone.addEventListener("drop", (event) => {
     event.preventDefault();
     const files = event.dataTransfer.files;//para recuperar el fichero en binari
