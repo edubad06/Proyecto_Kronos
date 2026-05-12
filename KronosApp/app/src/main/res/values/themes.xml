@@ -1,14 +1,50 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.KronosApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/primary_plum</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/primary_plum_light</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="colorSecondary">@color/primary_plum_light</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:windowBackground">@color/app_background</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/text_main</item>
+        <item name="colorSurfaceVariant">@color/app_background</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/border_color</item>
     </style>
 
     <style name="Theme.KronosApp" parent="Base.Theme.KronosApp" />
 
-    <style name="Circular">
+    <!-- Estil per a botons arrodonits (50px -> 25dp aprox) -->
+    <style name="Widget.Kronos.Button.Pill" parent="Widget.Material3.Button">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Kronos.Pill</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- Estil per a inputs arrodonits -->
+    <style name="Widget.Kronos.TextInputLayout.Pill" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Kronos.Pill</item>
+        <item name="boxStrokeColor">@color/border_color</item>
+        <item name="hintTextColor">@color/text_secondary</item>
+    </style>
+
+    <!-- Estil per a desplegables arrodonits -->
+    <style name="Widget.Kronos.TextInputLayout.Pill.ExposedDropdownMenu" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Kronos.Pill</item>
+        <item name="boxStrokeColor">@color/border_color</item>
+        <item name="hintTextColor">@color/text_secondary</item>
+    </style>
+
+    <style name="ShapeAppearance.Kronos.Pill" parent="">
         <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="ShapeAppearance.Kronos.Card" parent="">
+        <item name="cornerSize">20dp</item>
     </style>
 
 </resources>

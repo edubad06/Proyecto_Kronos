@@ -4,100 +4,101 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="0dp"
-    app:strokeColor="@android:color/darker_gray"
-    app:strokeWidth="1dp"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@color/white"
     tools:context=".ui.ue.UEFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:padding="16dp">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivObjetoIcon"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:background="@color/lightBackground"
-            android:contentDescription="@string/form_image_preview_description"
-            android:scaleType="centerCrop"/>
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="center_vertical"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.MediumComponent"
+            android:background="@color/app_background"
+            tools:src="@drawable/upload_document" />
 
-        <HorizontalScrollView
+        <LinearLayout
+            android:id="@+id/lLBody"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:scrollbars="none">
+            android:orientation="vertical"
+            android:layout_marginStart="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvObjetoName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_main"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="UE: 1234" />
 
             <LinearLayout
-                android:id="@+id/lLBody"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:paddingEnd="16dp">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
 
                 <TextView
                     android:id="@+id/tvObjetoJaciment"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:textSize="18sp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tag_jaciment_bg"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:textColor="@color/text_main"
+                    android:textSize="10sp"
                     android:textStyle="bold"
-                    android:hint="Jaciment: Pedralves" />
+                    android:layout_marginEnd="4dp"
+                    tools:text="Pedralbes" />
 
                 <TextView
                     android:id="@+id/tvSector"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:textSize="18sp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tag_sector_bg"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:textColor="@color/text_main"
+                    android:textSize="10sp"
                     android:textStyle="bold"
-                    android:hint="Sector: sample text" />
-
-                <TextView
-                    android:id="@+id/tvObjetoName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:hint="UE: 1234" />
+                    android:layout_marginEnd="4dp"
+                    tools:text="Sector A" />
 
                 <TextView
                     android:id="@+id/tvTipus"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:textSize="18sp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tag_ue_bg"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:textColor="@color/text_main"
+                    android:textSize="10sp"
                     android:textStyle="bold"
-                    android:hint="Tipus UE: sample text" />
-
-                <TextView
-                    android:id="@+id/tvFecha"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:hint="04/04/2025" />
+                    tools:text="Estrat" />
             </LinearLayout>
-        </HorizontalScrollView>
+
+            <TextView
+                android:id="@+id/tvFecha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
+                tools:text="04/04/2025" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

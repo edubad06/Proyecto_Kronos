@@ -2,12 +2,37 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="lightBackground">#A9939B</color>
-    <color name="red">#E65100</color>
+    <color name="red">#FFFF0000</color>
 
-    <!-- Colores semánticos para Day/Night -->
-    <color name="screen_background">@color/lightBackground</color>
-    <color name="card_background">@color/white</color>
-    <color name="primary_text">@color/black</color>
-    <color name="secondary_text">#66000000</color>
+    <!-- Estils basats en el document CSS -->
+    <color name="app_background">#f5f0f0</color>
+    <color name="text_main">#1a1a1a</color>
+    <color name="text_secondary">#888888</color>
+    <color name="primary_plum">#3d1f2e</color>
+    <color name="primary_plum_dark">#2a1520</color>
+    <color name="primary_plum_light">#634454</color>
+    <color name="border_color">#e0d8d8</color>
+    <color name="login_background">#b8a8a8</color>
+
+    <!-- Etiquetes de categories -->
+    <color name="tag_jaciment">#f9c4c4</color>
+    <color name="tag_sector">#c4d9f9</color>
+    <color name="tag_ue">#b8f0d8</color>
+
+    <!-- Mappings semàntics per Material 3 -->
+    <color name="colorPrimary">@color/primary_plum</color>
+    <color name="colorOnPrimary">@color/white</color>
+    <color name="colorPrimaryContainer">#f0e6e6</color>
+    <color name="colorOnPrimaryContainer">@color/primary_plum</color>
+
+    <color name="colorSecondary">@color/primary_plum_light</color>
+    <color name="colorOnSecondary">@color/white</color>
+
+    <color name="colorSurface">@color/white</color>
+    <color name="colorOnSurface">@color/text_main</color>
+    <color name="colorSurfaceVariant">@color/app_background</color>
+    <color name="colorOnSurfaceVariant">@color/text_secondary</color>
+    <color name="colorOutline">@color/border_color</color>
+
+    <color name="screen_background">@color/app_background</color>
 </resources>

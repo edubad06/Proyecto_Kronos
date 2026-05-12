@@ -204,7 +204,7 @@ class FormularioUE : AppCompatActivity() {
                 finish()
             } catch (e: Exception) {
                 progress.dismiss()
-                Toast.makeText(this@FormularioUE, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@FormularioUE, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -349,13 +349,15 @@ class FormularioUE : AppCompatActivity() {
         deshabilitarVistasRecursivo(root)
     }
 
-    private fun deshabilitarVistasRecursivo(layout: ViewGroup) {
-        for (i in 0 until layout.childCount) {
-            val child = layout.getChildAt(i)
-            // Mantener habilitados los botones de cerrar/volver
-            if (child.id != R.id.button_save && child.id != R.id.btn_back) {
-                child.isEnabled = false
-                if (child is ViewGroup) deshabilitarVistasRecursivo(child)
+    private fun deshabilitarVistasRecursivo(view: View) {
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                deshabilitarVistasRecursivo(view.getChildAt(i))
+            }
+        } else {
+            // Solo deshabilitar si no es uno de los botones de "volver"
+            if (view.id != R.id.btn_back && view.id != R.id.button_save) {
+                view.isEnabled = false
             }
         }
     }

@@ -33,20 +33,28 @@ class GaleriaActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_galeria)
 
-        val searchCard: View = findViewById(R.id.search_card)
-        val optionsCard: View = findViewById(R.id.options_card)
+        val cabeceraPrincipal: View = findViewById(R.id.cabecera_principal)
         val bottomNavContainer: View = findViewById(R.id.bottom_navigation_container)
 
-        // ✅ Ajuste dinámico para notch y barra de navegación
+        // ✅ Ajuste dinámico para notch y barra de navegación (actualizado al nuevo layout)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             
-            // Bajamos las tarjetas superiores
-            searchCard.setPadding(0, systemBars.top, 0, 0)
-            optionsCard.setPadding(0, systemBars.top, 0, 0)
+            // Ajustamos la cabecera para que no quede bajo el notch
+            cabeceraPrincipal.setPadding(
+                cabeceraPrincipal.paddingLeft, 
+                systemBars.top, 
+                cabeceraPrincipal.paddingRight, 
+                cabeceraPrincipal.paddingBottom
+            )
             
-            // Subimos la navegación inferior
-            bottomNavContainer.setPadding(0, 0, 0, systemBars.bottom)
+            // Ajustamos la navegación inferior para que no quede bajo la barra del sistema
+            bottomNavContainer.setPadding(
+                bottomNavContainer.paddingLeft, 
+                bottomNavContainer.paddingTop, 
+                bottomNavContainer.paddingRight, 
+                systemBars.bottom
+            )
             
             insets
         }
@@ -108,11 +116,10 @@ class GaleriaActivity : AppCompatActivity() {
             val isDatabase = viewPager.currentItem == 1
             val popup = FilterPopup(this, userJaciment, isDatabase) { sector, ueId, tipus, onlyMine ->
                 val finalOnlyMine = if (userRol.lowercase() != "director" && !isDatabase) true else onlyMine
-                val fragment = when (viewPager.currentItem) {
-                    0 -> supportFragmentManager.findFragmentByTag("f0") as? UEFragment
-                    1 -> supportFragmentManager.findFragmentByTag("f1") as? DBUEFragment
-                    else -> null
-                }
+                
+                // Buscamos los fragmentos por su ID de posición en el ViewPager2
+                val fragment = supportFragmentManager.findFragmentByTag("f" + viewPager.currentItem)
+
                 when (fragment) {
                     is UEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, finalOnlyMine)
                     is DBUEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, finalOnlyMine)

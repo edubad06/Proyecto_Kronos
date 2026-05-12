@@ -5,118 +5,119 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/screen_background">
+    android:background="@color/login_background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".ui.main.MainActivity">
+        android:padding="24dp">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/loginCard"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"
-            android:text="@string/app_name"
-            android:textColor="@color/primary_text"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <LinearLayout
-            android:id="@+id/loginLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="24dp"
-            android:background="@drawable/rounded_corners_background"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:padding="24dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="8dp"
+            app:strokeWidth="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title"
-            app:layout_constraintVertical_bias="0.2">
+            app:layout_constraintTop_toTopOf="parent">
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivLogoIcon"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
-                android:layout_marginBottom="24dp"
-                android:contentDescription="@string/logo"
-                android:padding="4dp"
-                android:scaleType="centerCrop"
-                app:shapeAppearanceOverlay="@style/Circular"
-                app:strokeColor="@color/primary_text"
-                app:strokeWidth="1dp" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilUser"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/Email"
-                app:errorEnabled="true"
-                app:placeholderText=" ">
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="32dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etUser"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </com.google.android.material.textfield.TextInputLayout>
+                <!-- Logo Login -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivLogoIcon"
+                    android:layout_width="200dp"
+                    android:layout_height="100dp"
+                    android:layout_marginBottom="24dp"
+                    android:contentDescription="@string/logo"
+                    android:scaleType="fitCenter"
+                    tools:src="@drawable/upload_document" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilPassword"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="@string/Contrasenya"
-                app:errorEnabled="true"
-                app:endIconMode="password_toggle"
-                app:errorIconDrawable="@null">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Benvingut"
+                    android:textColor="@color/text_main"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="24dp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPassword"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilUser"
+                    style="@style/Widget.Kronos.TextInputLayout.Pill"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:hint="@string/Email"
+                    app:errorEnabled="true">
 
-            <TextView
-                android:id="@+id/tvForgotPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:paddingHorizontal="4dp"
-                android:text="@string/forgot_password"
-                android:textColor="@color/primary_text"
-                android:textSize="14sp"
-                android:gravity="start"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackground" />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etUser"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <CheckBox
-                android:id="@+id/cbRememberMe"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Recorda'm"
-                android:textColor="@color/primary_text" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilPassword"
+                    style="@style/Widget.Kronos.TextInputLayout.Pill"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/Contrasenya"
+                    app:errorEnabled="true"
+                    app:errorIconDrawable="@null"
+                    app:endIconMode="password_toggle"
+                    app:endIconTint="@color/text_secondary">
 
-            <Button
-                android:id="@+id/button_login"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:padding="12dp"
-                android:text="@string/Login" />
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword" />
 
-        </LinearLayout>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/tvForgotPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/forgot_password"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:gravity="end"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <CheckBox
+                    android:id="@+id/cbRememberMe"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Recorda'm"
+                    android:buttonTint="@color/primary_plum"
+                    android:textColor="@color/text_main" />
+
+                <Button
+                    android:id="@+id/button_login"
+                    style="@style/Widget.Kronos.Button.Pill"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/Login"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

@@ -96,6 +96,15 @@
     <string name="forgot_password">T\'has oblidat de la contrasenya?</string>
     <string name="back">Enrera</string>
 
+    <!-- New Strings for UI Styles -->
+    <string name="dades_generals">Dades Generals</string>
+    <string name="benvingut">Benvingut</string>
+    <string name="nova_ue">Nova UE</string>
+    <string name="pujant">Pujant...</string>
+    <string name="eliminant">Eliminant...</string>
+    <string name="obligatori">Obligatori</string>
+    <string name="confirmacio_eliminar">Estàs segur que vols eliminar?</string>
+
     <!-- Arrays para los tipos de UE -->
     <string-array name="tipus_ue_options">
         <item>Interstrat</item>

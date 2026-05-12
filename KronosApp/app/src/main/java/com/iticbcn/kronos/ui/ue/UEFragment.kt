@@ -17,6 +17,7 @@ import com.iticbcn.kronos.ui.adapter.ObjecteAdapter
 import com.iticbcn.kronos.domain.model.ObjecteUE
 import com.iticbcn.kronos.R
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.iticbcn.kronos.ui.formulario.FormularioUE
 import com.google.firebase.auth.FirebaseAuth
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -48,7 +49,7 @@ class UEFragment : Fragment() {
 
         recyclerView = view.findViewById(R.id.rvObjectes)
         tvEmptyMessage = view.findViewById(R.id.tvEmptyMessage)
-        val fabAdd: FloatingActionButton = view.findViewById(R.id.fab_add_ue)
+        val fabAdd: ExtendedFloatingActionButton = view.findViewById(R.id.fab_add_ue)
         val fabUploadAll: FloatingActionButton = view.findViewById(R.id.fab_upload_all)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
