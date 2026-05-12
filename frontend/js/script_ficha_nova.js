@@ -1,6 +1,6 @@
 //DOM
 const form_ue = document.querySelector("#formulario-ue");
-const form_jaciment = document.querySelector("#formulario-yacimiento");
+const form_jaciment = document.querySelector("#formulario-jaciment");
 const form_sector = document.querySelector("#formulario-sector");
 const btn_guardar = document.querySelector(".boton-accion-guardar");
 const btn_fitxes = document.querySelector(".enlace-volver");
@@ -134,11 +134,18 @@ inicialitzar();
 btn_guardar.addEventListener("click", async function(){
     try {
         if (tab === 'sector') {
+            if (!document.getElementById('i-sec-nom').value.trim() ||
+                !document.getElementById('i-sec-codi').value.trim() ||
+                !document.getElementById('i-sec-codiJac').value) {
+                alert("Els camps Nom, Codi i Jaciment són obligatoris.");
+                return;
+            }
             const nouSector = {
                 nom: document.getElementById('i-sec-nom').value,
                 codi_sector: document.getElementById('i-sec-codi').value,
                 codi_jaciment: document.getElementById('i-sec-codiJac').value,
                 descripcio: document.getElementById('i-sec-descr').value,
+                registrat_per: sessionStorage.getItem("uid"),
                 data: firebase.firestore.Timestamp.now(),
                 sincronitzat: false
             };
@@ -148,7 +155,12 @@ btn_guardar.addEventListener("click", async function(){
                 await subirImatge(file, docRef.id, 'sectors');
             }
 
-        } else if (tab === 'jaciment') {        
+        } else if (tab === 'jaciment') {
+            if (!document.getElementById('i-jac-nom').value.trim() ||
+                !document.getElementById('i-jac-codi').value.trim()) {
+                alert("Els camps Nom i Codi són obligatoris.");
+                return;
+            }
             //cojo los editores marcados (EMAIL)
             const editors = Array.from(
                 document.querySelectorAll('#contenedor-editors input:checked')
@@ -174,6 +186,11 @@ btn_guardar.addEventListener("click", async function(){
             }
 
         } else if (tab === 'ue') {
+            if (!document.getElementById('i-ue-codi').value.trim() ||
+                !document.getElementById('i-ue-codiSec').value) {
+                alert("Els camps UE i Sector són obligatoris.");
+                return;
+            }
             const novaUE = {
                 codi_ue: document.getElementById('i-ue-codi').value,
                 codi_sector: document.getElementById('i-ue-codiSec').value,
@@ -185,7 +202,7 @@ btn_guardar.addEventListener("click", async function(){
                 estat_conservacio: document.getElementById('i-ue-estado').value,
                 data: firebase.firestore.Timestamp.now(),
                 descripcio: document.getElementById('i-ue-descr').value,
-                registrat_per: sessionStorage.getItem("nom"),
+                registrat_per: sessionStorage.getItem("uid"),
                 sincronitzat: false,
                 //recojo las relaciones y filtro las que están vacías
                 relacions: [
