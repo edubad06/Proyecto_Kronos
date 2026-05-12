@@ -14,6 +14,10 @@ import com.iticbcn.kronos.domain.model.TipusUEOptions
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.switchmaterial.SwitchMaterial
 import androidx.core.graphics.drawable.toDrawable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class FilterPopup(
@@ -41,14 +45,18 @@ class FilterPopup(
         swMyUEs?.visibility = if (showOnlyMineSwitch) View.VISIBLE else View.GONE
 
         // Configuración de Sectores filtrados por el Jaciment del usuario
-        val sectors = if (userJaciment.isNotEmpty()) {
-            DataManager.getSectorsByJaciment(context, userJaciment)
-        } else {
-            DataManager.getSectors(context)
-        }
+        CoroutineScope(Dispatchers.Main).launch {
+            val sectors = if (userJaciment.isNotEmpty()) {
+                withContext(Dispatchers.IO) {
+                    DataManager.getSectorsByJaciment(userJaciment)
+                }
+            } else {
+                emptyList()
+            }
 
-        val adapterSector = ArrayAdapter(context, android.R.layout.simple_list_item_1, sectors)
-        actvSector?.setAdapter(adapterSector)
+            val adapterSector = ArrayAdapter(context, android.R.layout.simple_list_item_1, sectors)
+            actvSector?.setAdapter(adapterSector)
+        }
 
         // Configuración de Tipus UE
         val tipusOptions = TipusUEOptions.getNames()

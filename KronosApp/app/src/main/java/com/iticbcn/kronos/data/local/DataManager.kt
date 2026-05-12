@@ -7,6 +7,7 @@ import com.iticbcn.kronos.data.repository.UERepository
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.google.gson.JsonSyntaxException
+import androidx.core.content.edit
 
 object DataManager {
     private const val PREFS_NAME = "UE_DATA"
@@ -18,23 +19,19 @@ object DataManager {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = prefs.getString(KEY_JACIMENTS, null)
         return if (json == null) {
-            mutableListOf("Carrer del Francolí, 65", "Pedralbes", "Tarraco")
+            mutableListOf()
         } else {
             try {
                 Gson().fromJson(json, object : TypeToken<MutableList<String>>() {}.type)
             } catch (e: JsonSyntaxException) {
-                mutableListOf("Carrer del Francolí, 65", "Pedralbes", "Tarraco")
+                return mutableListOf()
             }
         }
     }
 
-    fun getSectors(context: Context): List<String> {
-        return UERepository.getSectoresPorJaciment().values.flatten().distinct()
-    }
 
-    fun getSectorsByJaciment(context: Context, jacimentNom: String): List<String> {
-        val mapa = UERepository.getSectoresPorJaciment()
-        return mapa[jacimentNom] ?: emptyList()
+    suspend fun getSectorsByJaciment(jacimentNom: String): List<String> {
+        return UERepository.getSectoresPorJaciment(jacimentNom)
     }
 
     fun existsUE(context: Context, codi_ue: String, jaciment: String): Boolean {
@@ -49,25 +46,23 @@ object DataManager {
 
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = Gson().toJson(currentList)
-        prefs.edit().putString(KEY_LIST_LOCAL, json).apply()
+        prefs.edit { putString(KEY_LIST_LOCAL, json) }
     }
 
     fun getUEListLocal(context: Context): List<ObjecteUE> {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = prefs.getString(KEY_LIST_LOCAL, null)
+
         return if (json == null) {
-            val ejemplos = UERepository.getEjemplosIniciales()
-            saveFullList(context, ejemplos, KEY_LIST_LOCAL)
-            ejemplos
+            emptyList()
         } else {
             try {
                 val type = object : TypeToken<List<ObjecteUE>>() {}.type
                 Gson().fromJson(json, type)
             } catch (e: Exception) {
                 Log.e("DataManager", "Error parsing local UE list, clearing data", e)
-                val ejemplos = UERepository.getEjemplosIniciales()
-                saveFullList(context, ejemplos, KEY_LIST_LOCAL)
-                ejemplos
+                prefs.edit { remove(KEY_LIST_LOCAL) }
+                emptyList()
             }
         }
     }
@@ -83,7 +78,7 @@ object DataManager {
                 Gson().fromJson(json, type)
             } catch (e: Exception) {
                 Log.e("DataManager", "Error parsing DB UE list, clearing data", e)
-                prefs.edit().remove(KEY_LIST_DB).apply()
+                prefs.edit { remove(KEY_LIST_DB) }
                 emptyList()
             }
         }
@@ -96,7 +91,7 @@ object DataManager {
     private fun saveFullList(context: Context, list: List<ObjecteUE>, key: String) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val json = Gson().toJson(list)
-        prefs.edit().putString(key, json).apply()
+        prefs.edit { putString(key, json) }
     }
 
     fun deleteUE(context: Context, codi_ue: String, jaciment: String) {

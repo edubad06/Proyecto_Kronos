@@ -40,6 +40,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.ArrayList
+import java.util.Date
 
 class FormularioUE : AppCompatActivity() {
 
@@ -53,29 +54,20 @@ class FormularioUE : AppCompatActivity() {
     private var deleteJob: Job? = null
     private lateinit var progressBar: ProgressBar
 
-    // Solicitud de permisos
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
-        if (isGranted) {
-            getContent.launch(arrayOf("image/*"))
-        } else {
-            Toast.makeText(this, "Cal acceptar el permís per accedir a la galeria", Toast.LENGTH_SHORT).show()
-        }
+        if (isGranted) getContent.launch(arrayOf("image/*"))
+        else Toast.makeText(this, "Cal acceptar el permís", Toast.LENGTH_SHORT).show()
     }
 
     private val getContent = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         uri?.let {
             try {
-                // Tomar permisos persistentes de lectura para esta URI específica
-                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                contentResolver.takePersistableUriPermission(it, takeFlags)
-                
+                contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 selectedUris.add(it)
                 fotoAdapter.notifyItemInserted(selectedUris.size - 1)
             } catch (e: Exception) {
-                Log.e("FormularioUE", "Error al tomar permisos persistentes: ${e.message}")
-                // Si falla takePersistableUriPermission, aún añadimos la URI pero avisamos
                 selectedUris.add(it)
                 fotoAdapter.notifyItemInserted(selectedUris.size - 1)
             }
@@ -87,152 +79,134 @@ class FormularioUE : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_formulario_ue)
 
+        val topBar: View = findViewById(R.id.topBar)
+        val llButtonsContainer: View = findViewById(R.id.llButtonsContainer)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            topBar.setPadding(topBar.paddingLeft, systemBars.top, topBar.paddingRight, topBar.paddingBottom)
+            llButtonsContainer.setPadding(llButtonsContainer.paddingLeft, llButtonsContainer.paddingTop, llButtonsContainer.paddingRight, systemBars.bottom)
+            insets
+        }
+
         isReadOnly = intent.getBooleanExtra("EXTRA_READ_ONLY", false)
         isFromDatabase = intent.getBooleanExtra("EXTRA_IS_DB", false)
 
-        val btnBack: Button = findViewById(R.id.btn_back)
-        val btnEnviar: Button = findViewById(R.id.btn_enviar)
-        val btnAddImage: Button = findViewById(R.id.button_add_image)
-        val btnSave: Button = findViewById(R.id.button_save)
-        val btnDeleteFicha: Button = findViewById(R.id.button_delete_ficha)
         val etUe: TextInputEditText = findViewById(R.id.et_ue)
-        val etJaciment = findViewById<TextInputEditText>(R.id.et_jaciment)
+        val etJaciment = findViewById<AutoCompleteTextView>(R.id.et_jaciment)
+        val tilJaciment = findViewById<TextInputLayout>(R.id.til_jaciment)
         val actvSector = findViewById<AutoCompleteTextView>(R.id.actv_sector)
         val actvTipus = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue)
         val rvFotos = findViewById<RecyclerView>(R.id.rv_fotos_formulario)
-        // DENTRO DE onCreate, después de inicializar las vistas
-        val onBackPressedCallback = object : androidx.activity.OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (isReadOnly) {
-                    // Si es solo lectura, salimos directamente
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                } else {
-                    // Si es edición, preguntamos antes de salir
-                    mostrarDialogoConfirmarSalida()
-                }
-            }
-        }
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         progressBar = findViewById(R.id.progressBar)
-        
+
         rvFotos.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        fotoAdapter = FotoAdapter(selectedUris, isReadOnly) { uriEliminada ->
-            val uriStr = uriEliminada.toString()
-            if (uriStr.startsWith("http")) deletedCloudUrls.add(uriStr)
+        fotoAdapter = FotoAdapter(selectedUris, isReadOnly) { uri ->
+            if (uri.toString().startsWith("http")) deletedCloudUrls.add(uri.toString())
         }
         rvFotos.adapter = fotoAdapter
 
-        setupDropdownManual(actvTipus, TipusUEOptions.getNames())
+        tilJaciment?.isEnabled = false
 
-        btnBack.setOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
-        btnEnviar.setOnClickListener {
-            val tilUe = findViewById<TextInputLayout>(R.id.til_ue)
-            val ueText = etUe.text.toString().trim()
-            val jacimentText = etJaciment.text.toString()
-
-            if (ueText.isBlank()) {
-                tilUe.error = "Obligatori"
-                return@setOnClickListener
-            }
-
-            actualizarEnBaseDeDatos(ueText, jacimentText)
-        }
-        if (isReadOnly) {
-            btnEnviar.visibility = View.GONE
-            btnBack.visibility = View.GONE // ya tienes el botón guardar como "Enrera"
-        }
-
-        if (savedInstanceState == null) {
+        if (savedInstanceState != null) {
+            objetoAEditar = savedInstanceState.getSerializable("OBJETO_EDITAR") as? ObjecteUE
+            savedInstanceState.getStringArrayList("SELECTED_URIS")?.forEach { selectedUris.add(it.toUri()) }
+            fotoAdapter.notifyDataSetChanged()
+        } else {
             objetoAEditar = intent.getSerializableExtra("EXTRA_OBJETO") as? ObjecteUE
             if (objetoAEditar != null) prellenarFormulario(objetoAEditar!!)
             else cargarJacimentUsuario(etJaciment, actvSector)
-        } else {
-            objetoAEditar = savedInstanceState.getSerializable("OBJETO_EDITAR") as? ObjecteUE
-            val uriStrings = savedInstanceState.getStringArrayList("SELECTED_URIS")
-            uriStrings?.forEach { selectedUris.add(it.toUri()) }
-            fotoAdapter.notifyDataSetChanged()
+        }
+
+        setupDropdownManual(actvTipus, TipusUEOptions.getNames())
+
+        findViewById<Button>(R.id.btn_back).setOnClickListener { finish() }
+        
+        val btnEnviar = findViewById<Button>(R.id.btn_enviar)
+        btnEnviar.setOnClickListener {
+            val ue = etUe.text.toString().trim()
+            if (ue.isEmpty()) findViewById<TextInputLayout>(R.id.til_ue).error = "Obligatori"
+            else subirUEABaseDeDades(ue, etJaciment.text.toString())
+        }
+
+        // Si venim de DB, el botó d'enviar (pujar) no té sentit perquè ja hi és
+        if (isFromDatabase) {
+            btnEnviar.visibility = View.GONE
         }
 
         if (isReadOnly) {
             bloquearFormulario()
-            btnAddImage.visibility = View.GONE
-            btnSave.text = getString(R.string.back)
-            btnSave.setOnClickListener { finish() }
-        } else {
-            btnAddImage.setOnClickListener { 
-                checkAndRequestPermission() 
+            findViewById<Button>(R.id.button_add_image).visibility = View.GONE
+            findViewById<Button>(R.id.button_save).apply {
+                text = getString(R.string.back)
+                setOnClickListener { finish() }
             }
-            btnSave.setOnClickListener { 
-                val tilUe = findViewById<TextInputLayout>(R.id.til_ue)
-                guardarOActualizar(etUe, tilUe) 
+        } else {
+            findViewById<Button>(R.id.button_add_image).setOnClickListener { checkAndRequestPermission() }
+            findViewById<Button>(R.id.button_save).setOnClickListener { 
+                guardarOActualizar(etUe, findViewById(R.id.til_ue)) 
             }
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        configurarBotonEliminar(btnDeleteFicha)
-        if (isFromDatabase) {
-            btnEnviar.visibility = View.GONE
-            btnBack.visibility = View.GONE
-        } else {
-            btnEnviar.visibility = View.VISIBLE
-            btnBack.visibility = View.VISIBLE
-        }
+        configurarBotonEliminar(findViewById(R.id.button_delete_ficha))
     }
 
-    private fun checkAndRequestPermission() {
-        val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-            getContent.launch(arrayOf("image/*"))
-        } else {
-            requestPermissionLauncher.launch(permission)
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("OBJETO_EDITAR", objetoAEditar)
+        outState.putStringArrayList("SELECTED_URIS", ArrayList(selectedUris.map { it.toString() }))
     }
 
-    // El resto de funciones (guardarEnLocal, guardarOActualizar, etc.) se mantienen igual...
+    private fun subirUEABaseDeDades(ueText: String, jacimentText: String) {
+        saveJob = CoroutineScope(Dispatchers.Main).launch {
+            val progress = MaterialAlertDialogBuilder(this@FormularioUE).setTitle("Pujant...").setCancelable(false).show()
+            try {
+                val user = FirebaseAuth.getInstance().currentUser
+                val token = user?.getIdToken(false)?.await()?.token
+                val publicUrls = mutableListOf<String>()
 
-    private fun guardarEnLocal(ueText: String, jacimentText: String) {
-        val nouObjecte = ObjecteUE(
-            firestoreId = objetoAEditar?.firestoreId,
-            codi_ue = ueText,
-            codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
-            tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
-            descripcio = findViewById<TextInputEditText>(R.id.et_descripcio).text.toString(),
-            registrat_per = FirebaseAuth.getInstance().currentUser?.email ?: objetoAEditar?.registrat_per ?: "",
-            material = findViewById<TextInputEditText>(R.id.et_material).text.toString(),
-            estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.text.toString() ?: "",
-            cronologia = findViewById<TextInputEditText>(R.id.et_cronologia).text.toString(),
-            textura = findViewById<TextInputEditText>(R.id.Textura).text.toString(),
-            color = findViewById<TextInputEditText>(R.id.et_color).text.toString(),
-            relacions = obtenerRelacionesDeVista(),
-            imatges_urls = selectedUris.map { it.toString() },
-            sincronitzat = false,
-            fecha_creacio = objetoAEditar?.fecha_creacio ?: System.currentTimeMillis(),
-            jaciment = jacimentText
-        )
+                for (uri in selectedUris) {
+                    if (uri.toString().startsWith("http")) publicUrls.add(uri.toString())
+                    else S3Service.uploadImage(this@FormularioUE, uri, token)?.let { publicUrls.add(it) }
+                }
 
-        if (objetoAEditar != null && nouObjecte == objetoAEditar) {
-            finish()
-            return
+                // Generar ID compuesta compatible con Web
+                val docId = "${jacimentText}_${ueText}".replace("/", "_")
+                val db = FirebaseFirestore.getInstance().collection("unitats_estratigrafiques")
+
+                val finalObjecte = ObjecteUE(
+                    codi_ue = ueText,
+                    codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
+                    tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
+                    descripcio = findViewById<TextInputEditText>(R.id.et_descripcio).text.toString(),
+                    registrat_per = objetoAEditar?.registrat_per ?: user?.uid ?: "",
+                    material = findViewById<TextInputEditText>(R.id.et_material).text.toString(),
+                    cronologia = findViewById<TextInputEditText>(R.id.et_cronologia).text.toString(),
+                    textura = findViewById<TextInputEditText>(R.id.Textura).text.toString(),
+                    color = findViewById<TextInputEditText>(R.id.et_color).text.toString(),
+                    estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.text?.toString() ?: "",
+                    relacions = obtenerRelacionesDeVista(),
+                    imatges_urls = publicUrls,
+                    sincronitzat = true,
+                    jaciment = jacimentText,
+                    data = objetoAEditar?.data ?: Date()
+                )
+
+                db.document(docId).set(finalObjecte).await()
+                
+                if (objetoAEditar != null) {
+                    val oldId = "${objetoAEditar!!.jaciment}_${objetoAEditar!!.codi_ue}".replace("/", "_")
+                    if (oldId != docId) db.document(oldId).delete().await()
+                    DataManager.deleteUE(this@FormularioUE, objetoAEditar!!.codi_ue, objetoAEditar!!.jaciment)
+                }
+                
+                progress.dismiss()
+                finish()
+            } catch (e: Exception) {
+                progress.dismiss()
+                Toast.makeText(this@FormularioUE, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         }
-        if (objetoAEditar != null) {
-            DataManager.deleteUE(this, objetoAEditar!!.codi_ue, objetoAEditar!!.jaciment)
-        }
-
-        DataManager.saveUE(this, nouObjecte)
-        Toast.makeText(this, "Desat correctament", Toast.LENGTH_SHORT).show()
-        finish()
     }
 
     private fun prellenarFormulario(obj: ObjecteUE) {
@@ -243,49 +217,128 @@ class FormularioUE : AppCompatActivity() {
         findViewById<TextInputEditText>(R.id.et_color).setText(obj.color)
         findViewById<TextInputEditText>(R.id.et_material).setText(obj.material)
         findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.setText(obj.estat_conservacio)
-        findViewById<TextInputEditText>(R.id.et_jaciment).setText(obj.jaciment)
-        
+        findViewById<AutoCompleteTextView>(R.id.et_jaciment).setText(obj.jaciment, false)
         actualizarSectores(obj.jaciment, findViewById(R.id.actv_sector))
         findViewById<AutoCompleteTextView>(R.id.actv_sector).setText(obj.codi_sector, false)
         findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).setText(obj.tipus_ue, false)
 
         selectedUris.clear()
-        obj.imatges_urls.forEach { url -> if (url.isNotEmpty()) selectedUris.add(url.toUri()) }
+        obj.imatges_urls.forEach { if (it.isNotEmpty()) selectedUris.add(it.toUri()) }
+        
+        // Rellenar relaciones con claves compatibles Web
+        val fields = mapOf(
+            "igual_a" to R.id.et_igual_a, "se_li_lliura" to R.id.et_se_li_lliura,
+            "cobert_per" to R.id.et_cobert_per, "tallat_per" to R.id.et_tallat_per,
+            "farcit_per" to R.id.et_reblert_per, "lliura" to R.id.et_es_lliura_a,
+            "cobreix" to R.id.et_cobreix_a, "talla" to R.id.et_talla_a, "farceix" to R.id.et_rebleix_a
+        )
+        obj.relacions.forEach { rel ->
+            fields[rel.tipus]?.let { id -> findViewById<TextInputEditText>(id).setText(rel.desti) }
+        }
         fotoAdapter.notifyDataSetChanged()
     }
 
-    private fun setupDropdownManual(autoComplete: AutoCompleteTextView, items: List<String>) {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, items)
-        autoComplete.setAdapter(adapter)
+    private fun guardarOActualizar(etUe: TextInputEditText, tilUe: TextInputLayout) {
+        val ue = etUe.text.toString().trim()
+        val jac = findViewById<AutoCompleteTextView>(R.id.et_jaciment).text.toString()
+        if (ue.isEmpty()) { tilUe.error = "Obligatori"; return }
+
+        if (isFromDatabase || objetoAEditar?.id != null) actualizarEnBaseDeDatos(ue, jac)
+        else guardarEnLocal(ue, jac)
     }
 
-    private fun cargarJacimentUsuario(etJaciment: TextInputEditText, actvSector: AutoCompleteTextView) {
-        val userEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
-        FirebaseFirestore.getInstance().collection("usuaris")
-            .whereEqualTo("email", userEmail).get()
-            .addOnSuccessListener { query ->
-                if (!query.isEmpty) {
-                    val excavacio = query.documents[0].getString("excavacio") ?: return@addOnSuccessListener
-                    etJaciment.setText(excavacio)
-                    actualizarSectores(excavacio, actvSector)
+    private fun actualizarEnBaseDeDatos(ueText: String, jacimentText: String) {
+        saveJob = CoroutineScope(Dispatchers.Main).launch {
+            progressBar.visibility = View.VISIBLE
+            try {
+                val finalUrls = mutableListOf<String>()
+                selectedUris.forEach { uri ->
+                    if (uri.toString().startsWith("http")) finalUrls.add(uri.toString())
+                    else S3Service.uploadImage(this@FormularioUE, uri)?.let { finalUrls.add(it) }
+                }
+
+                val docId = "${jacimentText}_${ueText}".replace("/", "_")
+                val finalObject = ObjecteUE(
+                    codi_ue = ueText,
+                    codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
+                    tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
+                    descripcio = findViewById<TextInputEditText>(R.id.et_descripcio).text.toString(),
+                    registrat_per = objetoAEditar?.registrat_per ?: FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                    material = findViewById<TextInputEditText>(R.id.et_material).text.toString(),
+                    cronologia = findViewById<TextInputEditText>(R.id.et_cronologia).text.toString(),
+                    textura = findViewById<TextInputEditText>(R.id.Textura).text.toString(),
+                    color = findViewById<TextInputEditText>(R.id.et_color).text.toString(),
+                    estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.text?.toString() ?: "",
+                    relacions = obtenerRelacionesDeVista(),
+                    imatges_urls = finalUrls,
+                    sincronitzat = true,
+                    jaciment = jacimentText,
+                    data = objetoAEditar?.data ?: Date()
+                )
+
+                FirebaseFirestore.getInstance().collection("unitats_estratigrafiques").document(docId).set(finalObject).await()
+                if (objetoAEditar != null) {
+                    val oldId = "${objetoAEditar!!.jaciment}_${objetoAEditar!!.codi_ue}".replace("/", "_")
+                    if (oldId != docId) FirebaseFirestore.getInstance().collection("unitats_estratigrafiques").document(oldId).delete().await()
+                }
+                finish()
+            } catch (e: Exception) {
+                Toast.makeText(this@FormularioUE, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            } finally { progressBar.visibility = View.GONE }
+        }
+    }
+
+    private fun eliminarFitxa() {
+        val ue = findViewById<TextInputEditText>(R.id.et_ue).text.toString()
+        val jac = findViewById<AutoCompleteTextView>(R.id.et_jaciment).text.toString()
+        val docId = "${jac}_${ue}".replace("/", "_")
+
+        if (isFromDatabase) {
+            deleteJob = CoroutineScope(Dispatchers.Main).launch {
+                val progress = MaterialAlertDialogBuilder(this@FormularioUE).setTitle("Eliminant...").show()
+                try {
+                    FirebaseFirestore.getInstance().collection("unitats_estratigrafiques").document(docId).delete().await()
+                    progress.dismiss()
+                    finish()
+                } catch (e: Exception) {
+                    progress.dismiss()
+                    Toast.makeText(this@FormularioUE, "Error al eliminar", Toast.LENGTH_SHORT).show()
                 }
             }
+        } else {
+            DataManager.deleteUE(this, ue, jac)
+            finish()
+        }
+    }
+
+    private fun cargarJacimentUsuario(etJaciment: AutoCompleteTextView, actvSector: AutoCompleteTextView) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        FirebaseFirestore.getInstance().collection("usuaris").whereEqualTo("email", user.email).get().addOnSuccessListener { query ->
+            if (!query.isEmpty) {
+                val jac = query.documents[0].getString("excavacio") ?: ""
+                etJaciment.setText(jac, false)
+                actualizarSectores(jac, actvSector)
+            }
+        }
     }
 
     private fun actualizarSectores(jaciment: String, actvSector: AutoCompleteTextView) {
-        val sectores = DataManager.getSectorsByJaciment(this, jaciment)
-        actvSector.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, sectores))
+        CoroutineScope(Dispatchers.Main).launch {
+            val sectores = com.iticbcn.kronos.data.repository.UERepository.getSectoresPorJaciment(jaciment)
+            actvSector.setAdapter(ArrayAdapter(this@FormularioUE, android.R.layout.simple_dropdown_item_1line, sectores))
+        }
     }
 
     private fun obtenerRelacionesDeVista(): List<RelacioUE> {
         val list = mutableListOf<RelacioUE>()
+        // ✅ Claves actualizadas para compatibilidad total con la Web
         val fields = mapOf(
-            "igual" to R.id.et_igual_a, "se_li_lliura" to R.id.et_se_li_lliura,
-            "cobert" to R.id.et_cobert_per, "tallat" to R.id.et_tallat_per,
-            "reblert" to R.id.et_reblert_per, "lliura" to R.id.et_es_lliura_a,
-            "cobreix" to R.id.et_cobreix_a, "talla" to R.id.et_talla_a, "rebleix" to R.id.et_rebleix_a
+            "igual_a" to R.id.et_igual_a, "se_li_lliura" to R.id.et_se_li_lliura,
+            "cobert_per" to R.id.et_cobert_per, "tallat_per" to R.id.et_tallat_per,
+            "farcit_per" to R.id.et_reblert_per, "lliura" to R.id.et_es_lliura_a,
+            "cobreix" to R.id.et_cobreix_a, "talla" to R.id.et_talla_a, "farceix" to R.id.et_rebleix_a
         )
-        fields.forEach { (tipo, id) ->
+        fields.forEach { (tipo, id) -> 
             findViewById<TextInputEditText>(id)?.text?.toString()?.takeIf { it.isNotEmpty() }?.let { list.add(RelacioUE(tipo, it)) }
         }
         return list
@@ -299,194 +352,63 @@ class FormularioUE : AppCompatActivity() {
     private fun deshabilitarVistasRecursivo(layout: ViewGroup) {
         for (i in 0 until layout.childCount) {
             val child = layout.getChildAt(i)
-            if (child.id != R.id.button_save) {
+            // Mantener habilitados los botones de cerrar/volver
+            if (child.id != R.id.button_save && child.id != R.id.btn_back) {
                 child.isEnabled = false
                 if (child is ViewGroup) deshabilitarVistasRecursivo(child)
             }
         }
     }
 
-    private fun guardarOActualizar(etUe: TextInputEditText, tilUe: TextInputLayout) {
-        val ueText = etUe.text.toString().trim()
-        val jacimentText = findViewById<TextInputEditText>(R.id.et_jaciment).text.toString()
-        if (ueText.isBlank()) { tilUe.error = "Obligatori"; return }
-        if (isFromDatabase) actualizarEnBaseDeDatos(ueText, jacimentText) else guardarEnLocal(ueText, jacimentText)
+    private fun setupDropdownManual(autoComplete: AutoCompleteTextView, items: List<String>) {
+        autoComplete.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, items))
     }
 
-    private fun actualizarEnBaseDeDatos(ueText: String, jacimentText: String) {
-        progressBar.visibility = View.VISIBLE
+    private fun guardarEnLocal(ueText: String, jacimentText: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        val nou = ObjecteUE(
+            codi_ue = ueText,
+            jaciment = jacimentText,
+            codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
+            tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
+            descripcio = findViewById<TextInputEditText>(R.id.et_descripcio).text.toString(),
+            material = findViewById<TextInputEditText>(R.id.et_material).text.toString(),
+            cronologia = findViewById<TextInputEditText>(R.id.et_cronologia).text.toString(),
+            textura = findViewById<TextInputEditText>(R.id.Textura).text.toString(),
+            color = findViewById<TextInputEditText>(R.id.et_color).text.toString(),
+            estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.text?.toString() ?: "",
+            registrat_per = objetoAEditar?.registrat_per ?: user?.uid ?: "",
+            relacions = obtenerRelacionesDeVista(),
+            imatges_urls = selectedUris.map { it.toString() },
+            sincronitzat = false,
+            data = objetoAEditar?.data ?: Date()
+        )
+        if (objetoAEditar != null) DataManager.deleteUE(this, objetoAEditar!!.codi_ue, objetoAEditar!!.jaciment)
+        DataManager.saveUE(this, nou)
+        Toast.makeText(this, "Desat localment", Toast.LENGTH_SHORT).show()
+        finish()
+    }
 
-        saveJob = CoroutineScope(Dispatchers.Main).launch {
-            val progress = MaterialAlertDialogBuilder(this@FormularioUE)
-                .setTitle("Actualitzant...")
-                .setCancelable(false)
-                .show()
-
-            try {
-                // 🔹 1. Detectar cambios
-                if (objetoAEditar != null) {
-                    val objetoActualizadoSinFotos = objetoAEditar!!.copy(
-                        codi_ue = ueText,
-                        jaciment = jacimentText,
-                        codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
-                        tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
-                        descripcio = findViewById<TextInputEditText>(R.id.et_descripcio).text.toString(),
-                        material = findViewById<TextInputEditText>(R.id.et_material).text.toString(),
-                        estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.text.toString() ?: "",
-                        cronologia = findViewById<TextInputEditText>(R.id.et_cronologia).text.toString(),
-                        textura = findViewById<TextInputEditText>(R.id.Textura).text.toString(),
-                        color = findViewById<TextInputEditText>(R.id.et_color).text.toString(),
-                        relacions = obtenerRelacionesDeVista()
-                    )
-
-                    val mismasFotos = objetoAEditar!!.imatges_urls == selectedUris.map { it.toString() }
-
-                    if (objetoActualizadoSinFotos == objetoAEditar && mismasFotos) {
-                        progress.dismiss()
-                        progressBar.visibility = View.GONE
-                        finish()
-                        return@launch
-                    }
-                }
-
-                // 🔹 2. Subida de imágenes
-                val finalUrls = mutableListOf<String>()
-                for (uri in selectedUris) {
-                    val uriStr = uri.toString()
-                    if (uriStr.startsWith("http")) {
-                        finalUrls.add(uriStr)
-                    } else {
-                        val uploadedUrl = S3Service.uploadImage(this@FormularioUE, uri)
-                        if (uploadedUrl != null) finalUrls.add(uploadedUrl)
-                    }
-                }
-
-                // 🔹 3. Referencia Firestore
-                val db = FirebaseFirestore.getInstance().collection("unitats_estratigrafiques")
-
-                val docRef = if (!objetoAEditar?.firestoreId.isNullOrEmpty()) {
-                    db.document(objetoAEditar!!.firestoreId!!)
-                } else {
-                    db.document()
-                }
-
-                // 🔹 4. Crear objeto final (IMPORTANTE: mantener fecha_creacio)
-                val finalObject = ObjecteUE(
-                    firestoreId = docRef.id,
-                    codi_ue = ueText,
-                    codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
-                    tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
-                    descripcio = findViewById<TextInputEditText>(R.id.et_descripcio).text.toString(),
-                    registrat_per = objetoAEditar?.registrat_per ?: FirebaseAuth.getInstance().currentUser?.email ?: "",
-                    material = findViewById<TextInputEditText>(R.id.et_material).text.toString(),
-                    estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.text.toString() ?: "",
-                    cronologia = findViewById<TextInputEditText>(R.id.et_cronologia).text.toString(),
-                    textura = findViewById<TextInputEditText>(R.id.Textura).text.toString(),
-                    color = findViewById<TextInputEditText>(R.id.et_color).text.toString(),
-                    relacions = obtenerRelacionesDeVista(),
-                    imatges_urls = finalUrls,
-                    sincronitzat = true,
-                    jaciment = jacimentText,
-
-                    // 🔥 CLAVE: no perder la fecha original
-                    fecha_creacio = objetoAEditar?.fecha_creacio ?: System.currentTimeMillis()
-                )
-
-                // 🔹 5. Guardar (sobrescribe si existe, no duplica)
-                docRef.set(finalObject).await()
-
-                progress.dismiss()
-                finish()
-
-            } catch (e: Exception) {
-                progress.dismiss()
-                Toast.makeText(this@FormularioUE, "Error: ${e.message}", Toast.LENGTH_LONG).show()
-            } finally {
-                progressBar.visibility = View.GONE
+    private fun configurarBotonEliminar(btn: Button) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        if (objetoAEditar == null || isReadOnly) return
+        FirebaseFirestore.getInstance().collection("usuaris").whereEqualTo("email", user.email).get().addOnSuccessListener { docs ->
+            val rol = docs.firstOrNull()?.getString("rol")?.lowercase() ?: "tecnic"
+            val esSeu = objetoAEditar?.registrat_per?.equals(user.uid, true) == true
+            if (esSeu || rol == "director") {
+                btn.visibility = View.VISIBLE
+                btn.setOnClickListener { mostrarConfirmacioEliminar() }
             }
         }
-    }
-    private fun configurarBotonEliminar(btnDeleteFicha: Button) {
-        val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-        // Solo tiene sentido si estamos editando una ficha existente
-        if (objetoAEditar == null || isReadOnly) return
-
-        FirebaseFirestore.getInstance().collection("usuaris")
-            .whereEqualTo("email", currentUserEmail)
-            .get()
-            .addOnSuccessListener { documents ->
-                val rol = if (!documents.isEmpty) {
-                    documents.first().getString("rol")?.lowercase() ?: "tecnic"
-                } else "tecnic"
-
-                val esCreador = objetoAEditar?.registrat_per
-                    ?.trim()?.equals(currentUserEmail.trim(), ignoreCase = true) == true
-                val esDirector = rol == "director"
-
-                if (esCreador || esDirector) {
-                    btnDeleteFicha.visibility = View.VISIBLE
-                    btnDeleteFicha.setOnClickListener {
-                        mostrarConfirmacioEliminar()
-                    }
-                }
-            }
     }
 
     private fun mostrarConfirmacioEliminar() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Eliminar fitxa")
-            .setMessage("Estàs segur que vols eliminar aquesta UE? Aquesta acció no es pot desfer.")
-            .setNegativeButton("Cancel·lar", null)
-            .setPositiveButton("Eliminar") { _, _ ->
-                eliminarFitxa()
-            }
-            .show()
+        MaterialAlertDialogBuilder(this).setTitle("Eliminar").setMessage("Estàs segur?").setNegativeButton("No", null).setPositiveButton("Sí") { _, _ -> eliminarFitxa() }.show()
     }
 
-    private fun eliminarFitxa() {
-        val obj = objetoAEditar ?: return
-
-        if (isFromDatabase) {
-            // Eliminar de Firestore
-            deleteJob = CoroutineScope(Dispatchers.Main).launch {
-                val progress = MaterialAlertDialogBuilder(this@FormularioUE)
-                    .setTitle("Eliminant...")
-                    .setCancelable(false)
-                    .show()
-                try {
-                    FirebaseFirestore.getInstance()
-                        .collection("unitats_estratigrafiques")
-                        .document(obj.firestoreId!!)
-                        .delete()
-                        .await()
-                    progress.dismiss()
-                    Toast.makeText(this@FormularioUE, "UE eliminada", Toast.LENGTH_SHORT).show()
-                    finish()
-                } catch (e: Exception) {
-                    progress.dismiss()
-                    Toast.makeText(this@FormularioUE, "Error en eliminar", Toast.LENGTH_SHORT).show()
-                }
-            }
-        } else {
-            // Eliminar local
-            DataManager.deleteUE(this, obj.codi_ue, obj.jaciment)
-            Toast.makeText(this, "UE eliminada", Toast.LENGTH_SHORT).show()
-            finish()
-        }
-    }
-    private fun mostrarDialogoConfirmarSalida() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Sortir sense guardar")
-            .setMessage("Estàs segur que vols sortir? Els canvis no guardats es perdran.")
-            .setNegativeButton("Cancel·lar", null)
-            .setPositiveButton("Sortir") { _, _ ->
-                // Deshabilitamos el callback temporalmente para permitir la salida
-                onBackPressedDispatcher.onBackPressed()
-                // Si lo anterior no cierra la actividad dependiendo de tu versión de Activity:
-                finish()
-            }
-            .show()
+    private fun checkAndRequestPermission() {
+        val p = if (android.os.Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
+        if (ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED) getContent.launch(arrayOf("image/*"))
+        else requestPermissionLauncher.launch(p)
     }
 }

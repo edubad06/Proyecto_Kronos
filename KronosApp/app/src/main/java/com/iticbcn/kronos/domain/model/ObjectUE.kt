@@ -1,6 +1,9 @@
 package com.iticbcn.kronos.domain.model
 
+import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.Exclude
 import java.io.Serializable
+import java.util.Date
 
 data class RelacioUE(
     val tipus: String = "",
@@ -8,7 +11,12 @@ data class RelacioUE(
 ) : Serializable
 
 data class ObjecteUE(
-    var firestoreId: String? = null,
+    @DocumentId
+    val id: String? = null, // ✅ Recoge la ID de los metadatos (no crea campo)
+    
+    @get:Exclude
+    val firestoreId: String? = null, // ✅ Evita el error 'firestoreId was found from document'
+    
     val codi_ue: String = "",
     val codi_sector: String = "",
     val tipus_ue: String = "",
@@ -22,7 +30,7 @@ data class ObjecteUE(
     val relacions: List<RelacioUE> = emptyList(),
     val imatges_urls: List<String> = emptyList(),
     val sincronitzat: Boolean = false,
-    val fecha_creacio: Long = System.currentTimeMillis(),
+    val data: Date = Date(), // ✅ Cambiado de fecha_creacio a 'data' para compatibilidad Web
     val jaciment: String = ""
 ) : Serializable
 

@@ -3,11 +3,15 @@ package com.iticbcn.kronos.ui.galeria
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.edit
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.iticbcn.kronos.R
 import com.iticbcn.kronos.ui.adapter.GaleriaPagerAdapter
@@ -18,15 +22,34 @@ import com.iticbcn.kronos.ui.main.MainActivity
 import com.iticbcn.kronos.ui.ue.UEFragment
 import com.iticbcn.kronos.ui.ue.DBUEFragment
 import com.iticbcn.kronos.ui.accountConfig.AccountConfigActivity
-import androidx.core.view.get
 
 class GaleriaActivity : AppCompatActivity() {
 
     private var userJaciment: String = ""
+    private var userRol: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_galeria)
+
+        val searchCard: View = findViewById(R.id.search_card)
+        val optionsCard: View = findViewById(R.id.options_card)
+        val bottomNavContainer: View = findViewById(R.id.bottom_navigation_container)
+
+        // ✅ Ajuste dinámico para notch y barra de navegación
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            
+            // Bajamos las tarjetas superiores
+            searchCard.setPadding(0, systemBars.top, 0, 0)
+            optionsCard.setPadding(0, systemBars.top, 0, 0)
+            
+            // Subimos la navegación inferior
+            bottomNavContainer.setPadding(0, 0, 0, systemBars.bottom)
+            
+            insets
+        }
 
         val viewPager: ViewPager2 = findViewById(R.id.view_pager)
         val bottomNavigation: BottomNavigationView = findViewById(R.id.bottom_navigation)
@@ -47,34 +70,24 @@ class GaleriaActivity : AppCompatActivity() {
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                bottomNavigation.menu[position].isChecked = true
+                bottomNavigation.menu.getItem(position).isChecked = true
             }
         })
 
-        // Fetch user jaciment to use in filters
         fetchUserJaciment()
 
-        // MENU SUPERIOR DERECHO (Logout / Salir / Config)
         ivOptions.setOnClickListener { view ->
             val popup = PopupMenu(this, view)
             popup.menuInflater.inflate(R.menu.menu_galeria_options, popup.menu)
-
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_settings -> {
-                        val intent = Intent(this, AccountConfigActivity::class.java)
-                        startActivity(intent)
+                        startActivity(Intent(this, AccountConfigActivity::class.java))
                         true
                     }
                     R.id.action_logout -> {
-                        // 1. Cerrar sesión en Firebase
                         FirebaseAuth.getInstance().signOut()
-                        
-                        // 2. Limpiar preferencia de "Recordar"
-                        val prefs = getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE)
-                        prefs.edit { putBoolean("remember_me", false) }
-
-                        // 3. Volver al Login
+                        getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE).edit { putBoolean("remember_me", false) }
                         val intent = Intent(this, MainActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
@@ -82,8 +95,7 @@ class GaleriaActivity : AppCompatActivity() {
                         true
                     }
                     R.id.action_exit -> {
-                        finishAffinity() // Cierra todas las actividades
-                        System.exit(0)
+                        finishAffinity()
                         true
                     }
                     else -> false
@@ -92,27 +104,15 @@ class GaleriaActivity : AppCompatActivity() {
             popup.show()
         }
 
-        // BOTON DEL FILTRE
-        // BOTON DEL FILTRE
         btnShowFilter.setOnClickListener {
             val isDatabase = viewPager.currentItem == 1
             val popup = FilterPopup(this, userJaciment, isDatabase) { sector, ueId, tipus, onlyMine ->
-
-                // CORRECCIÓN:
-                // Si NO es director y estamos en local, forzamos true.
-                // Si ES director, respetamos lo que haya marcado en el checkbox (onlyMine).
-                val finalOnlyMine = if (userRol.lowercase() != "director" && !isDatabase) {
-                    true
-                } else {
-                    onlyMine
-                }
-
+                val finalOnlyMine = if (userRol.lowercase() != "director" && !isDatabase) true else onlyMine
                 val fragment = when (viewPager.currentItem) {
                     0 -> supportFragmentManager.findFragmentByTag("f0") as? UEFragment
                     1 -> supportFragmentManager.findFragmentByTag("f1") as? DBUEFragment
                     else -> null
                 }
-
                 when (fragment) {
                     is UEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, finalOnlyMine)
                     is DBUEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, finalOnlyMine)
@@ -122,10 +122,6 @@ class GaleriaActivity : AppCompatActivity() {
         }
     }
 
-    // 1. Añade esta variable arriba en la clase
-    private var userRol: String = ""
-
-    // 2. Actualiza la función fetchUserJaciment
     private fun fetchUserJaciment() {
         val userEmail = FirebaseAuth.getInstance().currentUser?.email
         if (userEmail != null) {

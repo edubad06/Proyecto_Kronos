@@ -1,46 +1,43 @@
 package com.iticbcn.kronos.data.repository
+
+import com.google.firebase.firestore.FirebaseFirestore
 import com.iticbcn.kronos.domain.model.ObjecteUE
+import kotlinx.coroutines.tasks.await
 
 object UERepository {
 
-    fun getEjemplosIniciales(): List<ObjecteUE> {
-        return listOf(
-            ObjecteUE(
-                jaciment = "Carrer del Francolí, 65",
-                codi_ue = "1001",
-                tipus_ue = "Estrat",
-                codi_sector = "Sector 1",
-                imatges_urls = emptyList(),
-                cronologia = "Romana",
-                descripcio = "Sedimento arcilloso con restos cerámicos",
-                textura = "Argilosa",
-                color = "Marró",
-                material = "Pedra",
-                estat_conservacio = "Bo",
-                fecha_creacio = System.currentTimeMillis()
-            ),
-            ObjecteUE(
-                jaciment = "Pedralbes",
-                codi_ue = "2005",
-                tipus_ue = "Estructura",
-                codi_sector = "Claustre",
-                imatges_urls = emptyList(),
-                cronologia = "Gòtica",
-                descripcio = "Pedres irregulars amb morter de calç",
-                textura = "Pedregosa",
-                color = "Gris",
-                material = "Morter",
-                estat_conservacio = "Regular",
-                fecha_creacio = System.currentTimeMillis()
-            )
-        )
+    // Eliminamos la variable 'db' de aquí para evitar el memory leak
+
+    /**
+     * Obtiene todos los IDs de los yacimientos disponibles en Firestore
+     */
+    suspend fun getJacimentsFromFirestore(): List<String> {
+        // Obtenemos la instancia de Firestore localmente dentro de la función
+        val db = FirebaseFirestore.getInstance()
+        return try {
+            val snapshot = db.collection("jaciments").get().await()
+            // Extraemos el campo 'id_jaciment'
+            snapshot.documents.mapNotNull { it.getString("id_jaciment") }
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
-    fun getSectoresPorJaciment(): Map<String, List<String>> {
-        return mapOf(
-            "Carrer del Francolí, 65" to listOf("Sector 1", "Sector 2", "Sector 3"),
-            "Pedralbes" to listOf("Claustre", "Jardins", "Cripta"),
-            "Tarraco" to listOf("Fòrum", "Amfiteatre", "Muralla")
-        )
+    /**
+     * Obtiene los sectores filtrados por el yacimiento seleccionado
+     */
+    suspend fun getSectoresPorJaciment(codiJaciment: String): List<String> {
+        // Obtenemos la instancia de Firestore localmente dentro de la función
+        val db = FirebaseFirestore.getInstance()
+        return try {
+            val snapshot = db.collection("sectors")
+                .whereEqualTo("codi_jaciment", codiJaciment)
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { it.getString("codi_sector") }
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 }

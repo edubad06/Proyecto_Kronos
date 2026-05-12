@@ -3,7 +3,7 @@ package com.iticbcn.kronos.ui.ue
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
+import android.view. View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -42,8 +42,9 @@ class DBUEFragment : Fragment() {
         // Cargar caché inicial silenciosamente (sin mostrar el aviso aún)
         originalList = DataManager.getUEListDB(requireContext())
         
-        val currentEmail = FirebaseAuth.getInstance().currentUser?.email ?: ""
-        adapter = ObjecteAdapter(originalList, isDatabaseSource = true, currentUserEmail = currentEmail)
+        // ✅ CORRECCIÓN: Usar UID para consistencia en la lógica de permisos del Adapter
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        adapter = ObjecteAdapter(originalList, isDatabaseSource = true, currentUserEmail = currentUid)
         recyclerView.adapter = adapter
 
         if (originalList.isEmpty()) {
@@ -125,12 +126,15 @@ class DBUEFragment : Fragment() {
     }
 
     fun applyFilters(jaciment: String, sector: String, ue: String, tipus: String, onlyMine: Boolean = false) {
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         val filteredList = originalList.filter { item ->
             val matchJaciment = jaciment.isEmpty() || item.jaciment == jaciment
             val matchSector = sector.isEmpty() || item.codi_sector == sector
             val matchUE = ue.isEmpty() || item.codi_ue.contains(ue, ignoreCase = true)
             val matchTipus = tipus.isEmpty() || item.tipus_ue == tipus
-            val matchOnlyMine = !onlyMine || item.registrat_per == (FirebaseAuth.getInstance().currentUser?.email ?: "")
+            
+            // ✅ CORRECCIÓN: Filtrar por UID (registrat_per) en lugar de Email para consistencia
+            val matchOnlyMine = !onlyMine || item.registrat_per == currentUid
 
             matchJaciment && matchSector && matchUE && matchTipus && matchOnlyMine
         }
