@@ -93,6 +93,7 @@
     <string name="error_carregar_dades">Error en carregar les dades</string>
     <string name="aplicar_filtre">Aplicar filtre</string>
 
+    <string name="recordam">Recorda\'m</string>
     <string name="forgot_password">T\'has oblidat de la contrasenya?</string>
     <string name="back">Enrera</string>
 
@@ -113,28 +114,11 @@
         <item>Retall</item>
     </string-array>
 
-    <!-- Opciones para Jaciment -->
-    <string-array name="jaciment_options">
-        <item>Carrer del Francolí, 65</item>
-        <item>Pedralbes</item>
-        <item>Tarraco</item>
-    </string-array>
-
-    <!-- VESTIGIAL ____________ Opciones para Sector   -->
-    <string-array name="sector_options">
-        <item>A Rasa I</item>
-        <item>Sector B</item>
-        <item>Zona Nord</item>
-    </string-array>
-
     <!-- objecte adapter -->
     <string name="jaciment_label">Jaciment: %1$s</string>
     <string name="sector_label">Sector: %1$s</string>
     <string name="ue_label">UE: %1$s</string>
     <string name="tipus_label">Tipus UE: %1$s</string>
-    <string name="lorem_ipsum">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit...
-    </string>
     <string name="hello_blank_fragment">Hola fragment en blanc</string>
     <string name="enviar">Enviar</string>
 </resources>
