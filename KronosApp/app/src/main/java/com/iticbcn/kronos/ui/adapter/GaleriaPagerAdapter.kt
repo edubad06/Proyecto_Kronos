@@ -7,13 +7,19 @@ import com.iticbcn.kronos.ui.ue.DBUEFragment
 import com.iticbcn.kronos.ui.ue.UEFragment
 
 class GaleriaPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
-    override fun getItemCount(): Int = 2
+
+    private val fragments = listOf(
+        UEFragment(),
+        DBUEFragment()
+    )
+
+    override fun getItemCount() = fragments.size
 
     override fun createFragment(position: Int): Fragment {
-        return when (position) {
-            0 -> UEFragment()    // Pestaña Local
-            1 -> DBUEFragment()  // Pestaña Base de Datos
-            else -> UEFragment()
-        }
+        return fragments[position]
+    }
+
+    fun getFragment(position: Int): Fragment {
+        return fragments[position]
     }
 }

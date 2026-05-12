@@ -22,6 +22,7 @@ import com.iticbcn.kronos.ui.main.MainActivity
 import com.iticbcn.kronos.ui.ue.UEFragment
 import com.iticbcn.kronos.ui.ue.DBUEFragment
 import com.iticbcn.kronos.ui.accountConfig.AccountConfigActivity
+import androidx.core.view.get
 
 class GaleriaActivity : AppCompatActivity() {
 
@@ -64,8 +65,13 @@ class GaleriaActivity : AppCompatActivity() {
         val btnShowFilter: Button = findViewById(R.id.btn_show_filter)
         val ivOptions: ImageView = findViewById(R.id.iv_galeria_options)
 
-        viewPager.adapter = GaleriaPagerAdapter(this)
-        viewPager.isUserInputEnabled = false
+        val adapter = GaleriaPagerAdapter(this)
+        viewPager.adapter = adapter
+        viewPager.isUserInputEnabled = true
+
+
+
+
 
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -78,7 +84,7 @@ class GaleriaActivity : AppCompatActivity() {
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                bottomNavigation.menu.getItem(position).isChecked = true
+                bottomNavigation.menu[position].isChecked = true
             }
         })
 
@@ -95,7 +101,7 @@ class GaleriaActivity : AppCompatActivity() {
                     }
                     R.id.action_logout -> {
                         FirebaseAuth.getInstance().signOut()
-                        getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE).edit { putBoolean("remember_me", false) }
+                        getSharedPreferences("AUTH_PREFS", MODE_PRIVATE).edit { putBoolean("remember_me", false) }
                         val intent = Intent(this, MainActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
@@ -114,15 +120,23 @@ class GaleriaActivity : AppCompatActivity() {
 
         btnShowFilter.setOnClickListener {
             val isDatabase = viewPager.currentItem == 1
+
             val popup = FilterPopup(this, userJaciment, isDatabase) { sector, ueId, tipus, onlyMine ->
-                val finalOnlyMine = if (userRol.lowercase() != "director" && !isDatabase) true else onlyMine
-                
-                // Buscamos los fragmentos por su ID de posición en el ViewPager2
-                val fragment = supportFragmentManager.findFragmentByTag("f" + viewPager.currentItem)
+
+                val finalOnlyMine =
+                    if (userRol.lowercase() != "director" && !isDatabase) true
+                    else onlyMine
+
+                val fragment = (viewPager.adapter as GaleriaPagerAdapter)
+                    .getFragment(viewPager.currentItem)
 
                 when (fragment) {
-                    is UEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, finalOnlyMine)
-                    is DBUEFragment -> fragment.applyFilters(userJaciment, sector, ueId, tipus, finalOnlyMine)
+                    is UEFragment -> fragment.applyFilters(
+                        userJaciment, sector, ueId, tipus, finalOnlyMine
+                    )
+                    is DBUEFragment -> fragment.applyFilters(
+                        userJaciment, sector, ueId, tipus, finalOnlyMine
+                    )
                 }
             }
             popup.show()

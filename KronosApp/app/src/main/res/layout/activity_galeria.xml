@@ -21,21 +21,24 @@
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
+
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/cabecera_logo"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/logo"
+            android:src="@drawable/logo_kronos" />
+
+        <View
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Kronos"
-            android:textColor="@color/text_main"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:fontFamily="serif" />
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/iv_galeria_options"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:contentDescription="@string/titol_configuracio"
             android:padding="8dp"
             android:src="@drawable/ic_settings"
             app:tint="@color/text_secondary"
@@ -68,7 +71,8 @@
             app:iconTint="@color/text_secondary"
             app:iconGravity="textStart"
             android:gravity="start|center_vertical"
-            android:paddingStart="20dp" />
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"/>
     </com.google.android.material.card.MaterialCardView>
 
     <androidx.viewpager2.widget.ViewPager2

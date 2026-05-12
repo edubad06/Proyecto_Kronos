@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -39,16 +38,7 @@
                     android:layout_marginBottom="24dp"
                     android:contentDescription="@string/logo"
                     android:scaleType="fitCenter"
-                    tools:src="@drawable/upload_document" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Benvingut"
-                    android:textColor="@color/text_main"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="24dp" />
+                    android:src="@drawable/logo_kronos" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilUser"
@@ -103,7 +93,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Recorda'm"
+                    android:text="@string/recordam"
                     android:buttonTint="@color/primary_plum"
                     android:textColor="@color/text_main" />
 

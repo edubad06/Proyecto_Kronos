@@ -31,13 +31,6 @@
                 android:padding="32dp">
 
                 <!-- Avatar Cercle -->
-                <View
-                    android:id="@+id/avatar_placeholder"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:background="@drawable/ic_settings"
-                    android:backgroundTint="@color/border_color"
-                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:id="@+id/tvNombreHeader"
