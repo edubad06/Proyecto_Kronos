@@ -80,9 +80,9 @@ def lambda_handler(event, context):
         sql_sector = """
         MERGE INTO SECTORS t 
         USING (SELECT :v_codi as codi FROM dual) s ON (t.codi_sector = s.codi)
-        WHEN MATCHED THEN UPDATE SET t.id_jaciment = (SELECT id_jaciment FROM JACIMENTS WHERE codi_jaciment = :v_codi_jac), t.nom = :v_nom, t.descripcio = :v_descripcio, t.data = :v_data
-        WHEN NOT MATCHED THEN INSERT (codi_sector, id_jaciment, nom, descripcio, data) 
-        VALUES (:v_codi, (SELECT id_jaciment FROM JACIMENTS WHERE codi_jaciment = :v_codi_jac), :v_nom, :v_descripcio, :v_data)
+        WHEN MATCHED THEN UPDATE SET t.id_jaciment = (SELECT id_jaciment FROM JACIMENTS WHERE codi_jaciment = :v_codi_jac), t.nom = :v_nom, t.descripcio = :v_descripcio, t.data = :v_data, t.registrat_per = :v_reg
+        WHEN NOT MATCHED THEN INSERT (codi_sector, id_jaciment, nom, descripcio, data, registrat_per) 
+        VALUES (:v_codi, (SELECT id_jaciment FROM JACIMENTS WHERE codi_jaciment = :v_codi_jac), :v_nom, :v_descripcio, :v_data, :v_reg)
         """
         sql_del_foto_sec = "DELETE FROM fotografies_sector WHERE id_sector = (SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi)"
         sql_ins_foto_sec = "INSERT INTO fotografies_sector (id_sector, url_imatge) VALUES ((SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi), :v_url)"
@@ -96,7 +96,8 @@ def lambda_handler(event, context):
                     "v_codi_jac": p.get('codi_jaciment'), 
                     "v_nom": p.get('nom'),
                     "v_descripcio": p.get('descripcio'),
-                    "v_data": p.get('data')
+                    "v_data": p.get('data'),
+                    "v_reg": p.get('registrat_per')
                 })
                 
                 # Actualizar las fotos asociadas al sector
@@ -120,9 +121,9 @@ def lambda_handler(event, context):
         WHEN MATCHED THEN UPDATE SET t.id_sector = (SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi_sec), 
             t.tipus_ue = :v_tipus, t.descripcio = :v_descripcio, t.material = :v_mat, t.estat_conservacio = :v_estat, 
             t.cronologia = :v_crono, t.textura = :v_textura, t.color = :v_color, 
-            t.coordenada_x = :v_x, t.coordenada_y = :v_y, t.coordenada_z = :v_z, t.data = :v_data
-        WHEN NOT MATCHED THEN INSERT (codi_ue, id_sector, tipus_ue, descripcio, material, estat_conservacio, cronologia, textura, color, coordenada_x, coordenada_y, coordenada_z, data) 
-            VALUES (:v_codi, (SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi_sec), :v_tipus, :v_descripcio, :v_mat, :v_estat, :v_crono, :v_textura, :v_color, :v_x, :v_y, :v_z, :v_data)
+            t.coordenada_x = :v_x, t.coordenada_y = :v_y, t.coordenada_z = :v_z, t.data = :v_data, t.registrat_per = :v_reg
+        WHEN NOT MATCHED THEN INSERT (codi_ue, id_sector, tipus_ue, descripcio, material, estat_conservacio, cronologia, textura, color, coordenada_x, coordenada_y, coordenada_z, data, registrat_per) 
+            VALUES (:v_codi, (SELECT id_sector FROM SECTORS WHERE codi_sector = :v_codi_sec), :v_tipus, :v_descripcio, :v_mat, :v_estat, :v_crono, :v_textura, :v_color, :v_x, :v_y, :v_z, :v_data, :v_reg)
         """
         
         sql_delete_fotos = "DELETE FROM fotografies_ue WHERE id_ue = (SELECT id_ue FROM UNITATS_ESTRATIGRAFIQUES WHERE codi_ue = :v_codi)"
@@ -150,7 +151,8 @@ def lambda_handler(event, context):
                     "v_x": p.get('x'),
                     "v_y": p.get('y'),
                     "v_z": p.get('z'),
-                    "v_data": p.get('data')
+                    "v_data": p.get('data'),
+                    "v_reg": p.get('registrat_per')
                 })
 
                 # Gestionar las fotos de la UE
