@@ -59,7 +59,14 @@ const crearFicha = function(id, titulo, subtitulo, categoria, infoDreta, tab) {
  * Se usa tanto para la carga inicial como para los filtros.
  */
 const pintarFitxes = function(fitxes) {
-    contenedor.replaceChildren(); // limpio antes de pintar
+    contenedor.replaceChildren();
+    if (fitxes.length === 0) {
+        const msg = document.createElement('p');
+        msg.style.cssText = 'text-align:center;color:#888888;padding:2rem';
+        msg.textContent = "No s'han trobat fitxes.";
+        contenedor.appendChild(msg);
+        return;
+    }
     fitxes.forEach(f => {
         crearFicha(f.id, f.nom, f.subtitol, f.categoria, f.info, f.tab);
     });
