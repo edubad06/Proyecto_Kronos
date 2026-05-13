@@ -15,7 +15,6 @@ const tituloFicha = document.querySelector('.titulo-pagina');
 let modoEdicion = false;
 const rol = sessionStorage.getItem("rol");
 const uid = sessionStorage.getItem("uid");
-const emailUsuari = sessionStorage.getItem("email");
 let map;
 let marcador;
 let latDef = 41.386978;  
@@ -227,7 +226,7 @@ const cargarFicha = async function() {
 
             //mapa
             const titMAP = crearDiv('titulo-bloque-interno');
-            titMAP.textContent="Mapa";
+            titMAP.textContent="Map";
             colDcha.appendChild(titMAP);
             const contMapa = crearDiv('container-map');
             contMapa.id = 'map';
@@ -280,16 +279,12 @@ const cargarFicha = async function() {
         }
         if (rol !== 'director') {
             if (tab === 'jaciment') {
+                //técnico no puede modificar ni borrar jaciments
                 btn_modificar.style.display = 'none';
                 btn_borrar.style.display = 'none';
                 btn_guardar.style.display = 'none';
-            } else if (tab === 'sector') {
-                if (dades.registrat_per !== uid) {
-                    btn_modificar.style.display = 'none';
-                    btn_borrar.style.display = 'none';
-                    btn_guardar.style.display = 'none';
-                }
             } else if (tab === 'ue') {
+                //para UE, solo puede modificar/borrar si lo ha creado él
                 if (dades.registrat_per !== uid) {
                     btn_modificar.style.display = 'none';
                     btn_borrar.style.display = 'none';
@@ -473,23 +468,31 @@ btnPDF.addEventListener('click', function() {
 dropZone.addEventListener("dragover", (event) => {
     event.preventDefault();
 });
-dropZone.addEventListener("drop", (event) => {
+dropZone.addEventListener("drop", async (event) => {
     event.preventDefault();
     const files = event.dataTransfer.files;
-    Array.from(files).forEach(file => {
+    Array.from(files).forEach(async file => {
         if (file.type.startsWith("image/")) {
+            //preview temporal mientras se sube
             const reader = new FileReader();
-            reader.onload = async (e) => {
-                const imatge = crearImatge(e.target.result, null);
+            reader.onload = (e) => {
+                const imatge = crearImatge(e.target.result, null); // null porque aún no tiene URL de S3
+                imatge.dataset.temporal = 'true';//marco como temporal
                 dropZone.appendChild(imatge);
-                if (id) {
-                    const publicUrl = await subirImatge(file, id, coleccio);
-                    if (publicUrl) {
-                        imatge.querySelector('img').src = publicUrl;
-                    }
-                }
             };
             reader.readAsDataURL(file);
+            //subo a S3
+            if (id) {
+                const publicUrl = await subirImatge(file, id, coleccio);
+                //actualizo la imagen temporal con la URL real
+                if (publicUrl) {
+                    const imatgesTemporal = dropZone.querySelector('[data-temporal="true"]');
+                    if (imatgesTemporal) {
+                        imatgesTemporal.querySelector('img').src = publicUrl;
+                        imatgesTemporal.removeAttribute('data-temporal');
+                    }
+                }
+            }
         }
     });
 });
