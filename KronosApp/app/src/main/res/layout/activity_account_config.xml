@@ -13,7 +13,6 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- AVATAR + NOMBRE ENCABEZADO (Estil Tarjeta Perfil CSS) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,8 +28,6 @@
                 android:orientation="vertical"
                 android:gravity="center"
                 android:padding="32dp">
-
-                <!-- Avatar Cercle -->
 
                 <TextView
                     android:id="@+id/tvNombreHeader"
@@ -53,7 +50,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- SECCIÓN: INFORMACIÓN DE CUENTA -->
+        <!-- SECCIÓ: INFORMACIÓ DE COMPTE -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -81,7 +78,6 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
-                <!-- CAMPO: NOMBRE -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -107,7 +103,6 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_color" android:layout_marginHorizontal="16dp"/>
 
-                <!-- CAMPO: EMAIL -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -133,7 +128,6 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_color" android:layout_marginHorizontal="16dp"/>
 
-                <!-- CAMPO: EXCAVACIÓN -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -159,7 +153,6 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_color" android:layout_marginHorizontal="16dp"/>
 
-                <!-- CAMPO: ROL -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -206,5 +199,4 @@
             android:text="@string/btn_tornar_enrera" />
 
     </LinearLayout>
-
 </androidx.core.widget.NestedScrollView>

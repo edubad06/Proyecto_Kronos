@@ -8,7 +8,7 @@
     android:background="@color/app_background"
     tools:context=".ui.galeria.GaleriaActivity">
 
-    <!-- Cabecera Principal (Estilo CSS) -->
+    <!-- capçalera Principal -->
     <LinearLayout
         android:id="@+id/cabecera_principal"
         android:layout_width="match_parent"
@@ -47,7 +47,7 @@
             android:focusable="true" />
     </LinearLayout>
 
-    <!-- Barra de Filtros (Estilo Píldora) -->
+    <!-- Barra de Filtres  -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/search_card"
         android:layout_width="match_parent"
@@ -83,7 +83,7 @@
         app:layout_constraintTop_toBottomOf="@id/search_card"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation_container" />
 
-    <!-- Navegación Inferior Flotante -->
+    <!-- Navegació Inferior -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottom_navigation_container"
         android:layout_width="wrap_content"
@@ -105,7 +105,7 @@
             app:labelVisibilityMode="unlabeled"
             app:itemIconTint="@color/primary_plum"
             app:itemRippleColor="@color/app_background"
-            app:menu="@menu/bottom_navigation_menu" />
+            app:menu="@menu/bottom_navigation_menu"/>
 
     </com.google.android.material.card.MaterialCardView>
 

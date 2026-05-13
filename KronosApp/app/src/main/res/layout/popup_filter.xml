@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="320dp"
     android:layout_height="wrap_content"
     app:cardCornerRadius="20dp"
@@ -18,14 +17,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Filtrar cerca"
+            android:text="@string/filtrar_cerca"
             android:layout_gravity="center"
             android:textColor="@color/primary_plum"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="24dp" />
 
-        <!-- SECTOR (Dropdown) -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Kronos.TextInputLayout.Pill.ExposedDropdownMenu"
             android:layout_width="match_parent"
@@ -43,7 +41,6 @@
                 android:paddingBottom="16dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- CODI UE -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Kronos.TextInputLayout.Pill"
             android:layout_width="match_parent"
@@ -59,7 +56,6 @@
                 android:paddingBottom="16dp" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- TIPUS UE (Dropdown) -->
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.Kronos.TextInputLayout.Pill.ExposedDropdownMenu"
             android:layout_width="match_parent"

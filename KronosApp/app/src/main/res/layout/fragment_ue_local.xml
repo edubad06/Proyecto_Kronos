@@ -31,14 +31,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_upload_all"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:contentDescription="Pujar totes les UE"
-        android:src="@drawable/upload_document"
-        app:tint="@color/white"
+        android:text="@string/pujar_totes"
+        android:textColor="@color/white"
+        app:icon="@drawable/upload_document"
         app:backgroundTint="@color/primary_plum_light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -48,10 +48,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Nova UE"
+        android:text="@string/nova_ue"
         android:textColor="@color/white"
         app:icon="@android:drawable/ic_input_add"
-        app:iconTint="@color/white"
         app:backgroundTint="@color/primary_plum"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

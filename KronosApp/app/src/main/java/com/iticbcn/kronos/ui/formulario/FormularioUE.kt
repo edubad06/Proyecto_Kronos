@@ -5,13 +5,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,7 +50,6 @@ class FormularioUE : AppCompatActivity() {
     private var isFromDatabase: Boolean = false
     private var saveJob: Job? = null
     private var deleteJob: Job? = null
-    private lateinit var progressBar: ProgressBar
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -98,7 +95,6 @@ class FormularioUE : AppCompatActivity() {
         val actvSector = findViewById<AutoCompleteTextView>(R.id.actv_sector)
         val actvTipus = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue)
         val rvFotos = findViewById<RecyclerView>(R.id.rv_fotos_formulario)
-        progressBar = findViewById(R.id.progressBar)
 
         rvFotos.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         fotoAdapter = FotoAdapter(selectedUris, isReadOnly) { uri ->
@@ -249,26 +245,33 @@ class FormularioUE : AppCompatActivity() {
 
     private fun actualizarEnBaseDeDatos(ueText: String, jacimentText: String) {
         saveJob = CoroutineScope(Dispatchers.Main).launch {
-            progressBar.visibility = View.VISIBLE
             try {
                 val finalUrls = mutableListOf<String>()
+
                 selectedUris.forEach { uri ->
-                    if (uri.toString().startsWith("http")) finalUrls.add(uri.toString())
-                    else S3Service.uploadImage(this@FormularioUE, uri)?.let { finalUrls.add(it) }
+                    if (uri.toString().startsWith("http")) {
+                        finalUrls.add(uri.toString())
+                    } else {
+                        S3Service.uploadImage(this@FormularioUE, uri)
+                            ?.let { finalUrls.add(it) }
+                    }
                 }
 
                 val docId = "${jacimentText}_${ueText}".replace("/", "_")
+
                 val finalObject = ObjecteUE(
                     codi_ue = ueText,
                     codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
                     tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
                     descripcio = findViewById<TextInputEditText>(R.id.et_descripcio).text.toString(),
-                    registrat_per = objetoAEditar?.registrat_per ?: FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                    registrat_per = objetoAEditar?.registrat_per
+                        ?: FirebaseAuth.getInstance().currentUser?.uid ?: "",
                     material = findViewById<TextInputEditText>(R.id.et_material).text.toString(),
                     cronologia = findViewById<TextInputEditText>(R.id.et_cronologia).text.toString(),
                     textura = findViewById<TextInputEditText>(R.id.Textura).text.toString(),
                     color = findViewById<TextInputEditText>(R.id.et_color).text.toString(),
-                    estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.text?.toString() ?: "",
+                    estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)
+                        ?.text?.toString() ?: "",
                     relacions = obtenerRelacionesDeVista(),
                     imatges_urls = finalUrls,
                     sincronitzat = true,
@@ -276,15 +279,35 @@ class FormularioUE : AppCompatActivity() {
                     data = objetoAEditar?.data ?: Date()
                 )
 
-                FirebaseFirestore.getInstance().collection("unitats_estratigrafiques").document(docId).set(finalObject).await()
+                FirebaseFirestore.getInstance()
+                    .collection("unitats_estratigrafiques")
+                    .document(docId)
+                    .set(finalObject)
+                    .await()
+
                 if (objetoAEditar != null) {
-                    val oldId = "${objetoAEditar!!.jaciment}_${objetoAEditar!!.codi_ue}".replace("/", "_")
-                    if (oldId != docId) FirebaseFirestore.getInstance().collection("unitats_estratigrafiques").document(oldId).delete().await()
+                    val oldId =
+                        "${objetoAEditar!!.jaciment}_${objetoAEditar!!.codi_ue}"
+                            .replace("/", "_")
+
+                    if (oldId != docId) {
+                        FirebaseFirestore.getInstance()
+                            .collection("unitats_estratigrafiques")
+                            .document(oldId)
+                            .delete()
+                            .await()
+                    }
                 }
+
                 finish()
+
             } catch (e: Exception) {
-                Toast.makeText(this@FormularioUE, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-            } finally { progressBar.visibility = View.GONE }
+                Toast.makeText(
+                    this@FormularioUE,
+                    "Error: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 

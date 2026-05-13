@@ -16,6 +16,7 @@
             android:id="@+id/iv_mini_foto"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/imatge"
             android:scaleType="centerCrop"
             android:background="@color/app_background" />
 
@@ -24,6 +25,7 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:layout_margin="4dp"
+            android:contentDescription="@string/sortir"
             android:padding="6dp"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             android:background="@drawable/circular_delete_bg"

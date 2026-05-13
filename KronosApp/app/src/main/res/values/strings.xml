@@ -121,4 +121,10 @@
     <string name="tipus_label">Tipus UE: %1$s</string>
     <string name="hello_blank_fragment">Hola fragment en blanc</string>
     <string name="enviar">Enviar</string>
+    <string name="imatge">Imatge</string>
+    <string name="sortir">Sortir</string>
+    <string name="filtrar_cerca">Filtrar cerca</string>
+    <string name="local">Local</string>
+    <string name="base_de_dades">Base de Dades</string>
+    <string name="pujar_totes">Pujar totes</string>
 </resources>

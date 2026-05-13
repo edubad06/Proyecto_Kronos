@@ -60,7 +60,7 @@
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
                     android:textColor="@color/text_main"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     android:layout_marginEnd="4dp"
                     tools:text="Pedralbes" />
@@ -73,7 +73,7 @@
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
                     android:textColor="@color/text_main"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     android:layout_marginEnd="4dp"
                     tools:text="Sector A" />
@@ -86,7 +86,7 @@
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
                     android:textColor="@color/text_main"
-                    android:textSize="10sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     tools:text="Estrat" />
             </LinearLayout>

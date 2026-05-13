@@ -30,7 +30,7 @@
                 android:orientation="vertical"
                 android:padding="32dp">
 
-                <!-- Logo Login -->
+                <!-- Logo -->
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivLogoIcon"
                     android:layout_width="200dp"
@@ -39,7 +39,7 @@
                     android:contentDescription="@string/logo"
                     android:scaleType="fitCenter"
                     android:src="@drawable/logo_kronos" />
-
+                <!-- camps per accedir -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilUser"
                     style="@style/Widget.Kronos.TextInputLayout.Pill"
