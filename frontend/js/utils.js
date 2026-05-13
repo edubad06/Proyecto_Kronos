@@ -191,7 +191,10 @@ const sincronitzar = async function() {
  */
 
 auth.onAuthStateChanged(function(user) {
-    if (!user) return; // si no hay usuario, no hacemos nada
+    if (!user) {
+        window.location.assign("index.html");
+        return;
+    }
     const nom = sessionStorage.getItem("nom");
     
     // Avatar pequeño del navbar

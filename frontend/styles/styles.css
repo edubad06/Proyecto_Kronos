@@ -308,7 +308,7 @@ input:not(:disabled), textarea:not(:disabled), select:not(:disabled) {
 
 .barra-filtros {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
 }
