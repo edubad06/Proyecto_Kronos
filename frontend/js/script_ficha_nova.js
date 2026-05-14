@@ -106,6 +106,13 @@ const inicialitzar = async function() { //Es asíncrona porque necesita consulta
         const jaciments = await db.collection('jaciments').get();
         jaciments.forEach(doc => {
             const d = doc.data();
+
+            //si es técnico, solo mostramos los jaciments donde es editor
+            if (rol === 'tecnic') {
+                const emailUsuari = sessionStorage.getItem("email");
+                if (!d.editors || !d.editors.includes(emailUsuari)) return;
+            }
+
             const option = document.createElement('option');
             option.value = d.codi_jaciment;
             option.textContent = d.nom;
@@ -115,12 +122,31 @@ const inicialitzar = async function() { //Es asíncrona porque necesita consulta
     //cargo los sectores en la select de ues
     if (tab === 'ue') {
         const selectSec = document.getElementById('i-ue-codiSec');
+        const emailUsuari = sessionStorage.getItem("email");
+    
+        // Si es técnico, primero obtenemos los jaciments permitidos
+        let jacimentsPermesos = [];
+        if (rol === 'tecnic') {
+            const jaciments = await db.collection('jaciments').get();
+            jaciments.forEach(doc => {
+                const d = doc.data();
+                if (d.editors && d.editors.includes(emailUsuari)) {
+                    jacimentsPermesos.push(d.codi_jaciment);
+                }
+            });
+        }
+
         const sectors = await db.collection('sectors').get();
         sectors.forEach(doc => {
             const d = doc.data();
+            const codiSector = d.codi_sector || d.id_sector || doc.id;
+            const codiJaciment = d.codi_jaciment || d.id_jaciment || '';
+            
+            // Si es técnico, solo mostramos sectores de jaciments permitidos
+            if (rol === 'tecnic' && !jacimentsPermesos.includes(codiJaciment)) return;
             const option = document.createElement('option');
-            option.value = d.codi_sector;
-            option.textContent = `${d.nom} (${d.codi_jaciment})`;
+            option.value = codiSector;
+            option.textContent = `${d.nom} (${codiJaciment})`;
             selectSec.appendChild(option);
         });
     }
@@ -185,7 +211,7 @@ btn_guardar.addEventListener("click", async function(){
                 estat_conservacio: document.getElementById('i-ue-estado').value,
                 data: firebase.firestore.Timestamp.now(),
                 descripcio: document.getElementById('i-ue-descr').value,
-                registrat_per: sessionStorage.getItem("nom"),
+                registrat_per: sessionStorage.getItem("uid"),
                 sincronitzat: false,
                 //recojo las relaciones y filtro las que están vacías
                 relacions: [
