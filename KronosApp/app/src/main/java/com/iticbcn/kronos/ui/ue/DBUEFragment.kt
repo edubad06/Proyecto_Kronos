@@ -10,11 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.iticbcn.kronos.ui.adapter.ObjecteAdapter
-import com.iticbcn.kronos.domain.model.ObjecteUE
+import com.iticbcn.kronos.data.local.db.entities.ObjecteUE
 import com.iticbcn.kronos.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.iticbcn.kronos.data.local.DataManager
 
 class DBUEFragment : Fragment() {
 

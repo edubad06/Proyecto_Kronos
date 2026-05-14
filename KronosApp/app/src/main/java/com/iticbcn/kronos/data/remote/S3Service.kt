@@ -22,7 +22,7 @@ object S3Service {
         var apiConn: HttpURLConnection? = null
         var s3Conn: HttpURLConnection? = null
         try {
-            // Reutilizar token si se proporciona, sino pedirlo
+            // Reutilizar token si ES proporçiona, sinó pedirlo
             val token = authToken ?: FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token
             if (token == null) {
                 Log.e(TAG, "Error: No se pudo obtener el token de autenticación")
@@ -43,7 +43,6 @@ object S3Service {
                 setRequestProperty("Authorization", "Bearer $token")
                 setRequestProperty("X-Api-Key", API_KEY)
                 setRequestProperty("Content-Type", "application/json")
-                // ESTO ES NUEVO: Indica el tamaño exacto del cuerpo para evitar errores 500 en AWS
                 setFixedLengthStreamingMode(requestBody.toByteArray().size)
             }
 
@@ -61,7 +60,6 @@ object S3Service {
 
             if (uploadUrl.isNullOrEmpty()) return@withContext null
 
-            // PASO 2: Upload to S3
             s3Conn = (URL(uploadUrl).openConnection() as HttpURLConnection).apply {
                 requestMethod = "PUT"
                 connectTimeout = 60000 

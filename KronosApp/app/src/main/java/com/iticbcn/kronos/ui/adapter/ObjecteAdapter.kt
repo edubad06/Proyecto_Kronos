@@ -9,23 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.PopupMenu
 import android.widget.TextView
-import android.widget.Toast
-import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.iticbcn.kronos.R
-import com.iticbcn.kronos.data.local.DataManager
-import com.iticbcn.kronos.domain.model.ObjecteUE
-import com.iticbcn.kronos.data.remote.S3Service
+import com.iticbcn.kronos.data.local.db.entities.ObjecteUE
 import com.iticbcn.kronos.ui.formulario.FormularioUE
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Locale
 

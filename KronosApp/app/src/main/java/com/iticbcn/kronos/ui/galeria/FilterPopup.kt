@@ -9,8 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import com.iticbcn.kronos.R
-import com.iticbcn.kronos.data.local.DataManager
-import com.iticbcn.kronos.domain.model.TipusUEOptions
+import com.iticbcn.kronos.data.local.db.entities.TipusUEOptions
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.switchmaterial.SwitchMaterial
 import androidx.core.graphics.drawable.toDrawable

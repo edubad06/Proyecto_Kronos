@@ -5,12 +5,13 @@
     <color name="red">#FFFF0000</color>
 
     <!-- Estils basats en el document CSS -->
-    <color name="app_background">#f5f0f0</color>
+    <color name="app_background">#FDF8F8</color> <!-- Color de fons molt clar rojenc -->
     <color name="text_main">#1a1a1a</color>
     <color name="text_secondary">#888888</color>
     <color name="primary_plum">#3d1f2e</color>
     <color name="primary_plum_dark">#2a1520</color>
-    <color name="primary_plum_light">#634454</color>
+    <color name="primary_plum_light">#9E5E6B</color> <!-- Granat més definit i càlid -->
+    <color name="primary_plum_very_light">#F9EAEB</color> <!-- Granat clar (rojenc) per a contenidors i indicadors -->
     <color name="border_color">#e0d8d8</color>
     <color name="login_background">#b8a8a8</color>
 
@@ -22,16 +23,18 @@
     <!-- Mappings semàntics per Material 3 -->
     <color name="colorPrimary">@color/primary_plum</color>
     <color name="colorOnPrimary">@color/white</color>
-    <color name="colorPrimaryContainer">#f0e6e6</color>
+    <color name="colorPrimaryContainer">@color/primary_plum_very_light</color>
     <color name="colorOnPrimaryContainer">@color/primary_plum</color>
 
     <color name="colorSecondary">@color/primary_plum_light</color>
     <color name="colorOnSecondary">@color/white</color>
+    <color name="colorSecondaryContainer">@color/primary_plum_very_light</color>
+    <color name="colorOnSecondaryContainer">@color/primary_plum</color>
 
     <color name="colorSurface">@color/white</color>
     <color name="colorOnSurface">@color/text_main</color>
-    <color name="colorSurfaceVariant">@color/app_background</color>
-    <color name="colorOnSurfaceVariant">@color/text_secondary</color>
+    <color name="colorSurfaceVariant">@color/primary_plum_very_light</color> <!-- Substituït el lavanda per granat clar -->
+    <color name="colorOnSurfaceVariant">@color/primary_plum</color>
     <color name="colorOutline">@color/border_color</color>
 
     <color name="screen_background">@color/app_background</color>

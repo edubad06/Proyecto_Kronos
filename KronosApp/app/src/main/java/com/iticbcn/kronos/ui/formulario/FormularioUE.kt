@@ -18,33 +18,35 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.iticbcn.kronos.domain.model.ObjecteUE
-import com.iticbcn.kronos.domain.model.RelacioUE
+import com.iticbcn.kronos.data.local.db.entities.ObjecteUE
+import com.iticbcn.kronos.data.local.db.entities.RelacioUE
 import com.iticbcn.kronos.R
 import com.iticbcn.kronos.ui.adapter.FotoAdapter
-import com.iticbcn.kronos.data.local.DataManager
-import com.iticbcn.kronos.domain.model.TipusUEOptions
+import com.iticbcn.kronos.data.local.db.entities.TipusUEOptions
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.iticbcn.kronos.data.local.db.AppDatabase
 import com.iticbcn.kronos.data.remote.S3Service
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.ArrayList
 import java.util.Date
+import java.util.UUID
 
 class FormularioUE : AppCompatActivity() {
 
     private lateinit var fotoAdapter: FotoAdapter
     private val selectedUris = mutableListOf<Uri>()
-    private val deletedCloudUrls = mutableListOf<String>()
     private var objetoAEditar: ObjecteUE? = null
     private var isReadOnly: Boolean = false
     private var isFromDatabase: Boolean = false
@@ -90,7 +92,7 @@ class FormularioUE : AppCompatActivity() {
         isFromDatabase = intent.getBooleanExtra("EXTRA_IS_DB", false)
 
         val etUe: TextInputEditText = findViewById(R.id.et_ue)
-        val etJaciment = findViewById<AutoCompleteTextView>(R.id.et_jaciment)
+        val etJaciment = findViewById<TextInputEditText>(R.id.et_jaciment)
         val tilJaciment = findViewById<TextInputLayout>(R.id.til_jaciment)
         val actvSector = findViewById<AutoCompleteTextView>(R.id.actv_sector)
         val actvTipus = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue)
@@ -98,7 +100,17 @@ class FormularioUE : AppCompatActivity() {
 
         rvFotos.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         fotoAdapter = FotoAdapter(selectedUris, isReadOnly) { uri ->
-            if (uri.toString().startsWith("http")) deletedCloudUrls.add(uri.toString())
+            val url = uri.toString()
+
+            if (url.startsWith("http")) {
+
+                lifecycleScope.launch {
+                    try {
+                        S3Service.deleteImage(url)
+                    } catch (_: Exception) {
+                    }
+                }
+            }
         }
         rvFotos.adapter = fotoAdapter
 
@@ -116,8 +128,32 @@ class FormularioUE : AppCompatActivity() {
 
         setupDropdownManual(actvTipus, TipusUEOptions.getNames())
 
-        findViewById<Button>(R.id.btn_back).setOnClickListener { finish() }
-        
+        // --- CONFIGURACIÓN DE RETROCESO CON AVISO ---
+        val onBackPressedCallback = object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (hasThereBeenChanges()) {
+                    MaterialAlertDialogBuilder(this@FormularioUE)
+                        .setTitle("Sortir sense desar?")
+                        .setMessage("Tens canvis sense guardar. Si surts ara, es perdran definitivament.")
+                        .setNegativeButton("Cancel·lar", null)
+                        .setPositiveButton("Sortir") { _, _ ->
+                            isEnabled = false // Desactiva el callback para permitir la salida
+                            onBackPressedDispatcher.onBackPressed()
+                        }
+                        .show()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+        // Actualizamos el botón back para que use el dispatcher
+        findViewById<Button>(R.id.btn_back).setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+
         val btnEnviar = findViewById<Button>(R.id.btn_enviar)
         btnEnviar.setOnClickListener {
             val ue = etUe.text.toString().trim()
@@ -155,22 +191,40 @@ class FormularioUE : AppCompatActivity() {
 
     private fun subirUEABaseDeDades(ueText: String, jacimentText: String) {
         saveJob = CoroutineScope(Dispatchers.Main).launch {
-            val progress = MaterialAlertDialogBuilder(this@FormularioUE).setTitle("Pujant...").setCancelable(false).show()
+
+            val progress = MaterialAlertDialogBuilder(this@FormularioUE)
+                .setTitle("Pujant...")
+                .setCancelable(false)
+                .show()
+
             try {
                 val user = FirebaseAuth.getInstance().currentUser
                 val token = user?.getIdToken(false)?.await()?.token
+
                 val publicUrls = mutableListOf<String>()
 
                 for (uri in selectedUris) {
-                    if (uri.toString().startsWith("http")) publicUrls.add(uri.toString())
-                    else S3Service.uploadImage(this@FormularioUE, uri, token)?.let { publicUrls.add(it) }
+                    if (uri.toString().startsWith("http")) {
+                        publicUrls.add(uri.toString())
+                    } else {
+                        S3Service.uploadImage(this@FormularioUE, uri, token)
+                            ?.let { publicUrls.add(it) }
+                    }
                 }
 
-                // Generar ID compuesta compatible con Web
-                val docId = "${jacimentText}_${ueText}".replace("/", "_")
-                val db = FirebaseFirestore.getInstance().collection("unitats_estratigrafiques")
+                val db = FirebaseFirestore.getInstance()
+                    .collection("unitats_estratigrafiques")
+
+                val docRef = if (objetoAEditar?.id != null) {
+                    db.document(objetoAEditar!!.id)
+                } else {
+                    db.document() // 🔥 ID automático
+                }
+
+                val id = docRef.id
 
                 val finalObjecte = ObjecteUE(
+                    id = id,
                     codi_ue = ueText,
                     codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
                     tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
@@ -188,16 +242,11 @@ class FormularioUE : AppCompatActivity() {
                     data = objetoAEditar?.data ?: Date()
                 )
 
-                db.document(docId).set(finalObjecte).await()
-                
-                if (objetoAEditar != null) {
-                    val oldId = "${objetoAEditar!!.jaciment}_${objetoAEditar!!.codi_ue}".replace("/", "_")
-                    if (oldId != docId) db.document(oldId).delete().await()
-                    DataManager.deleteUE(this@FormularioUE, objetoAEditar!!.codi_ue, objetoAEditar!!.jaciment)
-                }
-                
+                docRef.set(finalObjecte).await()
+
                 progress.dismiss()
                 finish()
+
             } catch (e: Exception) {
                 progress.dismiss()
                 Toast.makeText(this@FormularioUE, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -213,7 +262,7 @@ class FormularioUE : AppCompatActivity() {
         findViewById<TextInputEditText>(R.id.et_color).setText(obj.color)
         findViewById<TextInputEditText>(R.id.et_material).setText(obj.material)
         findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.setText(obj.estat_conservacio)
-        findViewById<AutoCompleteTextView>(R.id.et_jaciment).setText(obj.jaciment, false)
+        findViewById<TextInputEditText>(R.id.et_jaciment).setText(obj.jaciment)
         actualizarSectores(obj.jaciment, findViewById(R.id.actv_sector))
         findViewById<AutoCompleteTextView>(R.id.actv_sector).setText(obj.codi_sector, false)
         findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).setText(obj.tipus_ue, false)
@@ -236,7 +285,7 @@ class FormularioUE : AppCompatActivity() {
 
     private fun guardarOActualizar(etUe: TextInputEditText, tilUe: TextInputLayout) {
         val ue = etUe.text.toString().trim()
-        val jac = findViewById<AutoCompleteTextView>(R.id.et_jaciment).text.toString()
+        val jac = findViewById<TextInputEditText>(R.id.et_jaciment).text.toString()
         if (ue.isEmpty()) { tilUe.error = "Obligatori"; return }
 
         if (isFromDatabase || objetoAEditar?.id != null) actualizarEnBaseDeDatos(ue, jac)
@@ -246,6 +295,7 @@ class FormularioUE : AppCompatActivity() {
     private fun actualizarEnBaseDeDatos(ueText: String, jacimentText: String) {
         saveJob = CoroutineScope(Dispatchers.Main).launch {
             try {
+
                 val finalUrls = mutableListOf<String>()
 
                 selectedUris.forEach { uri ->
@@ -257,9 +307,17 @@ class FormularioUE : AppCompatActivity() {
                     }
                 }
 
-                val docId = "${jacimentText}_${ueText}".replace("/", "_")
+                val db = FirebaseFirestore.getInstance()
+                    .collection("unitats_estratigrafiques")
+
+                val docRef = objetoAEditar?.id?.let {
+                    db.document(it)
+                } ?: db.document()
+
+                val id = docRef.id
 
                 val finalObject = ObjecteUE(
+                    id = id,
                     codi_ue = ueText,
                     codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
                     tipus_ue = findViewById<AutoCompleteTextView>(R.id.actv_tipus_ue).text.toString(),
@@ -270,8 +328,7 @@ class FormularioUE : AppCompatActivity() {
                     cronologia = findViewById<TextInputEditText>(R.id.et_cronologia).text.toString(),
                     textura = findViewById<TextInputEditText>(R.id.Textura).text.toString(),
                     color = findViewById<TextInputEditText>(R.id.et_color).text.toString(),
-                    estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)
-                        ?.text?.toString() ?: "",
+                    estat_conservacio = findViewById<TextInputEditText>(R.id.et_estat_conservacio)?.text?.toString() ?: "",
                     relacions = obtenerRelacionesDeVista(),
                     imatges_urls = finalUrls,
                     sincronitzat = true,
@@ -279,67 +336,95 @@ class FormularioUE : AppCompatActivity() {
                     data = objetoAEditar?.data ?: Date()
                 )
 
-                FirebaseFirestore.getInstance()
-                    .collection("unitats_estratigrafiques")
-                    .document(docId)
-                    .set(finalObject)
-                    .await()
-
-                if (objetoAEditar != null) {
-                    val oldId =
-                        "${objetoAEditar!!.jaciment}_${objetoAEditar!!.codi_ue}"
-                            .replace("/", "_")
-
-                    if (oldId != docId) {
-                        FirebaseFirestore.getInstance()
-                            .collection("unitats_estratigrafiques")
-                            .document(oldId)
-                            .delete()
-                            .await()
-                    }
+                docRef.set(finalObject).await()
+                withContext(Dispatchers.IO) {
+                    AppDatabase.getDatabase(this@FormularioUE)
+                        .ueDao()
+                        .insert(finalObject)
                 }
 
                 finish()
 
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@FormularioUE,
-                    "Error: ${e.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this@FormularioUE, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun eliminarFitxa() {
-        val ue = findViewById<TextInputEditText>(R.id.et_ue).text.toString()
-        val jac = findViewById<AutoCompleteTextView>(R.id.et_jaciment).text.toString()
-        val docId = "${jac}_${ue}".replace("/", "_")
+
+        val docId = objetoAEditar?.id ?: return
 
         if (isFromDatabase) {
+
             deleteJob = CoroutineScope(Dispatchers.Main).launch {
-                val progress = MaterialAlertDialogBuilder(this@FormularioUE).setTitle("Eliminant...").show()
+
+                val progress = MaterialAlertDialogBuilder(this@FormularioUE)
+                    .setTitle("Eliminant...")
+                    .show()
+
                 try {
-                    FirebaseFirestore.getInstance().collection("unitats_estratigrafiques").document(docId).delete().await()
+
+                    val fotos = objetoAEditar?.imatges_urls ?: emptyList()
+
+                    // Borrar imágenes del bucket S3
+                    fotos.forEach { url ->
+                        try {
+                            S3Service.deleteImage(url)
+                        } catch (_: Exception) {
+                        }
+                    }
+
+                    FirebaseFirestore.getInstance()
+                        .collection("unitats_estratigrafiques")
+                        .document(docId)
+                        .delete()
+                        .await()
+
+                    withContext(Dispatchers.IO) {
+                        objetoAEditar?.let {
+                            AppDatabase.getDatabase(this@FormularioUE)
+                                .ueDao()
+                                .delete(it)
+                        }
+                    }
+
                     progress.dismiss()
+
                     finish()
+
                 } catch (e: Exception) {
+
                     progress.dismiss()
-                    Toast.makeText(this@FormularioUE, "Error al eliminar", Toast.LENGTH_SHORT).show()
+
+                    Toast.makeText(
+                        this@FormularioUE,
+                        "Error al eliminar",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         } else {
-            DataManager.deleteUE(this, ue, jac)
-            finish()
+            lifecycleScope.launch {
+                objetoAEditar?.let {
+                    AppDatabase.getDatabase(this@FormularioUE)
+                        .ueDao()
+                        .delete(it)
+                }
+
+                withContext(Dispatchers.Main) {
+                    finish()
+                }
+            }
         }
     }
 
-    private fun cargarJacimentUsuario(etJaciment: AutoCompleteTextView, actvSector: AutoCompleteTextView) {
+    private fun cargarJacimentUsuario(etJaciment: TextInputEditText, actvSector: AutoCompleteTextView) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
         FirebaseFirestore.getInstance().collection("usuaris").whereEqualTo("email", user.email).get().addOnSuccessListener { query ->
             if (!query.isEmpty) {
                 val jac = query.documents[0].getString("excavacio") ?: ""
-                etJaciment.setText(jac, false)
+                etJaciment.setText(jac)
                 actualizarSectores(jac, actvSector)
             }
         }
@@ -391,7 +476,11 @@ class FormularioUE : AppCompatActivity() {
 
     private fun guardarEnLocal(ueText: String, jacimentText: String) {
         val user = FirebaseAuth.getInstance().currentUser
+
+        val id = objetoAEditar?.id ?: UUID.randomUUID().toString()
+
         val nou = ObjecteUE(
+            id = id,
             codi_ue = ueText,
             jaciment = jacimentText,
             codi_sector = findViewById<AutoCompleteTextView>(R.id.actv_sector).text.toString(),
@@ -408,10 +497,24 @@ class FormularioUE : AppCompatActivity() {
             sincronitzat = false,
             data = objetoAEditar?.data ?: Date()
         )
-        if (objetoAEditar != null) DataManager.deleteUE(this, objetoAEditar!!.codi_ue, objetoAEditar!!.jaciment)
-        DataManager.saveUE(this, nou)
-        Toast.makeText(this, "Desat localment", Toast.LENGTH_SHORT).show()
-        finish()
+
+        lifecycleScope.launch {
+            try {
+                val dao = AppDatabase.getDatabase(this@FormularioUE).ueDao()
+
+                dao.insert(nou)
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@FormularioUE, "Desat localment", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@FormularioUE, "Error al guardar localment", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun configurarBotonEliminar(btn: Button) {
@@ -435,5 +538,35 @@ class FormularioUE : AppCompatActivity() {
         val p = if (android.os.Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
         if (ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED) getContent.launch(arrayOf("image/*"))
         else requestPermissionLauncher.launch(p)
+    }
+    private fun hasThereBeenChanges(): Boolean {
+        if (isReadOnly) return false
+
+        // Si es una ficha nueva y hay algo escrito o alguna foto
+        if (objetoAEditar == null) {
+            return findViewById<TextInputEditText>(R.id.et_ue).text?.isNotEmpty() == true ||
+                    selectedUris.isNotEmpty() ||
+                    findViewById<TextInputEditText>(R.id.et_descripcio).text?.isNotEmpty() == true
+        }
+
+        // Si estamos editando, comparamos los campos críticos
+        val ueActual = findViewById<TextInputEditText>(R.id.et_ue).text.toString()
+        val descActual = findViewById<TextInputEditText>(R.id.et_descripcio).text.toString()
+        val jacimentActual = findViewById<TextInputEditText>(R.id.et_jaciment).text.toString()
+
+        // Comparamos también si la lista de URIs ha cambiado de tamaño o contenido
+        val fotosOriginales = objetoAEditar!!.imatges_urls.filter { it.isNotEmpty() }
+        val fotosCambiadas = selectedUris.size != fotosOriginales.size
+
+        return ueActual != objetoAEditar!!.codi_ue ||
+                descActual != objetoAEditar!!.descripcio ||
+                jacimentActual != objetoAEditar!!.jaciment ||
+                fotosCambiadas
+    }
+
+    override fun onDestroy() {
+        saveJob?.cancel()
+        deleteJob?.cancel()
+        super.onDestroy()
     }
 }

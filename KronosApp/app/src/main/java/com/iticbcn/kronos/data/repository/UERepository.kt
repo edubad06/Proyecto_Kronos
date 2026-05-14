@@ -1,7 +1,6 @@
 package com.iticbcn.kronos.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.iticbcn.kronos.domain.model.ObjecteUE
 import kotlinx.coroutines.tasks.await
 
 object UERepository {

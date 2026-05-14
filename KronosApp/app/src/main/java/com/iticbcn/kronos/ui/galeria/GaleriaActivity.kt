@@ -34,12 +34,13 @@ class GaleriaActivity : AppCompatActivity() {
         setContentView(R.layout.activity_galeria)
 
         val cabeceraPrincipal: View = findViewById(R.id.cabecera_principal)
-        val bottomNavContainer: View = findViewById(R.id.bottom_navigation_container)
+        val bottomNavigation: BottomNavigationView = findViewById(R.id.bottom_navigation)
 
-        // Ajuste dinámico para notch y barra de navegación
+        // Ajuste dinámico para notch y barra de navegación del sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
+            // Padding superior para que la cabecera no quede bajo el notch
             cabeceraPrincipal.setPadding(
                 cabeceraPrincipal.paddingLeft,
                 systemBars.top,
@@ -47,10 +48,11 @@ class GaleriaActivity : AppCompatActivity() {
                 cabeceraPrincipal.paddingBottom
             )
 
-            bottomNavContainer.setPadding(
-                bottomNavContainer.paddingLeft,
-                bottomNavContainer.paddingTop,
-                bottomNavContainer.paddingRight,
+            // Padding inferior para que el menú no quede bajo la barra de gestos/botones de Android
+            bottomNavigation.setPadding(
+                bottomNavigation.paddingLeft,
+                bottomNavigation.paddingTop,
+                bottomNavigation.paddingRight,
                 systemBars.bottom
             )
 
@@ -58,7 +60,6 @@ class GaleriaActivity : AppCompatActivity() {
         }
 
         val viewPager: ViewPager2 = findViewById(R.id.view_pager)
-        val bottomNavigation: BottomNavigationView = findViewById(R.id.bottom_navigation)
         val btnShowFilter: Button = findViewById(R.id.btn_show_filter)
         val ivOptions: ImageView = findViewById(R.id.iv_galeria_options)
 

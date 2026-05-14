@@ -14,6 +14,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.iticbcn.kronos.data.local.LocalAuthManager
+import com.iticbcn.kronos.data.sync.SyncUEWorker
 import com.iticbcn.kronos.databinding.ActivityMainBinding
 import com.iticbcn.kronos.ui.galeria.GaleriaActivity
 
@@ -34,6 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         // Si el usuario marcó "Recordar" y Firebase tiene sesión activa, saltamos el login
         if (rememberMe && auth.currentUser != null) {
+            iniciarSincronizacion()
             irAGaleria()
             return
         }
@@ -90,7 +93,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loginUser() {
-        // Limpiar errores previos
         binding.tilUser.error = null
         binding.tilPassword.error = null
 
@@ -98,45 +100,43 @@ class MainActivity : AppCompatActivity() {
         val password = binding.etPassword.text.toString().trim()
 
         var hasError = false
-        if (email.isEmpty()) {
-            binding.tilUser.error = "Siusplau, omple aquest camp"
-            hasError = true
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.tilUser.error = "L'adreça de correu no té un format vàlid"
-            hasError = true
-        }
-
-        if (password.isEmpty()) {
-            binding.tilPassword.error = "Siusplau, omple aquest camp"
-            hasError = true
-        }
-
+        if (email.isEmpty()) { binding.tilUser.error = "Siusplau, omple aquest camp"; hasError = true }
+        else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) { binding.tilUser.error = "L'adreça de correu no té un format vàlid"; hasError = true }
+        if (password.isEmpty()) { binding.tilPassword.error = "Siusplau, omple aquest camp"; hasError = true }
         if (hasError) return
 
+        //Primero intenta login con Firebase
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // --- GUARDAR PREFERENCIA USANDO KTX ---
-                    val prefs = getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE)
-                    prefs.edit { 
-                        putBoolean("remember_me", binding.cbRememberMe.isChecked) 
-                    }
+                    // Login OK — guardamos credenciales para uso offline
+                    LocalAuthManager.guardarCredencials(this, email, password)
 
+                    val prefs = getSharedPreferences("AUTH_PREFS", Context.MODE_PRIVATE)
+                    prefs.edit { putBoolean("remember_me", binding.cbRememberMe.isChecked) }
+                    iniciarSincronizacion()
                     irAGaleria()
+
+
                 } else {
-                    val exception = task.exception
-                    val message = exception?.message ?: ""
-                    
-                    when {
-                        exception is FirebaseAuthInvalidUserException -> {
-                            binding.tilUser.error = "L'adreça de correu no està registrada."
-                        }
-                        exception is FirebaseAuthInvalidCredentialsException -> {
-                            binding.tilPassword.error = "La contrasenya és incorrecta."
-                        }
-                        else -> {
-                            Toast.makeText(this, "Error d'accés: ${exception?.localizedMessage}", 
-                                Toast.LENGTH_LONG).show()
+                    // Firebase falló — intentamos login local si no hay conexión
+                    val isNetworkError = task.exception?.message?.contains("network") == true
+                            || task.exception?.message?.contains("Unable to resolve host") == true
+
+                    if (isNetworkError && LocalAuthManager.validarCredencialsLocals(this, email, password)) {
+                        // Sin conexión pero credenciales correctas
+                        Toast.makeText(this, "Mode sense connexió", Toast.LENGTH_SHORT).show()
+                        irAGaleria()
+                    } else {
+                        // Error real de credenciales
+                        val exception = task.exception
+                        when {
+                            exception is FirebaseAuthInvalidUserException ->
+                                binding.tilUser.error = "L'adreça de correu no està registrada."
+                            exception is FirebaseAuthInvalidCredentialsException ->
+                                binding.tilPassword.error = "La contrasenya és incorrecta."
+                            else ->
+                                Toast.makeText(this, "Error d'accés: ${exception?.localizedMessage}", Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -147,5 +147,13 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, GaleriaActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun iniciarSincronizacion() {
+        val request = androidx.work.OneTimeWorkRequestBuilder<SyncUEWorker>()
+            .build()
+
+        androidx.work.WorkManager.getInstance(this)
+            .enqueue(request)
     }
 }

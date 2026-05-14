@@ -8,7 +8,7 @@
     android:background="@color/app_background"
     tools:context=".ui.galeria.GaleriaActivity">
 
-    <!-- capçalera Principal -->
+    <!-- Capçalera Superior -->
     <LinearLayout
         android:id="@+id/cabecera_principal"
         android:layout_width="match_parent"
@@ -20,7 +20,6 @@
         android:paddingVertical="12dp"
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent">
-
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/cabecera_logo"
@@ -47,7 +46,7 @@
             android:focusable="true" />
     </LinearLayout>
 
-    <!-- Barra de Filtres  -->
+    <!-- Barra de Filtres -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/search_card"
         android:layout_width="match_parent"
@@ -81,32 +80,21 @@
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/search_card"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation_container" />
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation" />
 
-    <!-- Navegació Inferior -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/bottom_navigation_container"
-        android:layout_width="wrap_content"
+    <!-- Navegació Inferior (MODIFICADA para que parezca la superior) -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        app:cardCornerRadius="50dp"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/white"
-        app:strokeWidth="0dp"
+        android:background="@color/white"
+        app:backgroundTint="@color/white"
+        app:elevation="0dp"
+        app:itemIconTint="@color/nav_item_color"
+        app:itemTextColor="@color/nav_item_color"
+        app:itemRippleColor="#20741B30"
+        app:menu="@menu/bottom_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_navigation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            app:labelVisibilityMode="unlabeled"
-            app:itemIconTint="@color/primary_plum"
-            app:itemRippleColor="@color/app_background"
-            app:menu="@menu/bottom_navigation_menu"/>
-
-    </com.google.android.material.card.MaterialCardView>
-
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

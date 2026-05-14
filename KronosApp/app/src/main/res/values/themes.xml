@@ -3,16 +3,24 @@
     <style name="Base.Theme.KronosApp" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary_plum</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorPrimaryContainer">@color/primary_plum_light</item>
-        <item name="colorOnPrimaryContainer">@color/white</item>
+        <!-- Canviat: Utilitzem un granat molt clar per als contenidors en lloc del color lavanda -->
+        <item name="colorPrimaryContainer">@color/primary_plum_very_light</item>
+        <item name="colorOnPrimaryContainer">@color/primary_plum</item>
+
         <item name="colorSecondary">@color/primary_plum_light</item>
         <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/primary_plum_very_light</item>
+        <item name="colorOnSecondaryContainer">@color/primary_plum</item>
+
         <item name="android:windowBackground">@color/app_background</item>
         <item name="colorSurface">@color/white</item>
         <item name="colorOnSurface">@color/text_main</item>
         <item name="colorSurfaceVariant">@color/app_background</item>
         <item name="colorOnSurfaceVariant">@color/text_secondary</item>
         <item name="colorOutline">@color/border_color</item>
+
+        <!-- Corregit: Use standard OutlinedBox style globally to avoid rendering errors in TextInputLayouts with TextInputEditText -->
+        <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox</item>
     </style>
 
     <style name="Theme.KronosApp" parent="Base.Theme.KronosApp" />

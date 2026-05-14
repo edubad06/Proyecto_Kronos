@@ -3,7 +3,6 @@ package com.iticbcn.kronos.ui.ue
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,11 +11,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.iticbcn.kronos.data.local.DataManager
 import com.iticbcn.kronos.ui.adapter.ObjecteAdapter
-import com.iticbcn.kronos.domain.model.ObjecteUE
+import com.iticbcn.kronos.data.local.db.entities.ObjecteUE
 import com.iticbcn.kronos.R
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.iticbcn.kronos.ui.formulario.FormularioUE
 import com.google.firebase.auth.FirebaseAuth
@@ -50,7 +47,7 @@ class UEFragment : Fragment() {
         recyclerView = view.findViewById(R.id.rvObjectes)
         tvEmptyMessage = view.findViewById(R.id.tvEmptyMessage)
         val fabAdd: ExtendedFloatingActionButton = view.findViewById(R.id.fab_add_ue)
-        val fabUploadAll: FloatingActionButton = view.findViewById(R.id.fab_upload_all)
+        val fabUploadAll: ExtendedFloatingActionButton = view.findViewById(R.id.fab_upload_all)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         originalList = DataManager.getUEListLocal(requireContext())
