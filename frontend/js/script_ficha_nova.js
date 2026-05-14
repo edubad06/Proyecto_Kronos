@@ -212,6 +212,7 @@ btn_guardar.addEventListener("click", async function(){
                 data: firebase.firestore.Timestamp.now(),
                 descripcio: document.getElementById('i-ue-descr').value,
                 registrat_per: sessionStorage.getItem("uid"),
+                nom_registrat: sessionStorage.getItem("nom"),
                 sincronitzat: false,
                 //recojo las relaciones y filtro las que están vacías
                 relacions: [
