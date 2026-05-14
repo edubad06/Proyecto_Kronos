@@ -252,7 +252,7 @@ const cargarFicha = async function() {
             divInfo.appendChild(crearCampo("campo-formulario-base","Textura",dades.textura,"i-ue-text")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Color",dades.color,"i-ue-color")); //ok
             divInfo.appendChild(crearCampo("campo-formulario-base","Material",dades.material,"i-ue-mat")); //ok
-            divInfo.appendChild(crearCampo("campo-formulario-base","Registrat per",dades.registrat_per || 'No hi ha registre',"i-ue-person")); //ok
+            divInfo.appendChild(crearCampo("campo-formulario-base", "Registrat per", dades.nom_registrat || dades.registrat_per || 'Sense registre', "i-ue-person")); //ok
             //convierto fecha Timestamp a fecha legible
             const dataLlegible = dades.data ? dades.data.toDate().toLocaleDateString('ca-ES') : 'Sense data';
             divInfo.appendChild(crearCampo("campo-formulario-base","Data de creació",dataLlegible,"i-ue-data"));
