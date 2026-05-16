@@ -20,6 +20,7 @@ import com.iticbcn.kronos.databinding.ActivityMainBinding
 import com.iticbcn.kronos.ui.galeria.GaleriaActivity
 
 class MainActivity : AppCompatActivity() {
+    //this better work
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var auth: FirebaseAuth
